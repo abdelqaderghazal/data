@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سِجل المؤشرات التشغيلية — المحافظات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{--ink:#007a3d;--ink-2:#005a2d;--sand:#f5f5f5;--sand-2:#e8e8e8;--paper:#ffffff;--brass:#ce1126;--brass-light:#e85a6a;--alert:#ce1126;--good:#007a3d;--line:#d0d0d0;--ink-soft:#4a4a4a;--accent-blue:#000000;--accent-green:#007a3d;--syria-green:#007a3d;--syria-white:#ffffff;--syria-black:#000000;--syria-red:#ce1126;}
+  *{box-sizing:border-box;}body{margin:0;background:var(--sand);color:var(--ink);font-family:'Cairo',sans-serif;}
+  ::selection{background:#b8e0c8;color:var(--syria-black);}
+  .masthead{background:linear-gradient(135deg,var(--syria-green) 0%,#005a2d 50%,var(--syria-black) 100%);color:var(--syria-white);padding:38px 28px 30px;position:relative;overflow:hidden;border-bottom:4px solid var(--syria-red);}
+  .masthead::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,0.025) 0 2px,transparent 2px 26px);pointer-events:none;}
+  .masthead-inner{max-width:1180px;margin:0 auto;position:relative;padding:0;border-radius:0;box-shadow:none;background:transparent;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.12em;font-size:12.5px;color:var(--syria-white);display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:600;opacity:0.9;}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--brass-light);}
+  h1{font-family:'Tajawal',sans-serif;font-weight:900;font-size:clamp(26px,4vw,40px);margin:0 0 8px;line-height:1.25;color:var(--syria-white);text-shadow:0 2px 4px rgba(0,0,0,0.3);}
+  .sub{color:rgba(255,255,255,0.85);font-size:15.5px;max-width:640px;line-height:1.7;margin:0 0 20px;font-weight:500;}
+  .month-badge{display:inline-flex;align-items:center;gap:8px;background:var(--syria-green);border:2px solid var(--syria-green);padding:7px 16px;border-radius:100px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--syria-white);font-weight:600;}
+  .toolbar{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 4px 14px rgba(18,60,68,0.06);}
+  .toolbar-inner{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .toolbar-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin-inline-end:6px;white-space:nowrap;}
+  .chip{border:1px solid var(--line);background:var(--sand);color:var(--ink);padding:7px 15px;border-radius:100px;font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s ease;font-family:'Cairo',sans-serif;}
+  .chip:hover{border-color:var(--brass);}
+  .chip.active{background:var(--syria-green);color:var(--syria-white);border-color:var(--syria-green);}
+  .chip:disabled{opacity:0.3;cursor:not-allowed;}
+  .month-toolbar{background:var(--sand);border-bottom:1px solid var(--line);position:static;box-shadow:none;}
+  .month-toolbar .chip{background:var(--paper);}
+  .month-toolbar .chip.active{background:var(--syria-red);color:var(--syria-white);border-color:var(--syria-red);}
+  .data-panel{max-width:1180px;margin:0 auto;padding:20px 28px 0;}
+  .data-source-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:20px;}
+  .data-source-bar .label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);font-weight:600;white-space:nowrap;}
+  .gsheet-input{flex:1;min-width:280px;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink);background:var(--sand);direction:ltr;}
+  .gsheet-input:focus{outline:none;border-color:var(--brass);background:var(--paper);}
+  .btn{border:none;border-radius:8px;padding:8px 18px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.15s ease;}
+  .btn-primary{background:var(--syria-green);color:var(--syria-white);}
+  .btn-primary:hover{background:var(--syria-black);}
+  .btn-success{background:var(--syria-red);color:white;}
+  .btn-success:hover{background:#a00e1f;}
+  .status-badge{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 10px;border-radius:100px;font-weight:600;}
+  .status-ok{background:#e8f5e9;color:var(--syria-green);}
+  .status-loading{background:#fff3e0;color:#ef6c00;}
+  .status-error{background:#ffebee;color:#c62828;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(18,60,68,0.5);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{background:var(--paper);border-radius:18px;max-width:600px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(18,60,68,0.3);}
+  .modal-header{padding:20px 24px;border-bottom:1px solid var(--sand-2);display:flex;align-items:center;justify-content:space-between;}
+  .modal-header h3{margin:0;font-family:'Tajawal',sans-serif;font-weight:700;font-size:18px;}
+  .modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink-soft);line-height:1;}
+  .modal-body{padding:20px 24px;}
+  .modal-body p{font-size:13.5px;color:var(--ink-soft);line-height:1.8;margin:0 0 16px;}
+  .help-box{background:var(--sand);border-inline-start:3px solid var(--syria-green);padding:12px 16px;border-radius:6px;font-size:12.5px;line-height:1.8;color:var(--ink-soft);margin-bottom:16px;}
+  .help-box code{background:var(--paper);padding:2px 6px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink);direction:ltr;display:inline-block;}
+  main{max-width:1180px;margin:0 auto;padding:30px 28px 70px;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:38px;}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 14px 14px;text-align:center;position:relative;}
+  .kpi .seal{width:46px;height:46px;border-radius:50%;background:var(--syria-green);border:2px solid var(--syria-red);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;color:var(--syria-white);}
+  .kpi .val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:21px;color:var(--ink);}
+  .kpi .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.4;min-height:30px;}
+  section.category{background:var(--paper);border:1px solid var(--line);border-radius:18px;margin-bottom:24px;overflow:hidden;}
+  .cat-head{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid var(--sand-2);cursor:pointer;background:linear-gradient(90deg,var(--sand) 0%,transparent 100%);}
+  .cat-head .icon{width:44px;height:44px;border-radius:50%;background:var(--syria-green);color:var(--syria-white);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid var(--syria-red);}
+  .cat-head h2{font-family:'Tajawal',sans-serif;font-weight:700;font-size:18px;margin:0;color:var(--ink);}
+  .cat-head p{margin:3px 0 0;font-size:13px;color:var(--ink-soft);}
+  .cat-head .chev{margin-inline-start:auto;font-size:18px;color:var(--syria-red);transition:transform .2s;}
+  .cat-body{padding:22px 24px 26px;display:none;}
+  section.category.open .cat-body{display:block;}
+  section.category.open .chev{transform:rotate(180deg);}
+  .cat-note{font-size:13.5px;color:var(--ink-soft);background:var(--sand);border-inline-start:3px solid var(--syria-red);padding:10px 14px;border-radius:6px;margin-bottom:18px;line-height:1.8;}
+  .chart-wrap{background:var(--sand);border-radius:12px;padding:16px;margin-bottom:18px;min-height:220px;}
+  .chart-wrap canvas{max-height:320px;}
+  .ind-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;}
+  .ind-card{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:var(--paper);display:flex;gap:10px;align-items:flex-start;}
+  .ind-card .em{font-size:19px;flex-shrink:0;}
+  .ind-card .t{font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
+  .ind-card .n{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;color:var(--ink);}
+  .gov-list{display:flex;flex-direction:column;gap:10px;}
+  .gov-item{border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden;}
+  .gov-item .gh{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;}
+  .gov-item .gh .stamp{width:34px;height:34px;border-radius:50%;border:2px solid var(--syria-green);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--syria-green);font-weight:700;font-family:'IBM Plex Mono',monospace;flex-shrink:0;background:var(--syria-white);}
+  .gov-item .gh strong{font-family:'Tajawal',sans-serif;font-size:15.5px;}
+  .gov-item .gh .chev{margin-inline-start:auto;color:var(--syria-red);transition:transform .2s;}
+  .gov-item.open .chev{transform:rotate(180deg);}
+  .gov-item .gb{display:none;padding:0 18px 18px;font-size:13.5px;line-height:1.85;}
+  .gov-item.open .gb{display:block;}
+  .gov-item .gb .row{margin-bottom:10px;}
+  .gov-item .gb .row b{color:var(--ink);font-family:'Tajawal',sans-serif;font-weight:700;font-size:12.5px;display:block;margin-bottom:3px;}
+  .gov-item .gb .row span{color:var(--ink-soft);}
+  .empty-note{color:#a08b6a;font-style:italic;}
+  .file-drop-zone{border:2px dashed var(--line);border-radius:12px;padding:30px;text-align:center;background:var(--sand);cursor:pointer;transition:.2s;}
+  .file-drop-zone:hover{border-color:var(--syria-green);background:#e8f5e9;}
+  .file-drop-zone.dragover{border-color:var(--accent-blue);background:#e8f4f8;}
+  footer{max-width:1180px;margin:0 auto;padding:0 28px 50px;color:var(--ink-soft);font-size:12.5px;line-height:1.9;}
+  footer .line{border-top:1px dashed var(--line);margin:0 0 18px;padding-top:18px;}
+  @media(max-width:640px){.cat-head{padding:16px;}.cat-body{padding:16px;}.data-source-bar{flex-direction:column;align-items:stretch;}.gsheet-input{min-width:unset;width:100%;}}
+
+  .map-section{background:var(--paper);border:1px solid var(--line);border-radius:18px;margin-bottom:24px;overflow:hidden;}
+  .map-head{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid var(--sand-2);background:linear-gradient(90deg,var(--sand) 0%,transparent 100%);}
+  .map-head .icon{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid var(--brass);}
+  .map-head h2{font-family:'Tajawal',sans-serif;font-weight:700;font-size:18px;margin:0;color:var(--ink);}
+  .map-head p{margin:3px 0 0;font-size:13px;color:var(--ink-soft);}
+  #govMap{width:100%;height:500px;border-radius:0 0 18px 18px;}
+  .map-legend{display:flex;flex-wrap:wrap;gap:12px;padding:14px 24px;background:var(--sand);border-bottom:1px solid var(--sand-2);}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);}
+  .legend-dot{width:14px;height:14px;border-radius:50%;}
+  .map-info-window{font-family:'Cairo',sans-serif;direction:rtl;text-align:right;min-width:280px;max-width:340px;max-height:450px;overflow-y:auto;}
+  .map-info-window h4{margin:0 0 10px;font-family:'Tajawal';font-size:16px;color:var(--ink);border-bottom:2px solid var(--syria-red);padding-bottom:8px;}
+  .map-info-window .info-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eee;font-size:11.5px;align-items:flex-start;gap:8px;}
+  .map-info-window .info-row:last-child{border-bottom:none;}
+  .map-info-window .info-label{color:#666;flex-shrink:0;max-width:70%;}
+  .map-info-window .info-val{font-weight:700;color:var(--ink);text-align:left;flex-shrink:0;}
+  .map-info-window::-webkit-scrollbar{width:6px;}
+  .map-info-window::-webkit-scrollbar-track{background:#f1f1f1;border-radius:3px;}
+  .map-info-window::-webkit-scrollbar-thumb{background:var(--syria-green);border-radius:3px;}
+  .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.25);}
+  .leaflet-popup-content{margin:12px 16px;}
+  .leaflet-popup-tip{background:white;}
+
+
+  /* ===== LOGIN OVERLAY ===== */
+  .password-overlay{position:fixed;inset:0;background:linear-gradient(135deg,var(--syria-green) 0%,#005a2d 50%,var(--syria-black) 100%);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .password-box{background:var(--paper);border-radius:20px;padding:40px 36px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);border:2px solid var(--syria-red);}
+  .password-box .lock-icon{font-size:56px;margin-bottom:16px;}
+  .password-box h2{font-family:'Tajawal',sans-serif;font-weight:900;font-size:24px;margin:0 0 8px;color:var(--syria-green);}
+  .password-box p{color:var(--ink-soft);font-size:14px;margin:0 0 24px;line-height:1.7;}
+  .password-box input{width:100%;border:2px solid var(--line);border-radius:12px;padding:14px 18px;font-family:'IBM Plex Mono',monospace;font-size:16px;text-align:center;letter-spacing:4px;color:var(--ink);background:var(--sand);margin-bottom:16px;transition:.15s;}
+  .password-box input:focus{outline:none;border-color:var(--syria-green);background:var(--paper);}
+  .password-box .btn-login{width:100%;border:none;border-radius:12px;padding:14px;font-family:'Cairo',sans-serif;font-size:16px;font-weight:700;cursor:pointer;background:var(--syria-green);color:var(--syria-white);transition:.15s;}
+  .password-box .btn-login:hover{background:var(--syria-black);}
+  .password-box .error-msg{color:var(--syria-red);font-size:13px;margin-top:12px;display:none;font-weight:600;}
+  .password-box .error-msg.show{display:block;}
+  body.locked{overflow:hidden;}
+  body.locked > *:not(.password-overlay){display:none;}
+
+  /* User type selector */
+  .user-type-selector{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;text-align:right;}
+  .user-type-option{display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--line);border-radius:12px;cursor:pointer;transition:.15s;background:var(--sand);position:relative;}
+  .user-type-option:hover{border-color:var(--syria-green);background:#e8f5e9;}
+  .user-type-option.active{border-color:var(--syria-green);background:#e8f5e9;}
+  .user-type-option input{position:absolute;opacity:0;width:0;height:0;}
+  .user-icon{font-size:28px;flex-shrink:0;}
+  .user-label{font-family:'Tajawal';font-weight:700;font-size:15px;color:var(--ink);display:block;}
+  .user-desc{font-size:12px;color:var(--ink-soft);display:block;margin-top:2px;}
+
+  /* User management in admin panel */
+  .user-management{margin:20px 0;text-align:right;}
+  .user-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:var(--sand);}
+  .user-info{display:flex;align-items:center;gap:10px;}
+  .user-role-badge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono';}
+  .user-role-badge.admin{background:#e8f5e9;color:var(--syria-green);}
+  .user-role-badge.viewer{background:#e3f2fd;color:#1565c0;}
+  .user-name{font-size:13px;color:var(--ink-soft);}
+  .btn-sm{padding:6px 14px;font-size:12px;border-radius:6px;}
+
+  /* Change password form */
+  .change-pw-form{background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px;text-align:right;}
+  .change-pw-form h4{margin:0 0 12px;font-family:'Tajawal';font-size:14px;color:var(--ink);}
+  .change-pw-form input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:center;letter-spacing:2px;margin-bottom:8px;direction:ltr;}
+  .change-pw-form input:focus{outline:none;border-color:var(--syria-green);}
+  .change-pw-form .success-msg{color:var(--good);font-size:12px;margin-top:8px;display:none;}
+  .change-pw-form .success-msg.show{display:block;}
+
+  /* Read-only mode indicator */
+  .read-only-banner{position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#1565c0,#0d47a1);color:white;padding:8px 20px;text-align:center;font-size:13px;font-weight:600;z-index:999;font-family:'Cairo';display:none;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+  .read-only-banner.show{display:block;}
+  .read-only-banner .close-banner{position:absolute;left:16px;top:50%;transform:translateY(-50%);background:none;border:none;color:white;font-size:18px;cursor:pointer;}
+
+  /* Disabled buttons in read-only mode */
+  body.readonly .btn-success{opacity:0.4;pointer-events:none;}
+  body.readonly .btn-primary[id="refreshBtn"]{opacity:0.4;pointer-events:none;}
+  body.readonly #fileDropZone{opacity:0.4;pointer-events:none;}
+  body.readonly .gsheet-input{opacity:0.6;pointer-events:none;}  .change-pw-section{background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:20px;text-align:right;}
+  .change-pw-section h4{margin:0 0 12px;font-family:'Tajawal';font-size:14px;color:var(--ink);}
+  .change-pw-section input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:center;letter-spacing:2px;margin-bottom:8px;direction:ltr;}
+  .change-pw-section input:focus{outline:none;border-color:var(--syria-green);}
+  .change-pw-section .btn-sm{padding:8px 16px;font-size:12px;border-radius:6px;}
+  .change-pw-section .success-msg{color:var(--good);font-size:12px;margin-top:8px;display:none;}
+  .change-pw-section .success-msg.show{display:block;}
+
+</style>
+<base target="_blank">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+<body class="locked">
+
+<!-- ═══════════════════════════════════════
+     LOGIN SCREEN
+     ═══════════════════════════════════════ -->
+<div class="password-overlay" id="passwordOverlay">
+  <div class="password-box" id="loginBox">
+    <div class="lock-icon">🔒</div>
+    <h2>سِجل المؤشرات التشغيلية</h2>
+    <p>هذه الصفحة محمية بكلمة مرور.<br>اختر نوع المستخدم وأدخل كلمة المرور.</p>
+
+    <div class="user-type-selector">
+      <label class="user-type-option active" onclick="selectUserType('admin')">
+        <input type="radio" name="userType" value="admin" checked>
+        <span class="user-icon">👨‍💼</span>
+        <span class="user-label">مدير النظام</span>
+        <span class="user-desc">تعديل البيانات + تغيير كلمات المرور</span>
+      </label>
+      <label class="user-type-option" onclick="selectUserType('viewer')">
+        <input type="radio" name="userType" value="viewer">
+        <span class="user-icon">👁️</span>
+        <span class="user-label">مطلع</span>
+        <span class="user-desc">عرض التقارير فقط</span>
+      </label>
+    </div>
+
+    <input type="password" id="passwordInput" placeholder="••••••" maxlength="20" autocomplete="off">
+    <button class="btn-login" onclick="checkPassword()">🔓 دخول</button>
+    <div class="error-msg" id="passwordError">❌ كلمة المرور غير صحيحة</div>
+  </div>
+
+  <!-- Admin Panel (hidden by default, shown after admin login) -->
+  <div class="password-box" id="adminPanel" style="display:none;">
+    <div class="lock-icon">⚙️</div>
+    <h2>لوحة تحكم المدير</h2>
+    <p>إدارة المستخدمين وتغيير كلمات المرور</p>
+
+    <div class="user-management">
+      <div class="user-row">
+        <div class="user-info">
+          <span class="user-role-badge admin">👨‍💼 مدير</span>
+          <span class="user-name">المسؤول الرئيسي</span>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="showChangePw('admin')">🔐 تغيير</button>
+      </div>
+      <div class="user-row">
+        <div class="user-info">
+          <span class="user-role-badge viewer">👁️ مطلع</span>
+          <span class="user-name">المستخدم الافتراضي</span>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="showChangePw('viewer')">🔐 تغيير</button>
+      </div>
+    </div>
+
+    <div class="change-pw-form" id="changePwForm" style="display:none;">
+      <h4 id="changePwTitle">تغيير كلمة المرور</h4>
+      <input type="hidden" id="targetUserType">
+      <input type="password" id="currentPwInput" placeholder="كلمة المرور الحالية">
+      <input type="password" id="newPwInput" placeholder="كلمة المرور الجديدة">
+      <input type="password" id="confirmPwInput" placeholder="تأكيد كلمة المرور الجديدة">
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="changePassword()" style="flex:1;">💾 حفظ</button>
+        <button class="btn btn-sm" onclick="hideChangePw()" style="background:var(--sand);color:var(--ink-soft);">إلغاء</button>
+      </div>
+      <div class="success-msg" id="pwSuccessMsg">✅ تم تغيير كلمة المرور بنجاح!</div>
+      <div class="error-msg" id="pwChangeError" style="margin-top:8px;display:none;"></div>
+    </div>
+
+    <div style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px;">
+      <button class="btn btn-login" onclick="enterDashboard()">📊 الدخول للوحة التحكم</button>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<div class="read-only-banner" id="readOnlyBanner">👁️ وضع القراءة فقط — لا يمكنك تعديل البيانات <button class="close-banner" onclick="document.getElementById('readOnlyBanner').classList.remove('show')">×</button></div>
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>سِجل المؤشرات التشغيلية وفق المحافظات</h1>
+    <p class="sub">وزارة الشؤون الاجتماعية والعمل — مديرية التخطيط والإحصاء</p>
+    <span class="month-badge" id="mastheadBadge">🗓️ ارفع ملف CSV للبدء</span>
+  </div>
+</header>
+
+<!-- Governorate Filter -->
+<div class="toolbar" id="govToolbar">
+  <div class="toolbar-inner">
+    <span class="toolbar-label">🏛️ تصفية حسب المحافظة</span>
+    <button class="chip active" data-gov="all">الكل</button>
+    <button class="chip" data-gov="دمشق">دمشق</button>
+    <button class="chip" data-gov="ريف دمشق">ريف دمشق</button>
+    <button class="chip" data-gov="حلب">حلب</button>
+    <button class="chip" data-gov="حمص">حمص</button>
+    <button class="chip" data-gov="حماه">حماه</button>
+    <button class="chip" data-gov="اللاذقية">اللاذقية</button>
+    <button class="chip" data-gov="طرطوس">طرطوس</button>
+    <button class="chip" data-gov="السويداء">السويداء</button>
+    <button class="chip" data-gov="درعا">درعا</button>
+    <button class="chip" data-gov="القنيطرة">القنيطرة</button>
+    <button class="chip" data-gov="ادلب">ادلب</button>
+    <button class="chip" data-gov="الرقة">الرقة</button>
+    <button class="chip" data-gov="دير الزور">دير الزور</button>
+    <button class="chip" data-gov="الحسكة">الحسكة</button>
+  </div>
+</div>
+
+<!-- Month Filter -->
+<div class="toolbar month-toolbar" id="monthToolbar">
+  <div class="toolbar-inner">
+    <span class="toolbar-label">📅 تصفية حسب الشهر</span>
+    <button class="chip active" data-month="all">الكل</button>
+    <button class="chip" data-month="كانون الثاني">كانون الثاني</button>
+    <button class="chip" data-month="شباط">شباط</button>
+    <button class="chip" data-month="آذار">آذار</button>
+    <button class="chip" data-month="نيسان">نيسان</button>
+    <button class="chip" data-month="أيار">أيار</button>
+    <button class="chip" data-month="حزيران">حزيران</button>
+    <button class="chip" data-month="تموز">تموز</button>
+    <button class="chip" data-month="آب">آب</button>
+    <button class="chip" data-month="أيلول">أيلول</button>
+    <button class="chip" data-month="تشرين الأول">تشرين الأول</button>
+    <button class="chip" data-month="تشرين الثاني">تشرين الثاني</button>
+    <button class="chip" data-month="كانون الأول">كانون الأول</button>
+  </div>
+</div>
+
+<div class="data-panel" id="viewerMessage" style="display:none;">
+  <div style="background:#e3f2fd;border:1px solid #1565c0;border-radius:12px;padding:12px 18px;margin-bottom:16px;text-align:center;color:#1565c0;font-weight:600;font-size:13px;">👁️ أنت في وضع القراءة فقط — البيانات تُحمّل تلقائياً</div>
+</div>
+<div class="data-panel">
+  <div class="data-source-bar">
+    <span class="label">📁 مصدر البيانات:</span>
+    <input type="text" class="gsheet-input" id="gsheetUrl" placeholder="رابط Google Sheet" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSYw2t1DGme6GL7bFv8FDnl3cYMbHYpm2LRjjvHsXyE2TB5Tbkum28ObIMc1jop-AQMJCWThzX9q3vL/pub?output=csv" readonly style="background:#f0ebe0;color:var(--ink-soft);">
+    <button class="btn btn-primary" onclick="loadFromSheet()" id="refreshBtn">🔄 تحديث من الرابط</button>
+    <button class="btn btn-success" onclick="showUploadModal()">📁 رفع ملف CSV يدوياً</button>
+    <span class="status-badge status-loading" id="dataStatus">جاري التحميل التلقائي...</span>
+  </div>
+</div>
+
+<main>
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  
+  <section class="category open map-section" data-cat="map">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🗺️</div>
+      <div><h2>الخريطة التفاعلية للمحافظات</h2><p>انقر على أي محافظة لعرض مؤشراتها التشغيلية</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body" style="padding:0;">
+      <div class="map-legend" id="mapLegend">
+        <span style="font-weight:600;color:var(--ink);font-size:12.5px;">🔴 شدة المؤشرات:</span>
+        <div class="legend-item"><span class="legend-dot" style="background:#B5533C;"></span>مرتفعة جداً</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#B08D57;"></span>مرتفعة</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#4F7A63;"></span>متوسطة</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#6E8FA3;"></span>منخفضة</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#ccc;"></span>لا توجد بيانات</div>
+      </div>
+      <div id="govMap" style="height:500px;"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="disability">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🦽</div>
+      <div><h2>رعاية ذوي الإعاقة</h2><p>بطاقات الإعاقة، الطلاب، برامج التأهيل والتدريب المهني</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-disability">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-disability"></canvas></div>
+      <div class="ind-cards" id="cards-disability"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="social">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">👵</div>
+      <div><h2>الرعاية الاجتماعية: المسنون، الأيتام، المتسولون، الكفالة</h2><p>دور الرعاية والمستفيدون منها</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-social">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-social"></canvas></div>
+      <div class="ind-cards" id="cards-social"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="ngo">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🤝</div>
+      <div><h2>المنظمات غير الحكومية</h2><p>المشهرة والمسحوبة تراخيصها والندوات التوعوية</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-ngo">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-ngo"></canvas></div>
+      <div class="ind-cards" id="cards-ngo"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="juvenile">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">⚖️</div>
+      <div><h2>معاهد إصلاح الأحداث</h2><p>عدد المعاهد والنزلاء</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-juvenile">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-juvenile"></canvas></div>
+      <div class="ind-cards" id="cards-juvenile"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="rural">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🌾</div>
+      <div><h2>التنمية الريفية والصناعات الريفية</h2><p>المراكز والوحدات والمستفيدون</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-rural">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-rural"></canvas></div>
+      <div class="ind-cards" id="cards-rural"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="labor">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🏗️</div>
+      <div><h2>التفتيش العمالي والزراعي والصناعي</h2><p>الزيارات والمخالفات والعمال المسجّلون حديثاً</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-labor">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-labor"></canvas></div>
+      <div class="ind-cards" id="cards-labor"></div>
+    </div>
+  </section>
+
+  <section class="category open" data-cat="details">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">📖</div>
+      <div><h2>ملف كل محافظة: أهم الإنجازات والتوصيات والاحتياجات</h2><p>انقر على اسم المحافظة لعرض التفاصيل النوعية</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <div class="gov-list" id="govList"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="line" id="footerNote">⚠️ ارفع ملف CSV لعرض البيانات</div>
+  <div>هذه اللوحة تفاعلية بالكامل: استخدم أزرار المحافظات والأشهر أعلاه للتصفية، أو ارفع ملف CSV مباشرة.</div>
+</footer>
+
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📁 رفع ملف CSV</h3>
+      <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="help-box">
+        <strong>كيفية الاستخدام:</strong><br>
+        1. اضغط على المنطقة أدناه لاختيار ملف من جهازك.<br>
+        2. أو اسحب الملف وأفلته في المنطقة.<br>
+        3. يمكنك أيضاً نسخ البيانات من Google Sheets أو Excel ولصقها في المربع أسفل.<br>
+        <strong>الصيغ المدعومة:</strong> CSV (فاصلة إنجليزية/عربية)، TSV (تاب)، Excel CSV
+      </div>
+      <div class="file-drop-zone" id="fileDropZone" onclick="document.getElementById('csvFileInput').click()">
+        <div style="font-size:40px;margin-bottom:10px;">📂</div>
+        <div style="font-weight:700;font-size:15px;">اضغط هنا أو اسحب ملف CSV</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">CSV / TSV / Excel CSV — يدعم الفاصلة الإنجليزية والعربية والتاب</div>
+      </div>
+      <input type="file" id="csvFileInput" accept=".csv,.tsv,.txt" style="display:none;" onchange="handleCSVUpload(this)">
+      <hr style="border:none;border-top:1px solid var(--line);margin:20px 0;">
+      <p style="font-weight:600;margin-bottom:8px;">✂️ أو الصق البيانات مباشرة:</p>
+      <textarea id="csvPasteArea" placeholder="انسخ البيانات من Google Sheets والصقها هنا..." rows="6" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;direction:ltr;resize:vertical;"></textarea>
+      <button class="btn btn-primary" onclick="handleCSVPaste()" style="margin-top:10px;">📋 تحليل البيانات الملصقة</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================
+// COLUMN MAPPING (Arabic headers from actual CSV)
+// =====================
+const COLUMN_MAP = {
+  "المحافظة": "gov",
+  "الشهر": "month",
+  "عدد الأشخاص  ذوي الإعاقة الحاصلين على بطاقة الإعاقة": "disabled_cards",
+  "عدد الطلاب المسجلين في المعاهد  الخاصة بذوي الاعاقة": "special_students",
+  "عدد المستفيدين من برامج مراكز التأهيل والتدريب المهني (مراكز تمكين الشباب ان وجدت)": "rehab_benef",
+  "عدد مراكز التأهيل المهني": "rehab_centers",
+  "عدد مراكز رعاية المتسولين": "beggar_centers",
+  "عدد النزلاء في مراكز التسول": "beggar_inmates",
+  "عدد دور الرعاية للمسنين": "elderly_homes",
+  "عدد المستفيدين من خدمات دور رعاية المسنين": "elderly_benef",
+  "عدد المنظمات غير الحكومية المشهرة": "ngo_active",
+  "عدد المنظمات غير الحكومية المسحوب ترخيصها": "ngo_revoked",
+  "عدد الندوات الحوارية والدورات حول قضايا الصحة والسلامة المهنية": "seminars",
+  "نسبة الانفاق الاستثماري": "investment_spending",
+  "نسبة العمال في القطاع الخاص غير المنظم": "unorganized_workers",
+  "عدد الاتفاقيات الموقعة بخصوص الحماية الاجتماعية": "social_agreements",
+  "عدد دور رعاية الايتام": "orphan_homes",
+  "عدد المستفيدين من الخدمات (كفالة داخلية )": "sponsor_internal",
+  "عدد المستفيدين من الخدمات (كفالة خارجية)": "sponsor_external",
+  "عدد معاهد الاحداث": "juvenile_inst",
+  "عدد معاهد الاحداث ضمن الخدمة": "juvenile_inst_active",
+  "عدد النزلاء من الاحداث": "juvenile_inmates",
+  "عدد مراكز التنمية الريفية خارج الخدمة": "rural_dev_inactive",
+  "عدد مراكز التنمية الريفية ضمن الخدمة": "rural_dev_active",
+  "عدد وحدات الصناعات الريفية خارج الخدمة": "rural_ind_inactive",
+  "عدد وحدات الصناعات الريفية ضمن الخدمة": "rural_ind_active",
+  "عدد المستفيدين من مراكز التنمية الريفية": "rural_dev_benef",
+  "عدد المستفيدين من  وحدات الصناعات الريفية": "rural_ind_benef",
+  "عدد المسجلين  الجدد من العاملين خلال الزيارات التفتيشية لهذا الشهر": "new_workers_insp",
+  "عدد   تراخيص العمل الممنوحة  للعاملين غير السوريين": "work_permits_new",
+  "عدد تراخيص العمل المجدد  للعاملين غير السوريين": "work_permits_renew",
+  "عدد مكاتب التشغيل المرخصة  لمزاولة مهنة استقدام العاملات غير السوريات": "recruitment_offices",
+  "عدد تراخيص العمل  للعاملات المنزليات غير السوريات": "domestic_permits_new",
+  "عدد تراحيص العمل  للعاملات المنزليات غير السوريات": "domestic_permits_renew",
+  "عدد تراخيص العمل المجدد  للعاملات المنزليات غير السوريات": "domestic_permits_renew2",
+  "عدد المكاتب المرخصة لتشغيل العمال المنزليين السوريين": "domestic_offices_syrian",
+  "عدد المكاتب الخاصة  المرخصة لمزاولة مهنة تشغيل  للعمال السوريين": "private_offices_syrian",
+  "عدد الزيارات التفتيشية على المنشآت (صناعي)": "insp_industrial",
+  "عدد الزيارات التفتيشية على المنشآت (زراعي)": "insp_agri",
+  "عدد المخالفات الناتجة عن الزيارات": "violations",
+  "عدد المستفيدين من برامج مراكز التأهيل والتدريب المهني (مراكز تنمية ريفية)": "rural_rehab_benef",
+  "عدد السكان": "population",
+  "السنة": "year",
+  "اهم ثلاث انجازات": "achievements",
+  "اهم ثلال توصيات": "recommendations",
+  "الاحتياجات الرئيسية": "needs",
+};
+
+// =====================
+// STATE
+// =====================
+let ALL_DATA = [];
+let activeGov = "all";
+let selectedMonths = new Set();
+let selectedMonthChips = new Set();
+let charts = {};
+const MONTHS_LIST = ["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+const ALL_GOVS = ["دمشق","ريف دمشق","حلب","حمص","حماه","اللاذقية","طرطوس","السويداء","درعا","القنيطرة","ادلب","الرقة","دير الزور","الحسكة"];
+
+function filtered(){
+  let data = ALL_DATA;
+  if(activeGov !== "all"){
+    data = data.filter(d => d.gov === activeGov);
+  }
+  if(selectedMonths.size > 0){
+    data = data.filter(d => selectedMonths.has(d.month));
+  }
+  return data;
+}
+
+function sum(field, arr){
+  return arr.reduce((a, r) => a + (r[field] || 0), 0);
+}
+
+const fmt = n => n.toLocaleString('en-US');
+const PALETTE = ['#123C44','#B08D57','#4F7A63','#B5533C','#6E8FA3','#8C7A5B','#3f5a5f','#C99A62','#5f8a70','#a15a4a','#2E6B7E','#8B6914','#5D4E37','#4A6741'];
+
+// =====================
+// CSV PARSING - Auto detect delimiter
+// =====================
+function detectDelimiter(csvText){
+  const firstLine = csvText.split('\n')[0];
+  const delimiters = [
+    {char:',', name:'فاصلة إنجليزية'},
+    {char:'؛', name:'فاصلة عربية'},
+    {char:';', name:'فاصلة منقوطة'},
+    {char:'\t', name:'تاب'},
+    {char:'|', name:'خط عمودي'}
+  ];
+  let best = {char:',', count:0};
+  for(const d of delimiters){
+    const count = (firstLine.match(new RegExp(d.char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+    if(count > best.count) best = {char:d.char, count:count, name:d.name};
+  }
+  console.log('Detected delimiter:', best.name || best.char, 'count:', best.count);
+  return best.char;
+}
+
+function parseCSVWithDelimiter(csvText, delimiter){
+  const lines = csvText.trim().split('\n');
+  if(lines.length < 2) return [];
+
+  function parseLine(line){
+    const result = []; let current = ''; let inQuotes = false;
+    for(let i = 0; i < line.length; i++){
+      const char = line[i];
+      if(char === '"'){
+        if(inQuotes && line[i+1] === '"'){ current += '"'; i++; }
+        else { inQuotes = !inQuotes; }
+      }
+      else if(char === delimiter && !inQuotes){ result.push(current); current = ''; }
+      else { current += char; }
+    }
+    result.push(current);
+    return result;
+  }
+
+  const rawHeaders = parseLine(lines[0]);
+  const headers = rawHeaders.map(h => {
+    const key = h.trim();
+    return COLUMN_MAP[key] || key;
+  });
+
+  console.log('Parsed headers:', headers);
+
+  const result = [];
+  for(let i = 1; i < lines.length; i++){
+    const values = parseLine(lines[i]);
+    if(values.length < 2) continue; // Skip empty lines
+
+    const obj = {};
+    headers.forEach((h, idx) => {
+      let val = values[idx] ? values[idx].trim() : '';
+      if(val && !isNaN(val) && val !== ''){
+        const num = parseFloat(val);
+        if(!isNaN(num)) obj[h] = num;
+        else obj[h] = val;
+      }
+      else if(val === '' || val === 'null' || val === 'NULL'){
+        obj[h] = null;
+      }
+      else {
+        obj[h] = val;
+      }
+    });
+    result.push(obj);
+  }
+  return result;
+}
+
+// =====================
+// DATA PROCESSING
+// =====================
+function processCSVData(csvText){
+  try {
+    const delimiter = detectDelimiter(csvText);
+    const parsed = parseCSVWithDelimiter(csvText, delimiter);
+
+    console.log('Parsed rows:', parsed.length);
+    console.log('First row:', parsed[0]);
+
+    if(parsed.length === 0) throw new Error('لا توجد بيانات في الملف');
+
+    const firstRow = parsed[0];
+    if(!firstRow.gov || !firstRow.month){ 
+      throw new Error('الملف لا يحتوي على أعمدة المحافظة والشهر المطلوبة. تأكد من أن أسماء الأعمدة تطابق النموذج.');
+    }
+
+    ALL_DATA = parsed;
+    selectedMonths = new Set([...new Set(ALL_DATA.map(d => d.month))]);
+    selectedMonthChips.clear();
+
+    const statusEl = document.getElementById('dataStatus');
+    statusEl.textContent = `تم التحميل: ${parsed.length} سجل`; 
+    statusEl.className = 'status-badge status-ok';
+
+    syncMonthChipsWithData();
+    renderAll();
+    return true;
+  } catch(err) {
+    const statusEl = document.getElementById('dataStatus');
+    statusEl.textContent = 'خطأ: ' + err.message;
+    statusEl.className = 'status-badge status-error';
+    alert('خطأ في معالجة البيانات: ' + err.message);
+    return false;
+  }
+}
+
+// =====================
+// MONTH FILTER
+// =====================
+function filterByMonth(chipEl){
+  const month = chipEl.getAttribute('data-month');
+  const allMonthChips = document.querySelectorAll('#monthToolbar .chip');
+
+  if(month === 'all'){
+    selectedMonthChips.clear();
+    allMonthChips.forEach(c => {
+      c.classList.remove('active');
+      if(c.getAttribute('data-month') === 'all') c.classList.add('active');
+    });
+    selectedMonths = new Set([...new Set(ALL_DATA.map(d => d.month))]);
+  } else {
+    document.querySelector('#monthToolbar .chip[data-month="all"]').classList.remove('active');
+
+    if(selectedMonthChips.has(month)){
+      selectedMonthChips.delete(month);
+      chipEl.classList.remove('active');
+    } else {
+      selectedMonthChips.add(month);
+      chipEl.classList.add('active');
+    }
+
+    if(selectedMonthChips.size === 0){
+      document.querySelector('#monthToolbar .chip[data-month="all"]').classList.add('active');
+      selectedMonths = new Set([...new Set(ALL_DATA.map(d => d.month))]);
+    } else {
+      selectedMonths = new Set(selectedMonthChips);
+    }
+  }
+  renderAll();
+}
+
+function syncMonthChipsWithData(){
+  const availableMonths = new Set(ALL_DATA.map(d => d.month));
+  document.querySelectorAll('#monthToolbar .chip').forEach(chip => {
+    const m = chip.getAttribute('data-month');
+    if(m !== 'all'){
+      if(!availableMonths.has(m)){
+        chip.disabled = true;
+        chip.style.opacity = '0.3';
+      } else {
+        chip.disabled = false;
+        chip.style.opacity = '1';
+      }
+    }
+  });
+}
+
+// =====================
+// MONTH FILTER SETUP
+// =====================
+function setupMonthFilter(){
+  document.querySelectorAll('#monthToolbar .chip').forEach(chip => {
+    chip.addEventListener('click', function(){
+      filterByMonth(this);
+    });
+  });
+}
+
+// =====================
+// GOVERNORATE FILTER
+// =====================
+function setupGovFilter(){
+  document.querySelectorAll('#govToolbar .chip').forEach(chip => {
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('#govToolbar .chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      activeGov = this.getAttribute('data-gov');
+      console.log('Selected governorate:', activeGov);
+      renderAll();
+    });
+  });
+}
+
+// =====================
+// KPIs
+// =====================
+function kpiDefs(arr){
+  return [
+    {em:"🦽",lbl:"بطاقات إعاقة",val:sum("disabled_cards",arr)},
+    {em:"🎓",lbl:"طلاب معاهد الإعاقة",val:sum("special_students",arr)},
+    {em:"👵",lbl:"مستفيدو رعاية المسنين",val:sum("elderly_benef",arr)},
+    {em:"👶",lbl:"دور رعاية الأيتام",val:sum("orphan_homes",arr)},
+    {em:"🤝",lbl:"منظمات غير حكومية نشطة",val:sum("ngo_active",arr)},
+    {em:"⚖️",lbl:"نزلاء معاهد الأحداث",val:sum("juvenile_inmates",arr)},
+    {em:"🌾",lbl:"مستفيدو التنمية الريفية",val:sum("rural_dev_benef",arr)},
+    {em:"🏗️",lbl:"زيارات تفتيش صناعي",val:sum("insp_industrial",arr)},
+    {em:"⚠️",lbl:"مخالفات مسجّلة",val:sum("violations",arr)},
+    {em:"👥",lbl:"إجمالي السكان",val:sum("population",arr)},
+  ];
+}
+
+function renderKPIs(){
+  const arr = filtered();
+  document.getElementById('kpiGrid').innerHTML = kpiDefs(arr).map(k => 
+    `<div class="kpi"><div class="seal">${k.em}</div><div class="val">${fmt(k.val)}</div><div class="lbl">${k.lbl}</div></div>`
+  ).join('');
+}
+
+// =====================
+// CHARTS
+// =====================
+function barChart(canvasId, dataField){
+  const arr = filtered();
+
+  // If single governorate selected, show INDICATORS as bars instead of governorates
+  if(activeGov !== 'all' && arr.length > 0){
+    renderSingleGovChart(canvasId, arr, dataField);
+    return;
+  }
+
+  // Default: show all governorates
+  const grouped = {};
+  arr.forEach(d => {
+    if(!grouped[d.gov]) grouped[d.gov] = {...d};
+    else {
+      Object.keys(d).forEach(key => {
+        if(typeof d[key] === 'number'){
+          grouped[d.gov][key] = (grouped[d.gov][key] || 0) + d[key];
+        }
+      });
+    }
+  });
+
+  // When showing "all" governorates, ensure all 14 appear even with 0 values
+  ALL_GOVS.forEach(gov => {
+    if(!grouped[gov]){
+      grouped[gov] = { gov: gov };
+    }
+  });
+
+  const govList = Object.values(grouped);
+  const labels = govList.map(d => d.gov);
+  const data = govList.map(d => d[dataField] || 0);
+
+  const chartHeight = Math.max(220, labels.length * 42);
+  const canvas = document.getElementById(canvasId);
+  if(canvas && canvas.parentElement){
+    canvas.parentElement.style.height = chartHeight + 'px';
+  }
+
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = canvas.getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: { 
+      labels, 
+      datasets: [{ 
+        data, 
+        backgroundColor: labels.map((_,i) => PALETTE[i % PALETTE.length]), 
+        borderRadius: 6, 
+        maxBarThickness: 28,
+        barPercentage: 0.7
+      }] 
+    },
+    options: { 
+      indexAxis: 'y', 
+      plugins: { 
+        legend: { display: false }, 
+        tooltip: { rtl: true, titleFont: { family: 'Cairo' }, bodyFont: { family: 'Cairo' } } 
+      }, 
+      scales: { 
+        x: { 
+          grid: { color: '#e2d8c2' }, 
+          ticks: { font: { family: 'IBM Plex Mono', size: 11 } },
+          beginAtZero: true
+        }, 
+        y: { 
+          grid: { display: false }, 
+          ticks: { font: { family: 'Cairo', size: 12.5 } } 
+        } 
+      }, 
+      responsive: true, 
+      maintainAspectRatio: false 
+    }
+  });
+}
+
+// NEW: Chart for single governorate showing all indicators
+function renderSingleGovChart(canvasId, arr, categoryField){
+  const d = arr[0]; // Single governorate data
+
+  // Define indicators for each category
+  const indicatorMap = {
+    'disabled_cards': [
+      {key:'disabled_cards', label:'بطاقات إعاقة'},
+      {key:'special_students', label:'طلاب معاهد'},
+      {key:'rehab_centers', label:'مراكز تأهيل'},
+      {key:'rehab_benef', label:'مستفيدو تأهيل'}
+    ],
+    'elderly_benef': [
+      {key:'elderly_benef', label:'مستفيدو مسنين'},
+      {key:'beggar_inmates', label:'نزلاء تسول'},
+      {key:'orphan_homes', label:'دور أيتام'},
+      {key:'sponsor_internal', label:'كفالة داخلية'},
+      {key:'sponsor_external', label:'كفالة خارجية'}
+    ],
+    'ngo_active': [
+      {key:'ngo_active', label:'منظمات نشطة'},
+      {key:'ngo_revoked', label:'منظمات مسحوبة'},
+      {key:'seminars', label:'ندوات توعوية'}
+    ],
+    'juvenile_inmates': [
+      {key:'juvenile_inst', label:'معاهد أحداث'},
+      {key:'juvenile_inst_active', label:'معاهد بالخدمة'},
+      {key:'juvenile_inmates', label:'نزلاء أحداث'}
+    ],
+    'rural_dev_benef': [
+      {key:'rural_dev_benef', label:'مستفيدو تنمية ريفية'},
+      {key:'rural_ind_benef', label:'مستفيدو صناعات ريفية'},
+      {key:'rural_dev_active', label:'مراكز تنمية'},
+      {key:'rural_ind_active', label:'وحدات صناعية'}
+    ],
+    'insp_industrial': [
+      {key:'new_workers_insp', label:'عمال جدد'},
+      {key:'insp_industrial', label:'تفتيش صناعي'},
+      {key:'insp_agri', label:'تفتيش زراعي'},
+      {key:'violations', label:'مخالفات'}
+    ]
+  };
+
+  // Find the right indicator set based on the category field
+  let indicators = indicatorMap[categoryField];
+  if(!indicators){
+    // Fallback: try to find any matching key
+    indicators = Object.keys(indicatorMap).map(k => indicatorMap[k]).find(set => 
+      set.some(item => item.key === categoryField)
+    ) || [];
+  }
+
+  // If still no match, use a generic set of numeric fields
+  if(indicators.length === 0){
+    const numericKeys = Object.keys(d).filter(k => typeof d[k] === 'number' && k !== 'year');
+    indicators = numericKeys.slice(0, 8).map(k => ({key:k, label:k}));
+  }
+
+  const labels = indicators.map(i => i.label);
+  const data = indicators.map(i => d[i.key] || 0);
+
+  const canvas = document.getElementById(canvasId);
+  if(canvas && canvas.parentElement){
+    canvas.parentElement.style.height = '350px';
+  }
+
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = canvas.getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: { 
+      labels, 
+      datasets: [{ 
+        label: d.gov,
+        data, 
+        backgroundColor: labels.map((_,i) => PALETTE[i % PALETTE.length]), 
+        borderRadius: 6, 
+        maxBarThickness: 45,
+        barPercentage: 0.6
+      }] 
+    },
+    options: { 
+      indexAxis: 'x', 
+      plugins: { 
+        legend: { display: true, position: 'top', labels: { font: { family: 'Cairo' }, text: d.gov } }, 
+        tooltip: { rtl: true, titleFont: { family: 'Cairo' }, bodyFont: { family: 'Cairo' } } 
+      }, 
+      scales: { 
+        x: { 
+          grid: { display: false }, 
+          ticks: { font: { family: 'Cairo', size: 11 }, autoSkip: false, maxRotation: 45, minRotation: 0 } 
+        }, 
+        y: { 
+          grid: { color: '#e2d8c2' }, 
+          ticks: { font: { family: 'IBM Plex Mono', size: 11 } },
+          beginAtZero: true
+        } 
+      }, 
+      responsive: true, 
+      maintainAspectRatio: false 
+    }
+  });
+}
+
+function renderCards(containerId, items){
+  document.getElementById(containerId).innerHTML = items.map(it => 
+    `<div class="ind-card"><span class="em">${it.em}</span><div><div class="n">${fmt(it.n)}</div><div class="t">${it.t}</div></div></div>`
+  ).join('');
+}
+
+function renderCategory(cat){
+  const arr = filtered();
+
+  if(cat === 'disability'){
+    barChart('chart-disability', 'disabled_cards');
+    renderCards('cards-disability', [
+      {em:'🦽',n:sum('disabled_cards',arr),t:'إجمالي بطاقات الإعاقة الصادرة'},
+      {em:'🎓',n:sum('special_students',arr),t:'الطلاب في معاهد ذوي الإعاقة'},
+      {em:'🛠️',n:sum('rehab_centers',arr),t:'مراكز التأهيل المهني'},
+      {em:'👨‍🔧',n:sum('rehab_benef',arr),t:'مستفيدو برامج التأهيل'}
+    ]);
+    const zeroGovs = arr.filter(d => (d.disabled_cards||0) === 0).map(d => d.gov);
+    document.getElementById('note-disability').textContent = zeroGovs.length > 0 
+      ? `💡 محافظة ${zeroGovs.join(' و')} سجّلت صفراً في بطاقات الإعاقة — يستحق التحقق.` 
+      : `💡 جميع المحافظات سجّلت بطاقات إعاقة.`;
+  }
+
+  if(cat === 'social'){
+    barChart('chart-social', 'elderly_benef');
+    renderCards('cards-social', [
+      {em:'👵',n:sum('elderly_benef',arr),t:'مستفيدو دور رعاية المسنين'},
+      {em:'🏚️',n:sum('beggar_inmates',arr),t:'نزلاء مراكز رعاية المتسولين'},
+      {em:'👶',n:sum('orphan_homes',arr),t:'دور رعاية الأيتام'},
+      {em:'💞',n:sum('sponsor_internal',arr),t:'مستفيدو الكفالة الداخلية'},
+      {em:'🌍',n:sum('sponsor_external',arr),t:'مستفيدو الكفالة الخارجية'}
+    ]);
+    const extTotal = sum('sponsor_external', arr);
+    const idlibExt = arr.filter(d => d.gov === 'ادلب').reduce((a,d) => a + (d.sponsor_external||0), 0);
+    const pct = extTotal > 0 ? Math.round((idlibExt/extTotal)*100) : 0;
+    document.getElementById('note-social').textContent = 
+      `💡 تتركز الكفالة الخارجية بنسبة ~${pct}% في ادلب وحدها. نزلاء مراكز التسوّل شبه محصورين في حلب (${sum('beggar_inmates',arr)} من الإجمالي).`;
+  }
+
+  if(cat === 'ngo'){
+    barChart('chart-ngo', 'ngo_active');
+    renderCards('cards-ngo', [
+      {em:'🤝',n:sum('ngo_active',arr),t:'منظمات غير حكومية نشطة (مشهرة)'},
+      {em:'🚫',n:sum('ngo_revoked',arr),t:'منظمات مسحوبة الترخيص'},
+      {em:'📋',n:sum('seminars',arr),t:'ندوات ودورات توعوية'}
+    ]);
+    document.getElementById('note-ngo').textContent = 
+      `💡 ${sum('ngo_active',arr)} منظمة نشطة مقابل ${sum('ngo_revoked',arr)} فقط مسحوبة الترخيص — مؤشر استقرار نسبي للقطاع.`;
+  }
+
+  if(cat === 'juvenile'){
+    barChart('chart-juvenile', 'juvenile_inmates');
+    renderCards('cards-juvenile', [
+      {em:'🏛️',n:sum('juvenile_inst',arr),t:'معاهد إصلاح الأحداث'},
+      {em:'⚖️',n:sum('juvenile_inmates',arr),t:'نزلاء معاهد الأحداث'}
+    ]);
+    const total = sum('juvenile_inmates', arr);
+    const top2 = arr.filter(d => d.gov === 'ريف دمشق' || d.gov === 'حلب').reduce((a,d) => a + (d.juvenile_inmates||0), 0);
+    const pct = total > 0 ? Math.round((top2/total)*100) : 0;
+    document.getElementById('note-juvenile').textContent = 
+      `💡 أكثر من ${pct}% من نزلاء الأحداث في ريف دمشق وحلب فقط، رغم وجود معاهد مرخصة في محافظات أخرى بلا نزلاء مسجّلين — قد يعني معاهد متوقفة فعلياً.`;
+  }
+
+  if(cat === 'rural'){
+    barChart('chart-rural', 'rural_dev_benef');
+    renderCards('cards-rural', [
+      {em:'🌾',n:sum('rural_dev_benef',arr),t:'مستفيدو مراكز التنمية الريفية'},
+      {em:'🏭',n:sum('rural_ind_benef',arr),t:'مستفيدو وحدات الصناعات الريفية'},
+      {em:'🏘️',n:sum('rural_dev_active',arr),t:'مراكز التنمية الريفية ضمن الخدمة'},
+      {em:'🏗️',n:sum('rural_ind_active',arr),t:'وحدات الصناعات الريفية ضمن الخدمة'}
+    ]);
+    const topDev = arr.reduce((a,d) => (d.rural_dev_benef||0) > (a.val||0) ? {gov:d.gov, val:d.rural_dev_benef||0} : a, {gov:'', val:0});
+    const topInd = arr.reduce((a,d) => (d.rural_ind_benef||0) > (a.val||0) ? {gov:d.gov, val:d.rural_ind_benef||0} : a, {gov:'', val:0});
+    document.getElementById('note-rural').textContent = 
+      `💡 ${topDev.gov || 'لا توجد بيانات'} تتصدر مستفيدي التنمية الريفية (${fmt(topDev.val)})، بينما يتصدر ${topInd.gov || 'لا توجد بيانات'} مستفيدي الصناعات الريفية (${fmt(topInd.val)}).`;
+  }
+
+  if(cat === 'labor'){
+    barChart('chart-labor', 'insp_industrial');
+    renderCards('cards-labor', [
+      {em:'👷',n:sum('new_workers_insp',arr),t:'عمال مسجّلون حديثاً بالتفتيش'},
+      {em:'🏗️',n:sum('insp_industrial',arr),t:'زيارات تفتيش صناعي'},
+      {em:'🌱',n:sum('insp_agri',arr),t:'زيارات تفتيش زراعي'},
+      {em:'⚠️',n:sum('violations',arr),t:'مخالفات مسجّلة'}
+    ]);
+    const totalWorkers = sum('new_workers_insp', arr);
+    const latakiaWorkers = arr.filter(d => d.gov === 'اللاذقية').reduce((a,d) => a + (d.new_workers_insp||0), 0);
+    const pct = totalWorkers > 0 ? Math.round((latakiaWorkers/totalWorkers)*100) : 0;
+    document.getElementById('note-labor').textContent = 
+      `💡 اللاذقية وحدها سجّلت ${fmt(latakiaWorkers)} عامل جديد (نحو ${pct}% من الإجمالي).`;
+  }
+}
+
+// =====================
+// GOVERNORATE DETAILS
+// =====================
+function renderGovList(){
+  const arr = filtered();
+  const grouped = {};
+
+  arr.forEach(d => {
+    if(!grouped[d.gov]){
+      grouped[d.gov] = {...d};
+    } else {
+      Object.keys(d).forEach(key => {
+        if(typeof d[key] === 'number'){
+          grouped[d.gov][key] = (grouped[d.gov][key] || 0) + d[key];
+        }
+        else if(typeof d[key] === 'string' && d[key] && key !== 'gov' && key !== 'month'){
+          if(!grouped[d.gov][key]) grouped[d.gov][key] = d[key];
+          else grouped[d.gov][key] += " | " + d[key];
+        }
+      });
+    }
+  });
+
+  const govList = Object.values(grouped);
+  document.getElementById('govList').innerHTML = govList.map(d => `
+    <div class="gov-item">
+      <div class="gh" onclick="this.parentElement.classList.toggle('open')">
+        <div class="stamp">${d.gov ? d.gov[0] : '?'}</div>
+        <strong>${d.gov || 'غير معروف'}</strong>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="gb">
+        <div class="row"><b>🏆 أهم الإنجازات</b><span>${d.achievements ? d.achievements : '<span class="empty-note">لم تُدرَج بيانات</span>'}</span></div>
+        <div class="row"><b>📌 أهم التوصيات</b><span>${d.recommendations ? d.recommendations : '<span class="empty-note">لم تُدرَج بيانات</span>'}</span></div>
+        <div class="row"><b>🧰 الاحتياجات الرئيسية</b><span>${d.needs ? d.needs : '<span class="empty-note">لم تُدرَج بيانات</span>'}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+// =====================
+// RENDER ALL
+// =====================
+function renderAll(){
+  console.log('Rendering with', filtered().length, 'rows, activeGov:', activeGov, 'selectedMonths:', [...selectedMonths]);
+  renderKPIs();
+  ['disability','social','ngo','juvenile','rural','labor'].forEach(renderCategory);
+  renderGovList();
+  updateMastheadBadge();
+  updateFooterNote();
+  updateMapMarkers();
+}
+
+function updateMastheadBadge(){
+  const arr = filtered();
+  const govCount = new Set(arr.map(d => d.gov)).size;
+  const monthCount = new Set(arr.map(d => d.month)).size;
+  const monthText = monthCount === 1 ? (arr[0]?.month || '') : `متعدد الأشهر (${monthCount})`;
+  document.getElementById('mastheadBadge').innerHTML = `🗓️ ${monthText} &nbsp;·&nbsp; ${govCount} من 14 محافظة`;
+}
+
+function updateFooterNote(){
+  const arr = ALL_DATA;
+  const allGovs = ["دمشق","ريف دمشق","حلب","حمص","حماه","اللاذقية","طرطوس","السويداء","درعا","القنيطرة","ادلب","الرقة","دير الزور","الحسكة"];
+  const presentGovs = new Set(arr.map(d => d.gov));
+  const missingGovs = allGovs.filter(g => !presentGovs.has(g));
+  const note = missingGovs.length > 0 
+    ? `⚠️ ملاحظة على جودة البيانات: ${missingGovs.length} محافظة لم ترفع بياناتها (${missingGovs.join('، ')}). مصدر البيانات: نموذج «مؤشرات تشغيلية إجمالية وفق المحافظات».`
+    : `✅ جميع المحافظات الـ 14 رفعت بياناتها. مصدر البيانات: نموذج «مؤشرات تشغيلية إجمالية وفق المحافظات».`;
+  document.getElementById('footerNote').textContent = note;
+}
+
+function toggleCat(headEl){
+  headEl.parentElement.classList.toggle('open');
+  const cat = headEl.parentElement.getAttribute('data-cat');
+  if(cat !== 'details') setTimeout(() => renderCategory(cat), 0);
+  if(cat === 'map') initMapOnDemand();
+}
+
+// =====================
+// FILE HANDLING
+// =====================
+function handleCSVUpload(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){ 
+    processCSVData(e.target.result); 
+    closeUploadModal(); 
+  };
+  reader.readAsText(file);
+}
+
+function handleCSVPaste(){
+  const csvText = document.getElementById('csvPasteArea').value;
+  if(!csvText.trim()){ alert('الرجاء لصق البيانات أولاُ'); return; }
+  processCSVData(csvText);
+  closeUploadModal();
+}
+
+async function loadFromSheet(){
+  const url = document.getElementById('gsheetUrl').value.trim();
+  if(!url){ 
+    alert('الرجاء إدخال رابط Google Sheet أو استخدام زر رفع الملف'); 
+    return; 
+  }
+
+  const statusEl = document.getElementById('dataStatus');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  statusEl.textContent = '⏳ جاري التحديث...'; 
+  statusEl.className = 'status-badge status-loading';
+  if(refreshBtn) refreshBtn.disabled = true;
+
+  try {
+    // Add cache-buster to force fresh data
+    const cacheBuster = '&_cb=' + Date.now();
+    const fetchUrl = url + (url.includes('?') ? cacheBuster : '?' + cacheBuster);
+
+    const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' });
+    if(response.ok){ 
+      const csvText = await response.text(); 
+      if(processCSVData(csvText)) {
+        statusEl.textContent = '✅ تم التحديث بنجاح — ' + new Date().toLocaleTimeString('ar-SY');
+        statusEl.className = 'status-badge status-ok';
+        if(refreshBtn) refreshBtn.disabled = false;
+        return; 
+      }
+    }
+  } catch(e) { 
+    console.log('Direct fetch failed:', e.message); 
+  }
+
+  // Try with proxies if direct fetch fails
+  const proxies = ['https://api.allorigins.win/raw?url=','https://api.allorigins.win/get?url=','https://corsproxy.io/?'];
+  for(const proxy of proxies){
+    try {
+      const cacheBuster = '&_cb=' + Date.now();
+      const proxyUrl = proxy + encodeURIComponent(url + cacheBuster);
+      const response = await fetch(proxyUrl, { method: 'GET' });
+      if(!response.ok) continue;
+      let csvText;
+      if(proxy.includes('allorigins.win/get')) { 
+        const json = await response.json(); 
+        csvText = json.contents; 
+      }
+      else { 
+        csvText = await response.text(); 
+      }
+      if(processCSVData(csvText)) {
+        statusEl.textContent = '✅ تم التحديث بنجاح — ' + new Date().toLocaleTimeString('ar-SY');
+        statusEl.className = 'status-badge status-ok';
+        if(refreshBtn) refreshBtn.disabled = false;
+        return;
+      }
+    } catch(err) { 
+      console.warn('Proxy failed:', proxy, err.message); 
+    }
+  }
+
+  statusEl.textContent = '❌ فشل التحديث — جرب رفع الملف يدوياً';
+  statusEl.className = 'status-badge status-error';
+  if(refreshBtn) refreshBtn.disabled = false;
+  showUploadModal();
+}
+
+// =====================
+// MODALS
+// =====================
+function showUploadModal(){ 
+  document.getElementById('uploadModal').classList.add('open'); 
+}
+function closeUploadModal(){ 
+  document.getElementById('uploadModal').classList.remove('open'); 
+}
+
+window.onclick = function(event){ 
+  if(event.target.classList.contains('modal-overlay')) 
+    event.target.classList.remove('open'); 
+}
+
+// Drag and drop
+const dropZone = document.getElementById('fileDropZone');
+if(dropZone){
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault(); 
+    dropZone.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if(files.length > 0){ 
+      const reader = new FileReader(); 
+      reader.onload = function(ev){ 
+        processCSVData(ev.target.result); 
+        closeUploadModal(); 
+      }; 
+      reader.readAsText(files[0]); 
+    }
+  });
+}
+
+
+// =====================
+// MAP - Leaflet OpenStreetMap
+// =====================
+let map = null;
+let mapMarkers = {};
+
+const GOV_COORDS = {
+  "دمشق": [33.5138, 36.2765],
+  "ريف دمشق": [33.5833, 36.4000],
+  "حلب": [36.2021, 37.1343],
+  "حمص": [34.7308, 36.7094],
+  "حماه": [35.1333, 36.7500],
+  "اللاذقية": [35.5196, 35.7914],
+  "طرطوس": [34.8890, 35.8866],
+  "السويداء": [32.7089, 36.5695],
+  "درعا": [32.6258, 36.1054],
+  "القنيطرة": [33.1258, 35.8245],
+  "ادلب": [35.9306, 36.6339],
+  "الرقة": [35.9500, 39.0167],
+  "دير الزور": [35.3356, 40.1406],
+  "الحسكة": [36.5024, 40.7477]
+};
+
+function getGovIntensity(gov, arr){
+  const govData = arr.filter(d => d.gov === gov);
+  if(govData.length === 0) return 0;
+  let total = 0;
+  govData.forEach(d => {
+    total += (d.disabled_cards||0) + (d.elderly_benef||0) + (d.ngo_active||0) + 
+             (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_industrial||0) +
+             (d.new_workers_insp||0) + (d.special_students||0) + (d.rehab_benef||0) +
+             (d.population||0);
+  });
+  return total;
+}
+
+function getIntensityColor(intensity){
+  if(intensity === 0) return '#cccccc';
+  if(intensity > 5000) return '#B5533C'; // Very high - red
+  if(intensity > 2000) return '#B08D57'; // High - brass
+  if(intensity > 500) return '#4F7A63';  // Medium - green
+  return '#6E8FA3'; // Low - blue
+}
+
+function initMap(){
+  if(map !== null) return;
+
+  map = L.map('govMap').setView([35.0, 38.0], 6);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
+  }).addTo(map);
+
+  updateMapMarkers();
+}
+
+function updateMapMarkers(){
+  if(!map) return;
+
+  // Clear existing markers
+  Object.values(mapMarkers).forEach(m => map.removeLayer(m));
+  mapMarkers = {};
+
+  const arr = filtered();
+
+  ALL_GOVS.forEach(gov => {
+    const coords = GOV_COORDS[gov];
+    if(!coords) return;
+
+    const intensity = getGovIntensity(gov, arr);
+    const color = getIntensityColor(intensity);
+    const govData = arr.filter(d => d.gov === gov);
+
+    // Create custom icon
+    const customIcon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="
+        width:28px;height:28px;
+        background:${color};
+        border:3px solid white;
+        border-radius:50%;
+        box-shadow:0 2px 8px rgba(0,0,0,0.3);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:white;
+        font-weight:700;
+        font-size:11px;
+        font-family:'IBM Plex Mono',monospace;
+      ">${gov[0]}</div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    const marker = L.marker(coords, { icon: customIcon }).addTo(map);
+
+    // Build popup content
+    let popupContent = `<div class="map-info-window">
+      <h4>📍 ${gov}</h4>`;
+
+    if(govData.length === 0){
+      popupContent += `<div class="info-row"><span class="info-label">الحالة</span><span class="info-val" style="color:#999;">لا توجد بيانات</span></div>`;
+    } else {
+      // Aggregate all numeric fields across all records for this governorate
+      const agg = {};
+      const textFields = {};
+      govData.forEach(d => {
+        Object.keys(d).forEach(key => {
+          if (key === 'gov' || key === 'month') return;
+          const val = d[key];
+          if (typeof val === 'number') {
+            agg[key] = (agg[key] || 0) + val;
+          } else if (typeof val === 'string' && val.trim()) {
+            if (!textFields[key]) textFields[key] = [];
+            if (!textFields[key].includes(val)) textFields[key].push(val);
+          }
+        });
+      });
+
+      const d = agg; // Use aggregated data
+      const monthsList = govData.map(d => d.month).filter((v, i, a) => a.indexOf(v) === i).join('، ');
+
+      popupContent += `
+        <div class="info-row" style="background:#f5f5f5;border-radius:6px;padding:6px 8px;margin-bottom:8px;">
+          <span class="info-label" style="font-weight:700;">📅 الأشهر</span>
+          <span class="info-val" style="font-size:11px;">${monthsList || 'غير محدد'}</span>
+        </div>
+
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">🦽 رعاية ذوي الإعاقة</span>
+        </div>
+        <div class="info-row"><span class="info-label">بطاقات إعاقة</span><span class="info-val">${fmt(d.disabled_cards||0)}</span></div>
+        <div class="info-row"><span class="info-label">طلاب معاهد الإعاقة</span><span class="info-val">${fmt(d.special_students||0)}</span></div>
+        <div class="info-row"><span class="info-label">مراكز التأهيل المهني</span><span class="info-val">${fmt(d.rehab_centers||0)}</span></div>
+        <div class="info-row"><span class="info-label">مستفيدو التأهيل</span><span class="info-val">${fmt(d.rehab_benef||0)}</span></div>
+
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">👵 الرعاية الاجتماعية</span>
+        </div>
+        <div class="info-row"><span class="info-label">دور رعاية المسنين</span><span class="info-val">${fmt(d.elderly_homes||0)}</span></div>
+        <div class="info-row"><span class="info-label">مستفيدو رعاية المسنين</span><span class="info-val">${fmt(d.elderly_benef||0)}</span></div>
+        <div class="info-row"><span class="info-label">مراكز رعاية المتسولين</span><span class="info-val">${fmt(d.beggar_centers||0)}</span></div>
+        <div class="info-row"><span class="info-label">نزلاء مراكز التسول</span><span class="info-val">${fmt(d.beggar_inmates||0)}</span></div>
+        <div class="info-row"><span class="info-label">دور رعاية الأيتام</span><span class="info-val">${fmt(d.orphan_homes||0)}</span></div>
+        <div class="info-row"><span class="info-label">كفالة داخلية</span><span class="info-val">${fmt(d.sponsor_internal||0)}</span></div>
+        <div class="info-row"><span class="info-label">كفالة خارجية</span><span class="info-val">${fmt(d.sponsor_external||0)}</span></div>
+
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">🤝 المنظمات غير الحكومية</span>
+        </div>
+        <div class="info-row"><span class="info-label">منظمات نشطة</span><span class="info-val">${fmt(d.ngo_active||0)}</span></div>
+        <div class="info-row"><span class="info-label">منظمات مسحوبة</span><span class="info-val">${fmt(d.ngo_revoked||0)}</span></div>
+        <div class="info-row"><span class="info-label">ندوات ودورات</span><span class="info-val">${fmt(d.seminars||0)}</span></div>
+
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">⚖️ معاهد الأحداث</span>
+        </div>
+        <div class="info-row"><span class="info-label">معاهد الأحداث</span><span class="info-val">${fmt(d.juvenile_inst||0)}</span></div>
+        <div class="info-row"><span class="info-label">معاهد بالخدمة</span><span class="info-val">${fmt(d.juvenile_inst_active||0)}</span></div>
+        <div class="info-row"><span class="info-label">نزلاء الأحداث</span><span class="info-val">${fmt(d.juvenile_inmates||0)}</span></div>
+
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">🌾 التنمية الريفية</span>
+        </div>
+        <div class="info-row"><span class="info-label">مراكز تنمية ريفية (نشطة)</span><span class="info-val">${fmt(d.rural_dev_active||0)}</span></div>
+        <div class="info-row"><span class="info-label">مراكز تنمية ريفية (خارج الخدمة)</span><span class="info-val">${fmt(d.rural_dev_inactive||0)}</span></div>
+        <div class="info-row"><span class="info-label">وحدات صناعات ريفية (نشطة)</span><span class="info-val">${fmt(d.rural_ind_active||0)}</span></div>
+        <div class="info-row"><span class="info-label">وحدات صناعات ريفية (خارج الخدمة)</span><span class="info-val">${fmt(d.rural_ind_inactive||0)}</span></div>
+        <div class="info-row"><span class="info-label">مستفيدو التنمية الريفية</span><span class="info-val">${fmt(d.rural_dev_benef||0)}</span></div>
+        <div class="info-row"><span class="info-label">مستفيدو الصناعات الريفية</span><span class="info-val">${fmt(d.rural_ind_benef||0)}</span></div>
+        <div class="info-row"><span class="info-label">مستفيدو التأهيل (ريفي)</span><span class="info-val">${fmt(d.rural_rehab_benef||0)}</span></div>
+
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">🏗️ التفتيش والعمالة</span>
+        </div>
+        <div class="info-row"><span class="info-label">عمال مسجّلون جدد</span><span class="info-val">${fmt(d.new_workers_insp||0)}</span></div>
+        <div class="info-row"><span class="info-label">زيارات تفتيش صناعي</span><span class="info-val">${fmt(d.insp_industrial||0)}</span></div>
+        <div class="info-row"><span class="info-label">زيارات تفتيش زراعي</span><span class="info-val">${fmt(d.insp_agri||0)}</span></div>
+        <div class="info-row"><span class="info-label">مخالفات مسجّلة</span><span class="info-val">${fmt(d.violations||0)}</span></div>
+        <div class="info-row"><span class="info-label">تراخيص عمل جديدة (غير سوريين)</span><span class="info-val">${fmt(d.work_permits_new||0)}</span></div>
+        <div class="info-row"><span class="info-label">تراخيص عمل مجددة (غير سوريين)</span><span class="info-val">${fmt(d.work_permits_renew||0)}</span></div>
+        <div class="info-row"><span class="info-label">مكاتب استقدام عاملات</span><span class="info-val">${fmt(d.recruitment_offices||0)}</span></div>
+        <div class="info-row"><span class="info-label">تراخيص عاملات منزليات جديدة</span><span class="info-val">${fmt(d.domestic_permits_new||0)}</span></div>
+        <div class="info-row"><span class="info-label">تراخيص عاملات منزليات مجددة</span><span class="info-val">${fmt((d.domestic_permits_renew||0)+(d.domestic_permits_renew2||0))}</span></div>
+        <div class="info-row"><span class="info-label">مكاتب تشغيل سوريين</span><span class="info-val">${fmt(d.domestic_offices_syrian||0)}</span></div>
+        <div class="info-row"><span class="info-label">مكاتب خاصة سوريين</span><span class="info-val">${fmt(d.private_offices_syrian||0)}</span></div>
+
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">📊 مؤشرات عامة</span>
+        </div>
+        <div class="info-row"><span class="info-label">👥 عدد السكان</span><span class="info-val">${fmt(d.population||0)}</span></div>
+        <div class="info-row"><span class="info-label">نسبة الإنفاق الاستثماري</span><span class="info-val">${fmt(d.investment_spending||0)}%</span></div>
+        <div class="info-row"><span class="info-label">عمال غير منظمين</span><span class="info-val">${fmt(d.unorganized_workers||0)}%</span></div>
+        <div class="info-row"><span class="info-label">اتفاقيات الحماية الاجتماعية</span><span class="info-val">${fmt(d.social_agreements||0)}</span></div>
+
+        ${textFields.achievements && textFields.achievements.length ? `
+        <div style="border-top:2px solid var(--syria-red);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-red);font-size:12px;">🏆 أهم الإنجازات</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);line-height:1.8;padding:4px 0;">${textFields.achievements.join('<br>• ')}</div>
+        ` : ''}
+
+        ${textFields.recommendations && textFields.recommendations.length ? `
+        <div style="border-top:2px solid var(--syria-red);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-red);font-size:12px;">📌 أهم التوصيات</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);line-height:1.8;padding:4px 0;">${textFields.recommendations.join('<br>• ')}</div>
+        ` : ''}
+
+        ${textFields.needs && textFields.needs.length ? `
+        <div style="border-top:2px solid var(--syria-red);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-red);font-size:12px;">🧰 الاحتياجات الرئيسية</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);line-height:1.8;padding:4px 0;">${textFields.needs.join('<br>• ')}</div>
+        ` : ''}
+      `;
+    }
+    popupContent += `</div>`;
+
+    marker.bindPopup(popupContent, { 
+      maxWidth: 340,
+      minWidth: 280,
+      className: 'gov-popup',
+      autoPan: true,
+      autoPanPadding: [50, 50]
+    });
+
+    mapMarkers[gov] = marker;
+  });
+}
+
+// Initialize map when the map section is opened
+function initMapOnDemand(){
+  if(!map){
+    setTimeout(() => {
+      initMap();
+      updateMapMarkers();
+    }, 300);
+  } else {
+    updateMapMarkers();
+  }
+}
+
+// =====================
+// MULTI-USER AUTH SYSTEM
+// =====================
+// Default passwords - change these before publishing!
+const DEFAULT_PASSWORDS = {
+  admin: "246269",    // Admin password
+  viewer: "123456"    // Viewer password (read-only)
+};
+
+let currentUser = null; // 'admin' or 'viewer'
+let passwords = { ...DEFAULT_PASSWORDS };
+
+// Load saved passwords from localStorage
+function loadSavedPasswords() {
+  const saved = localStorage.getItem('govDashboard_passwords');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      passwords = { ...DEFAULT_PASSWORDS, ...parsed };
+    } catch(e) {
+      console.log('Failed to load saved passwords, using defaults');
+    }
+  }
+}
+
+// Save passwords to localStorage
+function savePasswords() {
+  localStorage.setItem('govDashboard_passwords', JSON.stringify(passwords));
+}
+
+function selectUserType(type) {
+  document.querySelectorAll('.user-type-option').forEach(opt => opt.classList.remove('active'));
+  document.querySelector(`.user-type-option:has(input[value="${type}"])`).classList.add('active');
+  document.querySelector(`input[name="userType"][value="${type}"]`).checked = true;
+}
+
+function checkPassword(){
+  const input = document.getElementById('passwordInput').value.trim();
+  const selectedType = document.querySelector('input[name="userType"]:checked').value;
+  const errorEl = document.getElementById('passwordError');
+
+  errorEl.classList.remove('show');
+
+  if(input === passwords[selectedType]){
+    currentUser = selectedType;
+
+    if(selectedType === 'admin'){
+      // Show admin panel instead of dashboard
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+    } else {
+      // Viewer goes directly to dashboard in read-only mode
+      enterDashboard();
+    }
+  } else {
+    errorEl.textContent = '❌ كلمة المرور غير صحيحة';
+    errorEl.classList.add('show');
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+  }
+}
+
+function enterDashboard(){
+  document.body.classList.remove('locked');
+  document.getElementById('passwordOverlay').style.display = 'none';
+
+  if(currentUser === 'viewer'){
+    // Enable read-only mode
+    document.body.classList.add('readonly');
+    document.getElementById('readOnlyBanner').classList.add('show');
+    // Hide data source controls for viewers
+    document.querySelector('.data-source-bar').style.display = 'none';
+    document.getElementById('viewerMessage').style.display = 'block';
+  }
+
+  // Auto-load data
+  setTimeout(() => { loadFromSheet(); }, 500);
+  setTimeout(() => { initMapOnDemand(); }, 1200);
+}
+
+function showChangePw(userType){
+  document.getElementById('changePwForm').style.display = 'block';
+  document.getElementById('targetUserType').value = userType;
+  document.getElementById('changePwTitle').textContent = userType === 'admin' ? '🔐 تغيير كلمة مرور المدير' : '🔐 تغيير كلمة مرور المطلع';
+  document.getElementById('pwSuccessMsg').classList.remove('show');
+  document.getElementById('pwChangeError').classList.remove('show');
+  document.getElementById('currentPwInput').value = '';
+  document.getElementById('newPwInput').value = '';
+  document.getElementById('confirmPwInput').value = '';
+  document.getElementById('currentPwInput').focus();
+}
+
+function hideChangePw(){
+  document.getElementById('changePwForm').style.display = 'none';
+}
+
+function changePassword(){
+  const targetType = document.getElementById('targetUserType').value;
+  const current = document.getElementById('currentPwInput').value.trim();
+  const newPw = document.getElementById('newPwInput').value.trim();
+  const confirm = document.getElementById('confirmPwInput').value.trim();
+  const errorEl = document.getElementById('pwChangeError');
+  const successEl = document.getElementById('pwSuccessMsg');
+
+  errorEl.classList.remove('show');
+  successEl.classList.remove('show');
+
+  if(current !== passwords[targetType]){
+    errorEl.textContent = '❌ كلمة المرور الحالية غير صحيحة';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  if(newPw.length < 4){
+    errorEl.textContent = '❌ كلمة المرور الجديدة يجب أن تكون 4 أحرف على الأقل';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  if(newPw !== confirm){
+    errorEl.textContent = '❌ كلمة المرور الجديدة غير متطابقة مع التأكيد';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  passwords[targetType] = newPw;
+  savePasswords();
+
+  document.getElementById('currentPwInput').value = '';
+  document.getElementById('newPwInput').value = '';
+  document.getElementById('confirmPwInput').value = '';
+
+  successEl.classList.add('show');
+  setTimeout(() => { 
+    successEl.classList.remove('show');
+    hideChangePw();
+  }, 2000);
+}
+
+// Allow Enter key to submit password
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && document.body.classList.contains('locked')){
+    if(document.getElementById('loginBox').style.display !== 'none'){
+      checkPassword();
+    }
+  }
+});// =====================
+// INIT
+// =====================
+window.addEventListener('DOMContentLoaded', () => {
+  loadSavedPasswords(); // Load saved passwords from localStorage
+  setupGovFilter();
+  setupMonthFilter();
+  // Data will auto-load after password verification
+});</script>
+</body>
+</html>
