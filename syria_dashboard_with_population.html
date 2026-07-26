@@ -239,6 +239,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <base target="_blank">
+<base target="_blank">
 </head>
 <body class="locked">
 
@@ -313,7 +314,6 @@
     </div>
   </div>
 </div>
-</div>
 
 
 <div class="read-only-banner" id="readOnlyBanner">👁️ وضع القراءة فقط — لا يمكنك تعديل البيانات <button class="close-banner" onclick="document.getElementById('readOnlyBanner').classList.remove('show')">×</button></div>
@@ -378,9 +378,10 @@
 <div class="data-panel">
   <div class="data-source-bar">
     <span class="label">📁 مصدر البيانات:</span>
-    <input type="text" class="gsheet-input" id="gsheetUrl" placeholder="رابط Google Sheet" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSYw2t1DGme6GL7bFv8FDnl3cYMbHYpm2LRjjvHsXyE2TB5Tbkum28ObIMc1jop-AQMJCWThzX9q3vL/pub?output=csv" readonly style="background:#f0ebe0;color:var(--ink-soft);">
+    <input type="text" class="gsheet-input" id="gsheetUrl" placeholder="رابط Google Sheet" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSYw2t1DGme6GL7bFv8FDnl3cYMbHYpm2LRjjvHsXyE2TB5Tbkum28ObIMc1jop-AQMJCWThzX9q3vL/pub?gid=1033203405&single=true&output=csv" readonly style="background:#f0ebe0;color:var(--ink-soft);" title="هذا الرابط يجب أن يكون ورقة Google Sheets منشورة للعامة بصيغة CSV">
     <button class="btn btn-primary" onclick="loadFromSheet()" id="refreshBtn">🔄 تحديث من الرابط</button>
     <button class="btn btn-success" onclick="showUploadModal()">📁 رفع ملف CSV يدوياً</button>
+    <button class="btn" onclick="loadDemoData()" style="background:#8e44ad;color:white;border:none;">🧪 بيانات تجريبية</button>
     <span class="status-badge status-loading" id="dataStatus">جاري التحميل التلقائي...</span>
   </div>
 </div>
@@ -500,6 +501,123 @@
   </section>
 
   <!-- INSIGHTS & COMPARISONS SECTION -->
+  
+  <section class="category" data-cat="permits">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🛂</div>
+      <div><h2>التراخيص والعمالة الأجنبية</h2><p>تراخيص العمل للأجانب، مكاتب الاستقدام، العمال المنزليون</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-permits">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-permits"></canvas></div>
+      <div class="ind-cards" id="cards-permits"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="financial">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">💰</div>
+      <div><h2>المؤشرات المالية والاستثمارية</h2><p>الإنفاق الاستثماري، العمال غير المنظمين، الاتفاقيات</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-financial">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-financial"></canvas></div>
+      <div class="ind-cards" id="cards-financial"></div>
+    </div>
+  </section>
+<section class="category" data-cat="dynamic">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">📋</div>
+      <div><h2>مؤشرات إضافية</h2><p>المؤشرات الإضافية المستوردة تلقائياً من ملف CSV</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-dynamic">💡 سيتم عرض المؤشرات الإضافية هنا تلقائياً عند استيراد البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-dynamic"></canvas></div>
+      <div class="ind-cards" id="cards-dynamic"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="jobplatform">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">💻</div>
+      <div><h2>منصة سوق العمل</h2><p>المسجلين، المنشآت، فرص العمل والتدريب</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-jobplatform">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-jobplatform"></canvas></div>
+      <div class="ind-cards" id="cards-jobplatform"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="humanitarian">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🆘</div>
+      <div><h2>المساعدات الإنسانية والمجتمعية</h2><p>المساعدات الغذائية والعينية والنقدية، المراكز المجتمعية، المخيمات</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-humanitarian">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-humanitarian"></canvas></div>
+      <div class="ind-cards" id="cards-humanitarian"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="insurance">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🛡️</div>
+      <div><h2>التأمينات الاجتماعية</h2><p>المسجلين في القطاعين العام والخاص، المتقاعدين، تعويضات إصابات العمل</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-insurance">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-insurance"></canvas></div>
+      <div class="ind-cards" id="cards-insurance"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="legal">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">⚖️</div>
+      <div><h2>الصكوك القانونية</h2><p>مشاريع الصكوك الجديدة والقيد المراجعة</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-legal">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-legal"></canvas></div>
+      <div class="ind-cards" id="cards-legal"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="labor_market">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">📈</div>
+      <div><h2>مؤشرات سوق العمل والبطالة</h2><p>قوة العمل، المشتغلون، المتعطلون، معدلات البطالة والمشاركة الاقتصادية</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-labor_market">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-labor_market"></canvas></div>
+      <div class="ind-cards" id="cards-labor_market"></div>
+    </div>
+  </section>
+
+  <section class="category" data-cat="food_security">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">🍞</div>
+      <div><h2>الأمن الغذائي</h2><p>تقديرات الفقر والأمن الغذائي للأسر</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-food_security">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-food_security"></canvas></div>
+      <div class="ind-cards" id="cards-food_security"></div>
+    </div>
+  </section>
+
   <section class="insights-section open" data-cat="insights" id="insightsSection">
     <div class="insights-head" onclick="toggleInsights(this)">
       <div class="icon">💡</div>
@@ -611,9 +729,86 @@ const COLUMN_MAP = {
   "إناث": "females",
   "السنة": "year",
   "اهم ثلاث انجازات": "achievements",
-  "اهم ثلال توصيات": "recommendations",
+  "اهم ثلاث توصيات": "recommendations",
   "الاحتياجات الرئيسية": "needs",
+  "عدد المسجلين على منصة سوق العمل(2024- 2025)": "job_platform_registered",
+  "عدد المنشآت المسجلة في المنصة": "job_platform_establishments",
+  "عدد فرص العمل على المنصة": "job_platform_jobs",
+  "عدد فرص التدريب على المنصة": "job_platform_training",
+  "عدد المنظمات غير الحكومية المشهرة في العام 2025": "ngo_active_2025",
+  "عدد المساعدات (سلة غذائية)": "food_baskets",
+  "عدد المساعدات عينية ( ادوية - عمليات- منظفات)": "inkind_assistance",
+  "اعانات مالية": "cash_assistance",
+  "عدد المراكز المجتمعية / UNHCR": "unhcr_community_centers",
+  "مساحات امنة للنساء/ UNFPA": "unfpa_safe_spaces",
+  "عدد المخيمات": "camps_count",
+  "عدد الاسر المقيمة في المخيمات": "camp_families",
+  "عدد المسجلين في التأمينات الاجتماعية/ قطاع عام": "social_insurance_public",
+  "عدد المسجلين في التأمينات الاجتماعية / قطاع خاص": "social_insurance_private",
+  "اجمالي عدد المسجلين القائمين على رأس عملهم": "social_insurance_total_active",
+  "عدد المتقاعدين المستفيدين": "pensioners",
+  "قرارات ضم الخدمة": "service_merge_decisions",
+  "عدد المستفيدين من تعويضات إصابات العمل": "work_injury_compensation",
+  "عدد المنشآت التي تم اشراكها بالتامينات": "establishments_joined_insurance",
+  "مشاريع الصكوك القانونية الجديدة": "new_legal_bonds",
+  "مشاريع الصكوك القانونية قيد المراجعة والتحديث": "legal_bonds_under_review",
+  "عدد السكان المقيمين في سورية (مليون)": "population_millions",
+  "السكان دون 15 سنة": "population_under_15",
+  "السكان 15-60 سنة": "population_15_60",
+  "السكان 60+ سنة": "population_over_60",
+  "حجم قوة العمل (مليون)": "labor_force_millions",
+  "المشتغلون": "employed",
+  "المتعطلون": "unemployed",
+  "معدل البطالة العام": "unemployment_rate_general",
+  "معدل بطالة الذكور": "unemployment_rate_males",
+  "معدل بطالة الاناث": "unemployment_rate_females",
+  "معدل بطالة الشباب": "unemployment_rate_youth",
+  "معدل المشاركة في النشاط الاقتصادي / ذكور": "economic_activity_males",
+  "معدل المشاركة في النشاط الاقتصادي / إناث": "economic_activity_females",
+  "معدل زواج القاصرات حسب المحافظات": "child_marriage_rate",
+  "%معدل عمل الأطفال": "child_labor_rate",
+  "نسبة النساء المعيلات": "female_breadwinners_rate",
+  "تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا )": "food_secure_households",
+  "تقديرات الفقر وفق الأمن الغذائي (الاسر ذات الهشاشة)": "food_vulnerable_households",
+  "تقديرات الفقر - الأمن الغذائي (الاسر المعدومة )": "food_insecure_households",
 };
+
+// Fields that are percentages — should be averaged, not summed
+const PERCENTAGE_FIELDS = new Set([
+  "investment_spending",
+  "unorganized_workers",
+  "unemployment_rate_general",
+  "unemployment_rate_males",
+  "unemployment_rate_females",
+  "unemployment_rate_youth",
+  "economic_activity_males",
+  "economic_activity_females",
+  "child_marriage_rate",
+  "child_labor_rate",
+  "female_breadwinners_rate",
+]);
+
+// Will hold auto-discovered indicators from CSV
+let DYNAMIC_INDICATORS = [];
+
+// =====================
+// DEMO DATA (Embedded for offline use)
+// =====================
+const DEMO_DATA_CSV = `المحافظة,الشهر,عدد الأشخاص  ذوي الإعاقة الحاصلين على بطاقة الإعاقة,عدد الطلاب المسجلين في المعاهد  الخاصة بذوي الاعاقة,عدد المستفيدين من برامج مراكز التأهيل والتدريب المهني (مراكز تمكين الشباب ان وجدت),عدد مراكز التأهيل المهني,عدد مراكز رعاية المتسولين,عدد النزلاء في مراكز التسول,عدد دور الرعاية للمسنين,عدد المستفيدين من خدمات دور رعاية المسنين,عدد المنظمات غير الحكومية المشهرة,عدد المنظمات غير الحكومية المسحوب ترخيصها,عدد الندوات الحوارية والدورات حول قضايا الصحة والسلامة المهنية,نسبة الانفاق الاستثماري,نسبة العمال في القطاع الخاص غير المنظم,عدد الاتفاقيات الموقعة بخصوص الحماية الاجتماعية,عدد دور رعاية الايتام,عدد المستفيدين من الخدمات (كفالة داخلية ),عدد المستفيدين من الخدمات (كفالة خارجية),عدد معاهد الاحداث,عدد معاهد الاحداث ضمن الخدمة,عدد النزلاء من الاحداث,عدد مراكز التنمية الريفية خارج الخدمة,عدد مراكز التنمية الريفية ضمن الخدمة,عدد وحدات الصناعات الريفية خارج الخدمة,عدد وحدات الصناعات الريفية ضمن الخدمة,عدد المستفيدين من مراكز التنمية الريفية,عدد المستفيدين من  وحدات الصناعات الريفية,عدد المسجلين  الجدد من العاملين خلال الزيارات التفتيشية لهذا الشهر,عدد   تراخيص العمل الممنوحة  للعاملين غير السوريين,عدد تراخيص العمل المجدد  للعاملين غير السوريين,عدد مكاتب التشغيل المرخصة  لمزاولة مهنة استقدام العاملات غير السوريات,عدد تراخيص العمل  للعاملات المنزليات غير السوريات,عدد تراحيص العمل  للعاملات المنزليات غير السوريات,عدد تراخيص العمل المجدد  للعاملات المنزليات غير السوريات,عدد المكاتب المرخصة لتشغيل العمال المنزليين السوريين,عدد المكاتب الخاصة  المرخصة لمزاولة مهنة تشغيل  للعمال السوريين,عدد الزيارات التفتيشية على المنشآت (صناعي),عدد الزيارات التفتيشية على المنشآت (زراعي),عدد المخالفات الناتجة عن الزيارات,عدد المستفيدين من برامج مراكز التأهيل والتدريب المهني (مراكز تنمية ريفية),عدد السكان,ذكور,إناث,السنة,اهم ثلاث انجازات,اهم ثلاث توصيات,الاحتياجات الرئيسية,عدد المسجلين على منصة سوق العمل(2024- 2025),عدد المنشآت المسجلة في المنصة,عدد فرص العمل على المنصة,عدد فرص التدريب على المنصة,عدد المنظمات غير الحكومية المشهرة في العام 2025,عدد المساعدات (سلة غذائية),عدد المساعدات عينية ( ادوية - عمليات- منظفات),اعانات مالية,عدد المراكز المجتمعية / UNHCR,مساحات امنة للنساء/ UNFPA,عدد المخيمات,عدد الاسر المقيمة في المخيمات,عدد المسجلين في التأمينات الاجتماعية/ قطاع عام,عدد المسجلين في التأمينات الاجتماعية / قطاع خاص,اجمالي عدد المسجلين القائمين على رأس عملهم,عدد المتقاعدين المستفيدين,قرارات ضم الخدمة,عدد المستفيدين من تعويضات إصابات العمل,عدد المنشآت التي تم اشراكها بالتامينات,مشاريع الصكوك القانونية الجديدة,مشاريع الصكوك القانونية قيد المراجعة والتحديث,عدد السكان المقيمين في سورية (مليون),السكان دون 15 سنة,السكان 15-60 سنة,السكان 60+ سنة,حجم قوة العمل (مليون),المشتغلون,المتعطلون,معدل البطالة العام,معدل بطالة الذكور,معدل بطالة الاناث,معدل بطالة الشباب,معدل المشاركة في النشاط الاقتصادي / ذكور,معدل المشاركة في النشاط الاقتصادي / إناث,معدل زواج القاصرات حسب المحافظات,%معدل عمل الأطفال,نسبة النساء المعيلات,تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا ),تقديرات الفقر وفق الأمن الغذائي (الاسر ذات الهشاشة),تقديرات الفقر - الأمن الغذائي (الاسر المعدومة )
+دمشق,كانون الثاني,1250,340,890,12,3,45,8,320,45,2,15,65.5,22.3,8,6,120,85,4,3,28,1,8,0,5,450,180,320,85,120,4,25,18,12,6,8,45,12,8,120,55,3200000,1650000,1550000,2025,افتتاح مركز تأهيل جديد|توسعة دور المسنين|حملة توعية صحية,تعزيز التعاون مع المنظمات|زيادة مخصصات التأهيل|تحديث البنية التحتية,حاجة لمركبات نقل|تجهيزات طبية|دعم مالي إضافي,12500,850,1200,450,48,3500,120,8,15,2800,85000,65000,150000,42000,120,850,450,12,8,5.2,1200000,2800000,1000000,2.1,1850000,250000,18.5,12.3,28.4,35.2,65.8,18.4,2.1,4.5,12.8,85000,45000,12000
+ريف دمشق,كانون الثاني,890,210,650,8,2,32,5,240,32,1,12,58.2,28.5,5,4,95,65,3,2,22,0,6,1,4,380,150,280,65,95,3,18,14,9,5,6,38,10,6,95,42,2800000,1450000,1350000,2025,تأهيل 200 شخص|افتتاح وحدة صحية|برنامج كفالة جديد,توسيع مراكز التأهيل|دعم الأسر الفقيرة|تطوير البنية التحتية,معدات طبية|مواصلات|كوادر بشرية,9800,720,950,380,42,2800,95,6,12,2200,72000,48000,120000,35000,95,720,380,10,6,4.8,950000,1850000,950000,1.8,1550000,220000,19.2,13.1,29.8,36.5,64.2,16.8,2.8,5.2,14.2,72000,38000,9500
+حلب,كانون الثاني,2100,520,1200,15,5,78,10,450,62,3,22,52.8,35.2,12,9,180,120,6,4,45,2,12,1,8,650,280,420,120,165,6,35,28,18,9,12,65,18,12,165,72,4500000,2350000,2150000,2025,إعادة تأهيل مركز كبير|برنامج إغاثي عاجل|توسعة دور الأيتام,دعم النازحين|تأهيل المناطق المتضررة|تعزيز الأمن الغذائي,مساعدات إنسانية عاجلة|إعادة إعمار|دعم نفسي,18500,1200,1800,720,65,5200,180,12,22,4200,120000,85000,205000,58000,165,1200,650,18,12,7.8,1800000,3200000,1400000,3.2,2650000,380000,22.5,15.2,32.1,38.8,62.5,14.2,3.5,6.8,16.5,120000,65000,18000
+حمص,كانون الثاني,650,180,420,6,1,18,3,150,22,1,8,68.5,18.5,4,3,65,45,2,2,15,0,5,0,3,220,95,180,48,72,2,12,9,6,3,4,28,8,5,72,32,1800000,920000,880000,2025,تأهيل مهني لـ150|توسعة مركز ريفي|حملة توعية,تعزيز التعاون المحلي|دعم المشاريع الصغيرة|تطوير الخدمات,آليات زراعية|بذور|أسمدة,6200,450,580,220,28,1650,55,4,8,1350,45000,32000,77000,22000,55,450,220,8,5,3.2,620000,1180000,600000,1.2,980000,145000,16.8,11.2,25.4,32.1,68.4,20.1,1.8,3.9,11.5,45000,25000,6800
+حماه,كانون الثاني,720,195,480,7,2,22,4,175,25,1,9,61.2,24.8,5,3,72,52,2,2,16,1,5,0,3,245,105,195,52,78,2,14,10,7,4,5,32,9,6,78,35,1950000,1000000,950000,2025,افتتاح معهد أحداث|تأهيل 120 شخص|برنامج كفالة,توسيع الخدمات الصحية|دعم التعليم|تطوير البنية التحتية,أدوية|معدات طبية|مواد غذائية,6800,480,650,260,32,1850,62,4,9,1550,48000,36000,84000,24000,62,480,245,9,6,3.5,680000,1250000,570000,1.3,1050000,155000,17.5,11.8,26.8,33.5,67.2,19.5,2.1,4.2,12.8,48000,28000,7500
+اللاذقية,كانون الثاني,580,155,380,5,1,15,3,130,18,0,7,72.5,15.2,3,2,55,38,2,1,12,0,4,0,2,185,80,155,42,58,2,10,7,5,3,4,22,6,4,58,25,1400000,720000,680000,2025,تأهيل 80 شخص|توسعة مركز ريفي|برنامج سياحي,تعزيز التعاون الدولي|دعم القطاع السياحي|تطوير البنية التحتية,معدات سياحية|مواد بناء|كوادر فنية,5200,380,480,185,22,1250,42,3,6,1050,38000,28000,66000,19000,42,380,185,7,4,2.8,520000,850000,430000,0.9,780000,105000,15.2,10.5,22.8,29.5,70.2,22.4,1.5,3.2,9.8,38000,22000,5500
+طرطوس,كانون الثاني,420,115,280,4,1,12,2,95,14,0,6,75.8,12.5,2,2,42,28,1,1,9,0,3,0,2,140,60,115,32,42,1,8,5,4,2,3,18,5,3,42,18,950000,490000,460000,2025,تأهيل 60 شخص|توسعة وحدة صناعية|برنامج بحري,تعزيز التعاون المحلي|دعم الصيادين|تطوير الموانئ,قوارب صيد|شباك|معدات بحرية,3800,280,350,140,18,950,32,2,5,820,28000,20000,48000,14000,32,280,140,6,4,2.1,380000,620000,310000,0.7,580000,78000,14.5,9.8,21.2,27.8,72.5,24.2,1.2,2.8,8.5,28000,18000,4200
+السويداء,كانون الثاني,380,105,250,4,1,10,2,85,12,0,5,78.5,10.2,2,2,38,25,1,1,8,0,3,0,2,125,55,105,28,38,1,7,5,3,2,3,15,4,3,38,16,850000,440000,410000,2025,تأهيل 50 شخص|توسعة مركز زراعي|برنامج شبابي,تعزيز التعاون الأهلي|دعم المزارعين|تطوير الخدمات,بذور|أسمدة|معدات زراعية,3200,240,280,115,15,820,28,2,4,720,24000,18000,42000,12000,28,240,125,5,3,1.9,320000,520000,260000,0.6,480000,65000,13.8,9.2,20.5,26.5,74.2,25.8,1.0,2.5,7.8,24000,15000,3500
+درعا,كانون الثاني,480,135,320,5,1,14,2,110,16,1,7,55.2,32.5,4,3,52,35,2,1,11,1,4,0,2,165,72,135,35,52,1,9,6,4,2,3,20,6,4,52,22,1100000,570000,530000,2025,تأهيل 70 شخص|إعادة تأهيل مركز|برنامج إغاثة,دعم العودة|تأهيل البنية التحتية|تعزيز الأمن الغذائي,مساعدات عاجلة|مواد بناء|أدوية,4200,320,380,155,20,1150,38,3,5,980,32000,24000,56000,16000,38,320,165,6,4,2.4,420000,680000,340000,0.8,620000,85000,16.5,11.2,24.5,31.2,68.5,21.5,1.8,3.8,10.2,32000,20000,4800
+القنيطرة,كانون الثاني,220,65,160,3,0,8,1,55,8,0,4,48.5,38.2,2,1,28,18,1,1,6,0,2,0,1,85,38,65,18,28,1,5,4,2,1,2,12,3,2,28,12,520000,270000,250000,2025,تأهيل 30 شخص|توسعة وحدة ريفية|برنامج زراعي,تعزيز التعاون المحلي|دعم المزارعين|تطوير البنية التحتية,معدات زراعية|بذور|أسمدة,1850,145,165,72,10,580,18,1,3,520,14500,11000,25500,7500,18,145,85,4,2,1.5,185000,310000,155000,0.4,280000,38000,18.2,12.5,26.8,34.5,65.2,18.8,2.2,4.5,11.8,14500,9500,2200
+ادلب,كانون الثاني,1650,420,950,10,4,62,7,380,48,2,18,42.5,45.8,10,7,155,105,5,3,38,1,10,1,6,520,225,350,95,135,5,28,22,14,7,10,52,15,10,135,58,3200000,1660000,1540000,2025,برنامج إغاثي كبير|تأهيل 300 شخص|توسعة مخيمات,دعم النازحين|تأهيل المناطق|تعزيز الأمن الغذائي,مساعدات إنسانية عاجلة|إعادة إعمار|دعم تعليمي,14200,950,1150,480,52,3800,135,9,18,3200,95000,68000,158000,45000,135,950,520,15,10,6.5,1420000,2480000,1080000,2.5,2100000,320000,23.8,16.2,34.5,41.2,58.5,12.5,3.8,7.2,18.5,95000,52000,15000
+الرقة,كانون الثاني,380,105,250,4,1,12,2,88,12,0,5,45.2,40.5,3,2,38,25,1,1,9,0,3,0,2,125,55,105,28,38,1,7,5,3,2,3,15,4,3,38,16,950000,490000,460000,2025,تأهيل 50 شخص|إعادة تأهيل بئر ماء|برنامج زراعي,دعم العودة|تأهيل البنية التحتية|تعزيز الأمن المائي,معدات زراعية|مواد بناء|أدوية,3200,240,280,115,15,820,28,2,4,720,24000,18000,42000,12000,28,240,125,5,3,1.9,320000,520000,260000,0.6,480000,65000,17.5,12.1,27.8,35.2,64.8,19.2,2.5,5.2,12.5,24000,15000,3500
+دير الزور,كانون الثاني,520,145,350,5,1,16,3,115,18,1,7,38.5,48.2,4,3,52,35,2,1,12,1,4,0,2,170,75,145,38,52,1,10,7,4,2,3,22,6,4,52,22,1450000,750000,700000,2025,تأهيل 80 شخص|إعادة تأهيل محطة كهرباء|برنامج إغاثة,دعم العودة|تأهيل البنية التحتية|تعزيز الأمن الغذائي,مساعدات عاجلة|مواد بناء|وقود,5200,380,450,185,22,1250,42,3,6,1050,38000,28000,66000,19000,42,380,185,7,4,2.8,520000,850000,430000,0.9,780000,105000,18.8,13.2,29.5,36.8,62.5,16.8,2.8,5.8,14.2,38000,22000,5500
+الحسكة,كانون الثاني,680,185,450,6,2,20,3,145,22,1,8,58.5,28.5,5,3,68,45,2,2,15,1,5,0,3,215,95,185,48,68,2,12,9,6,3,4,28,8,5,68,30,1550000,800000,750000,2025,تأهيل 100 شخص|توسعة مركز ريفي|برنامج زراعي,تعزيز التعاون المحلي|دعم المزارعين|تطوير البنية التحتية,معدات زراعية|بذور|أسمدة,6500,480,550,220,28,1650,55,4,8,1450,48000,36000,84000,24000,55,480,245,8,5,3.2,650000,1180000,600000,1.2,980000,145000,16.2,10.8,24.2,30.5,70.2,22.5,1.5,3.5,10.8,48000,28000,7500`;
 
 // =====================
 // STATE
@@ -642,7 +837,42 @@ function sum(field, arr){
   return arr.reduce((a, r) => a + (r[field] || 0), 0);
 }
 
-const fmt = n => n.toLocaleString('en-US');
+const fmt = n => {
+  if(n === null || n === undefined || isNaN(n)) return '—';
+  return Number(n).toLocaleString('en-US');
+};
+
+function aggregateValue(field, arr){
+  if(PERCENTAGE_FIELDS.has(field)){
+    const vals = arr.map(d => d[field] || 0).filter(v => v > 0);
+    return vals.length > 0 ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : 0;
+  }
+  return arr.reduce((a, r) => a + (r[field] || 0), 0);
+}
+
+function discoverDynamicIndicators(parsed){
+  if(parsed.length === 0){ DYNAMIC_INDICATORS = []; return; }
+  const knownVals = new Set(Object.values(COLUMN_MAP));
+  const firstRow = parsed[0];
+  DYNAMIC_INDICATORS = [];
+  Object.keys(firstRow).forEach(key => {
+    if(!knownVals.has(key) && typeof firstRow[key] === 'number' && !key.startsWith('_')){
+      // Clean label for display
+      let label = key.replace(/_/g, ' ').trim();
+      // If Arabic, keep as-is but truncate if too long
+      if(/[؀-ۿ]/.test(label)){
+        label = label.substring(0, 50);
+      } else {
+        label = label.replace(/\b\w/g, c => c.toUpperCase());
+      }
+      DYNAMIC_INDICATORS.push({
+        key: key,
+        label: label || key,
+        isPercentage: PERCENTAGE_FIELDS.has(key) || key.includes('نسبة') || key.includes('%')
+      });
+    }
+  });
+}
 const PALETTE = ['#123C44','#B08D57','#4F7A63','#B5533C','#6E8FA3','#8C7A5B','#3f5a5f','#C99A62','#5f8a70','#a15a4a','#2E6B7E','#8B6914','#5D4E37','#4A6741'];
 
 // =====================
@@ -701,6 +931,8 @@ function parseCSVWithDelimiter(csvText, delimiter){
     const obj = {};
     headers.forEach((h, idx) => {
       let val = values[idx] ? values[idx].trim() : '';
+      // Clean percentage signs and Arabic comma
+      val = val.replace(/%/g, '').replace(/،/g, ',').replace(/٪/g, '');
       if(val && !isNaN(val) && val !== ''){
         const num = parseFloat(val);
         if(!isNaN(num)) obj[h] = num;
@@ -736,6 +968,7 @@ function processCSVData(csvText){
       throw new Error('الملف لا يحتوي على أعمدة المحافظة والشهر المطلوبة. تأكد من أن أسماء الأعمدة تطابق النموذج.');
     }
 
+    discoverDynamicIndicators(parsed);
     ALL_DATA = parsed;
     selectedMonths = new Set([...new Set(ALL_DATA.map(d => d.month))]);
     selectedMonthChips.clear();
@@ -837,20 +1070,70 @@ function setupGovFilter(){
 // KPIs
 // =====================
 function kpiDefs(arr){
-  return [
+  const base = [
     {em:"🦽",lbl:"بطاقات إعاقة",val:sum("disabled_cards",arr)},
     {em:"🎓",lbl:"طلاب معاهد الإعاقة",val:sum("special_students",arr)},
+    {em:"🛠️",lbl:"مراكز تأهيل مهني",val:sum("rehab_centers",arr)},
+    {em:"👨‍🔧",lbl:"مستفيدو التأهيل",val:sum("rehab_benef",arr)},
     {em:"👵",lbl:"مستفيدو رعاية المسنين",val:sum("elderly_benef",arr)},
+    {em:"🏚️",lbl:"دور رعاية المسنين",val:sum("elderly_homes",arr)},
+    {em:"🧤",lbl:"نزلاء مراكز التسول",val:sum("beggar_inmates",arr)},
+    {em:"🏛️",lbl:"مراكز رعاية المتسولين",val:sum("beggar_centers",arr)},
     {em:"👶",lbl:"دور رعاية الأيتام",val:sum("orphan_homes",arr)},
-    {em:"🤝",lbl:"منظمات غير حكومية نشطة",val:sum("ngo_active",arr)},
+    {em:"💞",lbl:"كفالة داخلية",val:sum("sponsor_internal",arr)},
+    {em:"🌍",lbl:"كفالة خارجية",val:sum("sponsor_external",arr)},
+    {em:"🤝",lbl:"منظمات نشطة",val:sum("ngo_active",arr)},
+    {em:"🚫",lbl:"منظمات مسحوبة",val:sum("ngo_revoked",arr)},
+    {em:"📋",lbl:"ندوات ودورات",val:sum("seminars",arr)},
     {em:"⚖️",lbl:"نزلاء معاهد الأحداث",val:sum("juvenile_inmates",arr)},
-    {em:"🌾",lbl:"مستفيدو التنمية الريفية",val:sum("rural_dev_benef",arr)},
-    {em:"🏗️",lbl:"زيارات تفتيش صناعي",val:sum("insp_industrial",arr)},
+    {em:"🏛️",lbl:"معاهد أحداث",val:sum("juvenile_inst",arr)},
+    {em:"✅",lbl:"معاهد أحداث بالخدمة",val:sum("juvenile_inst_active",arr)},
+    {em:"🌾",lbl:"مستفيدو تنمية ريفية",val:sum("rural_dev_benef",arr)},
+    {em:"🏭",lbl:"مستفيدو صناعات ريفية",val:sum("rural_ind_benef",arr)},
+    {em:"🏘️",lbl:"مراكز تنمية ريفية",val:sum("rural_dev_active",arr)},
+    {em:"🏗️",lbl:"وحدات صناعات ريفية",val:sum("rural_ind_active",arr)},
+    {em:"👷",lbl:"عمال مسجّلون جدد",val:sum("new_workers_insp",arr)},
+    {em:"🏗️",lbl:"تفتيش صناعي",val:sum("insp_industrial",arr)},
+    {em:"🌱",lbl:"تفتيش زراعي",val:sum("insp_agri",arr)},
     {em:"⚠️",lbl:"مخالفات مسجّلة",val:sum("violations",arr)},
+    {em:"🛂",lbl:"تراخيص عمل جديدة (أجانب)",val:sum("work_permits_new",arr)},
+    {em:"🔄",lbl:"تراخيص عمل مجددة (أجانب)",val:sum("work_permits_renew",arr)},
+    {em:"🏢",lbl:"مكاتب استقدام عاملات",val:sum("recruitment_offices",arr)},
+    {em:"👩‍🍳",lbl:"تراخيص عاملات منزليات",val:sum("domestic_permits_new",arr)},
+    {em:"🏠",lbl:"مكاتب تشغيل سوريين",val:sum("domestic_offices_syrian",arr)},
+    {em:"🏢",lbl:"مكاتب خاصة سوريين",val:sum("private_offices_syrian",arr)},
+    {em:"💰",lbl:"نسبة الإنفاق الاستثماري",val:sum("investment_spending",arr)},
+    {em:"📊",lbl:"عمال غير منظمين",val:sum("unorganized_workers",arr)},
+    {em:"🤝",lbl:"اتفاقيات حماية اجتماعية",val:sum("social_agreements",arr)},
     {em:"👥",lbl:"إجمالي السكان",val:sum("population",arr)},
     {em:"♂️",lbl:"الذكور",val:sum("males",arr)},
     {em:"♀️",lbl:"الإناث",val:sum("females",arr)},
+    {em:"💻",lbl:"مسجلين منصة العمل",val:sum("job_platform_registered",arr)},
+    {em:"🏢",lbl:"منشآت المنصة",val:sum("job_platform_establishments",arr)},
+    {em:"🍞",lbl:"سلل غذائية",val:sum("food_baskets",arr)},
+    {em:"💵",lbl:"إعانات مالية",val:sum("cash_assistance",arr)},
+    {em:"🏛️",lbl:"تأمينات اجتماعية عام",val:sum("social_insurance_public",arr)},
+    {em:"🏢",lbl:"تأمينات اجتماعية خاص",val:sum("social_insurance_private",arr)},
+    {em:"👴",lbl:"متقاعدين",val:sum("pensioners",arr)},
+    {em:"📜",lbl:"صكوك قانونية جديدة",val:sum("new_legal_bonds",arr)},
+    {em:"✅",lbl:"مشتغلون",val:sum("employed",arr)},
+    {em:"❌",lbl:"متعطلون",val:sum("unemployed",arr)},
+    {em:"📉",lbl:"بطالة عام %",val:aggregateValue("unemployment_rate_general",arr)},
+    {em:"⚠️",lbl:"عمل الأطفال %",val:aggregateValue("child_labor_rate",arr)},
+    {em:"🚨",lbl:"أسر معدومة غذائياً",val:sum("food_insecure_households",arr)},
   ];
+
+  // Append dynamically discovered indicators
+  DYNAMIC_INDICATORS.forEach((ind, idx) => {
+    const icons = ['📊','📈','📉','🎯','🔍','💡','⚡','🌟','✨','🔢'];
+    base.push({
+      em: icons[idx % icons.length],
+      lbl: ind.label.substring(0, 30),
+      val: aggregateValue(ind.key, arr)
+    });
+  });
+
+  return base;
 }
 
 function renderKPIs(){
@@ -949,11 +1232,14 @@ function renderSingleGovChart(canvasId, arr, categoryField){
       {key:'disabled_cards', label:'بطاقات إعاقة'},
       {key:'special_students', label:'طلاب معاهد'},
       {key:'rehab_centers', label:'مراكز تأهيل'},
-      {key:'rehab_benef', label:'مستفيدو تأهيل'}
+      {key:'rehab_benef', label:'مستفيدو تأهيل'},
+      {key:'rural_rehab_benef', label:'تأهيل ريفي'}
     ],
     'elderly_benef': [
       {key:'elderly_benef', label:'مستفيدو مسنين'},
+      {key:'elderly_homes', label:'دور مسنين'},
       {key:'beggar_inmates', label:'نزلاء تسول'},
+      {key:'beggar_centers', label:'مراكز تسول'},
       {key:'orphan_homes', label:'دور أيتام'},
       {key:'sponsor_internal', label:'كفالة داخلية'},
       {key:'sponsor_external', label:'كفالة خارجية'}
@@ -971,14 +1257,32 @@ function renderSingleGovChart(canvasId, arr, categoryField){
     'rural_dev_benef': [
       {key:'rural_dev_benef', label:'مستفيدو تنمية ريفية'},
       {key:'rural_ind_benef', label:'مستفيدو صناعات ريفية'},
-      {key:'rural_dev_active', label:'مراكز تنمية'},
-      {key:'rural_ind_active', label:'وحدات صناعية'}
+      {key:'rural_dev_active', label:'مراكز تنمية نشطة'},
+      {key:'rural_dev_inactive', label:'مراكز تنمية خارج الخدمة'},
+      {key:'rural_ind_active', label:'وحدات صناعية نشطة'},
+      {key:'rural_ind_inactive', label:'وحدات صناعية خارج الخدمة'},
+      {key:'rural_rehab_benef', label:'تأهيل ريفي'}
     ],
     'insp_industrial': [
       {key:'new_workers_insp', label:'عمال جدد'},
       {key:'insp_industrial', label:'تفتيش صناعي'},
       {key:'insp_agri', label:'تفتيش زراعي'},
       {key:'violations', label:'مخالفات'}
+    ],
+    'work_permits_new': [
+      {key:'work_permits_new', label:'تراخيص جديدة'},
+      {key:'work_permits_renew', label:'تراخيص مجددة'},
+      {key:'recruitment_offices', label:'مكاتب استقدام'},
+      {key:'domestic_permits_new', label:'تراخيص منزليات'},
+      {key:'domestic_permits_renew', label:'تراخيص مجددة منزليات'},
+      {key:'domestic_permits_renew2', label:'تراخيص مجددة 2'},
+      {key:'domestic_offices_syrian', label:'مكاتب سوريين'},
+      {key:'private_offices_syrian', label:'مكاتب خاصة'}
+    ],
+    'investment_spending': [
+      {key:'investment_spending', label:'إنفاق استثماري %'},
+      {key:'unorganized_workers', label:'عمال غير منظمين %'},
+      {key:'social_agreements', label:'اتفاقيات حماية'}
     ],
     'population': [
       {key:'population', label:'👥 إجمالي السكان'},
@@ -1001,6 +1305,13 @@ function renderSingleGovChart(canvasId, arr, categoryField){
     const numericKeys = Object.keys(d).filter(k => typeof d[k] === 'number' && k !== 'year' && k !== 'population' && k !== 'males' && k !== 'females');
     indicators = numericKeys.slice(0, 8).map(k => ({key:k, label:k}));
   }
+
+  // Append dynamic indicators
+  DYNAMIC_INDICATORS.forEach(ind => {
+    if(d[ind.key] !== undefined && d[ind.key] !== null){
+      indicators.push({key: ind.key, label: ind.label.substring(0, 25)});
+    }
+  });
 
   const labels = indicators.map(i => i.label);
   const data = indicators.map(i => d[i.key] || 0);
@@ -1055,6 +1366,7 @@ function renderCards(containerId, items){
 }
 
 function renderCategory(cat){
+  if(cat === 'dynamic'){ renderDynamicCategory(); return; }
   const arr = filtered();
 
   if(cat === 'disability'){
@@ -1063,7 +1375,8 @@ function renderCategory(cat){
       {em:'🦽',n:sum('disabled_cards',arr),t:'إجمالي بطاقات الإعاقة الصادرة'},
       {em:'🎓',n:sum('special_students',arr),t:'الطلاب في معاهد ذوي الإعاقة'},
       {em:'🛠️',n:sum('rehab_centers',arr),t:'مراكز التأهيل المهني'},
-      {em:'👨‍🔧',n:sum('rehab_benef',arr),t:'مستفيدو برامج التأهيل'}
+      {em:'👨‍🔧',n:sum('rehab_benef',arr),t:'مستفيدو برامج التأهيل'},
+      {em:'🌾',n:sum('rural_rehab_benef',arr),t:'مستفيدو التأهيل (مراكز تنمية ريفية)'}
     ]);
     const zeroGovs = arr.filter(d => (d.disabled_cards||0) === 0).map(d => d.gov);
     document.getElementById('note-disability').textContent = zeroGovs.length > 0 
@@ -1075,7 +1388,9 @@ function renderCategory(cat){
     barChart('chart-social', 'elderly_benef');
     renderCards('cards-social', [
       {em:'👵',n:sum('elderly_benef',arr),t:'مستفيدو دور رعاية المسنين'},
-      {em:'🏚️',n:sum('beggar_inmates',arr),t:'نزلاء مراكز رعاية المتسولين'},
+      {em:'🏚️',n:sum('elderly_homes',arr),t:'دور رعاية المسنين'},
+      {em:'🧤',n:sum('beggar_inmates',arr),t:'نزلاء مراكز رعاية المتسولين'},
+      {em:'🏛️',n:sum('beggar_centers',arr),t:'مراكز رعاية المتسولين'},
       {em:'👶',n:sum('orphan_homes',arr),t:'دور رعاية الأيتام'},
       {em:'💞',n:sum('sponsor_internal',arr),t:'مستفيدو الكفالة الداخلية'},
       {em:'🌍',n:sum('sponsor_external',arr),t:'مستفيدو الكفالة الخارجية'}
@@ -1102,6 +1417,7 @@ function renderCategory(cat){
     barChart('chart-juvenile', 'juvenile_inmates');
     renderCards('cards-juvenile', [
       {em:'🏛️',n:sum('juvenile_inst',arr),t:'معاهد إصلاح الأحداث'},
+      {em:'✅',n:sum('juvenile_inst_active',arr),t:'معاهد الأحداث ضمن الخدمة'},
       {em:'⚖️',n:sum('juvenile_inmates',arr),t:'نزلاء معاهد الأحداث'}
     ]);
     const total = sum('juvenile_inmates', arr);
@@ -1117,7 +1433,10 @@ function renderCategory(cat){
       {em:'🌾',n:sum('rural_dev_benef',arr),t:'مستفيدو مراكز التنمية الريفية'},
       {em:'🏭',n:sum('rural_ind_benef',arr),t:'مستفيدو وحدات الصناعات الريفية'},
       {em:'🏘️',n:sum('rural_dev_active',arr),t:'مراكز التنمية الريفية ضمن الخدمة'},
-      {em:'🏗️',n:sum('rural_ind_active',arr),t:'وحدات الصناعات الريفية ضمن الخدمة'}
+      {em:'🔧',n:sum('rural_dev_inactive',arr),t:'مراكز التنمية الريفية خارج الخدمة'},
+      {em:'🏗️',n:sum('rural_ind_active',arr),t:'وحدات الصناعات الريفية ضمن الخدمة'},
+      {em:'🔧',n:sum('rural_ind_inactive',arr),t:'وحدات الصناعات الريفية خارج الخدمة'},
+      {em:'🌾',n:sum('rural_rehab_benef',arr),t:'مستفيدو التأهيل (مراكز تنمية ريفية)'}
     ]);
     const topDev = arr.reduce((a,d) => (d.rural_dev_benef||0) > (a.val||0) ? {gov:d.gov, val:d.rural_dev_benef||0} : a, {gov:'', val:0});
     const topInd = arr.reduce((a,d) => (d.rural_ind_benef||0) > (a.val||0) ? {gov:d.gov, val:d.rural_ind_benef||0} : a, {gov:'', val:0});
@@ -1140,6 +1459,37 @@ function renderCategory(cat){
       `💡 اللاذقية وحدها سجّلت ${fmt(latakiaWorkers)} عامل جديد (نحو ${pct}% من الإجمالي).`;
   }
 
+  if(cat === 'permits'){
+    barChart('chart-permits', 'work_permits_new');
+    renderCards('cards-permits', [
+      {em:'🛂',n:sum('work_permits_new',arr),t:'تراخيص عمل جديدة (غير سوريين)'},
+      {em:'🔄',n:sum('work_permits_renew',arr),t:'تراخيص عمل مجددة (غير سوريين)'},
+      {em:'🏢',n:sum('recruitment_offices',arr),t:'مكاتب استقدام عاملات غير سوريات'},
+      {em:'👩‍🍳',n:sum('domestic_permits_new',arr),t:'تراخيص عمل للعاملات المنزليات'},
+      {em:'📋',n:sum('domestic_permits_renew',arr),t:'تراخيص مجددة للعاملات المنزليات'},
+      {em:'📋',n:sum('domestic_permits_renew2',arr),t:'تراخيص مجددة (عمود إضافي)'},
+      {em:'🏠',n:sum('domestic_offices_syrian',arr),t:'مكاتب تشغيل العمال المنزليين السوريين'},
+      {em:'🏢',n:sum('private_offices_syrian',arr),t:'مكاتب خاصة لتشغيل العمال السوريين'}
+    ]);
+    const totalNew = sum('work_permits_new', arr);
+    const totalRenew = sum('work_permits_renew', arr);
+    document.getElementById('note-permits').textContent = 
+      `💡 إجمالي التراخيص الجديدة: ${fmt(totalNew)} | المجددة: ${fmt(totalRenew)} | مكاتب الاستقدام: ${fmt(sum('recruitment_offices', arr))}.`;
+  }
+
+  if(cat === 'financial'){
+    barChart('chart-financial', 'investment_spending');
+    renderCards('cards-financial', [
+      {em:'💰',n:sum('investment_spending',arr),t:'نسبة الإنفاق الاستثماري (%)'},
+      {em:'📊',n:sum('unorganized_workers',arr),t:'نسبة العمال غير المنظمين (%)'},
+      {em:'🤝',n:sum('social_agreements',arr),t:'اتفاقيات الحماية الاجتماعية'}
+    ]);
+    const avgInv = arr.length > 0 ? (sum('investment_spending', arr) / arr.length).toFixed(1) : 0;
+    const avgUnorg = arr.length > 0 ? (sum('unorganized_workers', arr) / arr.length).toFixed(1) : 0;
+    document.getElementById('note-financial').textContent = 
+      `💡 متوسط نسبة الإنفاق الاستثماري: ${avgInv}% | متوسط العمال غير المنظمين: ${avgUnorg}% | إجمالي الاتفاقيات: ${fmt(sum('social_agreements', arr))}.`;
+  }
+
   if(cat === 'demographics'){
     barChart('chart-demographics', 'population');
     renderCards('cards-demographics', [
@@ -1156,6 +1506,185 @@ function renderCategory(cat){
     document.getElementById('note-demographics').textContent = 
       `💡 نسبة الذكور ${malePct}% مقابل ${femalePct}% للإناث. نسبة الذكور/الإناث: ${genderRatio}.`;
   }
+
+  if(cat === 'jobplatform'){
+    barChart('chart-jobplatform', 'job_platform_registered');
+    renderCards('cards-jobplatform', [
+      {em:'👤',n:sum('job_platform_registered',arr),t:'مسجلين على منصة سوق العمل'},
+      {em:'🏢',n:sum('job_platform_establishments',arr),t:'منشآت مسجلة في المنصة'},
+      {em:'💼',n:sum('job_platform_jobs',arr),t:'فرص عمل على المنصة'},
+      {em:'🎓',n:sum('job_platform_training',arr),t:'فرص تدريب على المنصة'}
+    ]);
+    const totalReg = sum('job_platform_registered', arr);
+    const totalJobs = sum('job_platform_jobs', arr);
+    document.getElementById('note-jobplatform').textContent = 
+      `💡 ${fmt(totalReg)} مسجّل على المنصة مقابل ${fmt(totalJobs)} فرصة عمل.`;
+  }
+
+  if(cat === 'humanitarian'){
+    barChart('chart-humanitarian', 'food_baskets');
+    renderCards('cards-humanitarian', [
+      {em:'🍞',n:sum('food_baskets',arr),t:'مساعدات (سلل غذائية)'},
+      {em:'💊',n:sum('inkind_assistance',arr),t:'مساعدات عينية (أدوية/عمليات)'},
+      {em:'💵',n:sum('cash_assistance',arr),t:'إعانات مالية'},
+      {em:'🏛️',n:sum('unhcr_community_centers',arr),t:'مراكز مجتمعية / UNHCR'},
+      {em:'🛡️',n:sum('unfpa_safe_spaces',arr),t:'مساحات آمنة للنساء / UNFPA'},
+      {em:'⛺',n:sum('camps_count',arr),t:'عدد المخيمات'},
+      {em:'👨‍👩‍👧‍👦',n:sum('camp_families',arr),t:'أسر مقيمة في المخيمات'},
+      {em:'🤝',n:sum('ngo_active_2025',arr),t:'منظمات مشهرة 2025'}
+    ]);
+    const baskets = sum('food_baskets', arr);
+    const cash = sum('cash_assistance', arr);
+    const inkind = sum('inkind_assistance', arr);
+    document.getElementById('note-humanitarian').textContent = 
+      `💡 إجمالي المساعدات: ${fmt(baskets)} سلة غذائية | ${fmt(cash)} إعانة نقدية | ${fmt(inkind)} مساعدة عينية.`;
+  }
+
+  if(cat === 'insurance'){
+    barChart('chart-insurance', 'social_insurance_total_active');
+    renderCards('cards-insurance', [
+      {em:'🏛️',n:sum('social_insurance_public',arr),t:'مسجلين تأمينات - قطاع عام'},
+      {em:'🏢',n:sum('social_insurance_private',arr),t:'مسجلين تأمينات - قطاع خاص'},
+      {em:'👷',n:sum('social_insurance_total_active',arr),t:'إجمالي المسجلين القائمين على العمل'},
+      {em:'👴',n:sum('pensioners',arr),t:'متقاعدين مستفيدين'},
+      {em:'📋',n:sum('service_merge_decisions',arr),t:'قرارات ضم خدمة'},
+      {em:'🩹',n:sum('work_injury_compensation',arr),t:'مستفيدو تعويضات إصابات العمل'},
+      {em:'🏭',n:sum('establishments_joined_insurance',arr),t:'منشآت مشتركة بالتأمينات'}
+    ]);
+    const totalActive = sum('social_insurance_total_active', arr);
+    const public_ = sum('social_insurance_public', arr);
+    const private_ = sum('social_insurance_private', arr);
+    document.getElementById('note-insurance').textContent = 
+      `💡 إجمالي المسجلين: ${fmt(totalActive)} | قطاع عام: ${fmt(public_)} | قطاع خاص: ${fmt(private_)}.`;
+  }
+
+  if(cat === 'legal'){
+    barChart('chart-legal', 'new_legal_bonds');
+    renderCards('cards-legal', [
+      {em:'📜',n:sum('new_legal_bonds',arr),t:'مشاريع صكوك قانونية جديدة'},
+      {em:'📝',n:sum('legal_bonds_under_review',arr),t:'صكوك قيد المراجعة والتحديث'}
+    ]);
+    const new_ = sum('new_legal_bonds', arr);
+    const review = sum('legal_bonds_under_review', arr);
+    document.getElementById('note-legal').textContent = 
+      `💡 ${fmt(new_)} مشروع جديد مقابل ${fmt(review)} قيد المراجعة.`;
+  }
+
+  if(cat === 'labor_market'){
+    barChart('chart-labor_market', 'employed');
+    renderCards('cards-labor_market', [
+      {em:'👥',n:sum('population_millions',arr),t:'السكان المقيمين (مليون)'},
+      {em:'👶',n:sum('population_under_15',arr),t:'السكان دون 15 سنة'},
+      {em:'👨‍💼',n:sum('population_15_60',arr),t:'السكان 15-60 سنة'},
+      {em:'👴',n:sum('population_over_60',arr),t:'السكان 60+ سنة'},
+      {em:'💪',n:sum('labor_force_millions',arr),t:'قوة العمل (مليون)'},
+      {em:'✅',n:sum('employed',arr),t:'المشتغلون'},
+      {em:'❌',n:sum('unemployed',arr),t:'المتعطلون'},
+      {em:'📉',n:aggregateValue('unemployment_rate_general',arr),t:'معدل البطالة العام %'},
+      {em:'📉',n:aggregateValue('unemployment_rate_youth',arr),t:'معدل بطالة الشباب %'},
+      {em:'📊',n:aggregateValue('economic_activity_males',arr),t:'المشاركة الاقتصادية - ذكور %'},
+      {em:'📊',n:aggregateValue('economic_activity_females',arr),t:'المشاركة الاقتصادية - إناث %'},
+      {em:'⚠️',n:aggregateValue('child_marriage_rate',arr),t:'معدل زواج القاصرات %'},
+      {em:'⚠️',n:aggregateValue('child_labor_rate',arr),t:'معدل عمل الأطفال %'},
+      {em:'👩',n:aggregateValue('female_breadwinners_rate',arr),t:'نسبة النساء المعيلات %'}
+    ]);
+    const unemp = aggregateValue('unemployment_rate_general', arr);
+    const emp = sum('employed', arr);
+    document.getElementById('note-labor_market').textContent = 
+      `💡 معدل البطالة العام: ${unemp}% | المشتغلون: ${fmt(emp)} | المتعطلون: ${fmt(sum('unemployed', arr))}.`;
+  }
+
+  if(cat === 'food_security'){
+    barChart('chart-food_security', 'food_secure_households');
+    renderCards('cards-food_security', [
+      {em:'✅',n:sum('food_secure_households',arr),t:'أسر آمنة غذائياً'},
+      {em:'⚠️',n:sum('food_vulnerable_households',arr),t:'أسر ذات هشاشة غذائية'},
+      {em:'🚨',n:sum('food_insecure_households',arr),t:'أسر معدومة غذائياً'}
+    ]);
+    const secure = sum('food_secure_households', arr);
+    const vuln = sum('food_vulnerable_households', arr);
+    const insecure = sum('food_insecure_households', arr);
+    const total = secure + vuln + insecure;
+    if(total > 0){
+      const securePct = Math.round((secure/total)*100);
+      document.getElementById('note-food_security').textContent = 
+        `💡 ${securePct}% من الأسر آمنة غذائياً من إجمالي ${fmt(total)} أسرة مُقَيَّمة.`;
+    } else {
+      document.getElementById('note-food_security').textContent = '💡 ارفع ملف CSV لعرض بيانات الأمن الغذائي.';
+    }
+  }
+}
+
+// =====================
+// DYNAMIC INDICATORS SECTION
+// =====================
+function renderDynamicCategory(){
+  const arr = filtered();
+  const container = document.getElementById('cards-dynamic');
+  if(!container) return;
+
+  if(DYNAMIC_INDICATORS.length === 0){
+    document.getElementById('note-dynamic').textContent = '💡 لا توجد مؤشرات إضافية في البيانات الحالية. تأكد من أن ملف CSV يحتوي على أعمدة إضافية غير المؤشرات الأساسية.';
+    container.innerHTML = '';
+    const chartCanvas = document.getElementById('chart-dynamic');
+    if(chartCanvas && charts['chart-dynamic']){
+      charts['chart-dynamic'].destroy();
+      charts['chart-dynamic'] = null;
+    }
+    return;
+  }
+
+  document.getElementById('note-dynamic').textContent = `💡 تم العثور على ${DYNAMIC_INDICATORS.length} مؤشر إضافي في البيانات.`;
+
+  const items = DYNAMIC_INDICATORS.map(ind => {
+    const val = aggregateValue(ind.key, arr);
+    return {
+      em: ind.isPercentage ? '🔢' : '📊',
+      n: ind.isPercentage ? val + '%' : val,
+      t: ind.label + (ind.isPercentage ? ' (نسبة مئوية)' : '')
+    };
+  });
+
+  renderCards('cards-dynamic', items);
+
+  // Chart for dynamic indicators
+  const labels = DYNAMIC_INDICATORS.map(ind => ind.label.substring(0, 22));
+  const data = DYNAMIC_INDICATORS.map(ind => aggregateValue(ind.key, arr));
+
+  const canvasId = 'chart-dynamic';
+  const canvas = document.getElementById(canvasId);
+  if(canvas && canvas.parentElement){
+    canvas.parentElement.style.height = Math.max(250, labels.length * 38) + 'px';
+  }
+
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = canvas.getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: labels.map((_,i) => PALETTE[i % PALETTE.length]),
+        borderRadius: 6,
+        maxBarThickness: 28,
+        barPercentage: 0.7
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { rtl: true, titleFont: { family: 'Cairo' }, bodyFont: { family: 'Cairo' } }
+      },
+      scales: {
+        x: { grid: { color: '#e2d8c2' }, ticks: { font: { family: 'IBM Plex Mono', size: 11 } }, beginAtZero: true },
+        y: { grid: { display: false }, ticks: { font: { family: 'Cairo', size: 12 } } }
+      },
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
 }
 
 // =====================
@@ -1203,7 +1732,7 @@ function renderGovList(){
 function renderAll(){
   console.log('Rendering with', filtered().length, 'rows, activeGov:', activeGov, 'selectedMonths:', [...selectedMonths]);
   renderKPIs();
-  ['disability','social','ngo','juvenile','rural','labor','demographics'].forEach(renderCategory);
+  ['disability','social','ngo','juvenile','rural','labor','permits','financial','demographics','jobplatform','humanitarian','insurance','legal','labor_market','food_security','dynamic'].forEach(renderCategory);
   renderGovList();
   updateMastheadBadge();
   updateFooterNote();
@@ -1465,6 +1994,33 @@ function renderSectoralInsights(arr){
   const rural = sum('rural_dev_benef', arr);
   const violations = sum('violations', arr);
   const permits = sum('work_permits_new', arr);
+  const permitsRenew = sum('work_permits_renew', arr);
+  const recruitment = sum('recruitment_offices', arr);
+  const domestic = sum('domestic_permits_new', arr);
+  const investment = sum('investment_spending', arr);
+  const unorganized = sum('unorganized_workers', arr);
+  const agreements = sum('social_agreements', arr);
+  const specialStudents = sum('special_students', arr);
+  const rehabCenters = sum('rehab_centers', arr);
+  const beggarCenters = sum('beggar_centers', arr);
+  const beggarInmates = sum('beggar_inmates', arr);
+  const elderlyHomes = sum('elderly_homes', arr);
+  const sponsorInt = sum('sponsor_internal', arr);
+  const sponsorExt = sum('sponsor_external', arr);
+  const juvenileInst = sum('juvenile_inst', arr);
+  const juvenileInstActive = sum('juvenile_inst_active', arr);
+  const ruralInd = sum('rural_ind_benef', arr);
+  const ruralDevActive = sum('rural_dev_active', arr);
+  const ruralDevInactive = sum('rural_dev_inactive', arr);
+  const ruralIndActive = sum('rural_ind_active', arr);
+  const ruralIndInactive = sum('rural_ind_inactive', arr);
+  const ruralRehab = sum('rural_rehab_benef', arr);
+  const newWorkers = sum('new_workers_insp', arr);
+  const inspInd = sum('insp_industrial', arr);
+  const inspAgri = sum('insp_agri', arr);
+  const ngoActive = sum('ngo_active', arr);
+  const ngoRevoked = sum('ngo_revoked', arr);
+  const seminars = sum('seminars', arr);
 
   let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:24px 0 14px;display:flex;align-items:center;gap:8px;">📊 رؤى قطاعية</h3>';
 
@@ -1483,9 +2039,8 @@ function renderSectoralInsights(arr){
   }
 
   // Juvenile ratio warning
-  const juvenileInst = sum('juvenile_inst_active', arr);
-  if(juveniles > 0 && juvenileInst > 0){
-    const inmatesPerInst = (juveniles / juvenileInst).toFixed(1);
+  if(juveniles > 0 && juvenileInstActive > 0){
+    const inmatesPerInst = (juveniles / juvenileInstActive).toFixed(1);
     html += `
       <div class="insight-card ${parseFloat(inmatesPerInst) > 50 ? 'warning' : 'info'}">
         <div class="insight-header">
@@ -1629,6 +2184,79 @@ function renderAnomalies(arr){
 function renderPatterns(arr){
   let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:24px 0 14px;display:flex;align-items:center;gap:8px;">🔍 أنماط ومقارنات متقاطعة</h3>';
 
+  // Define all needed variables locally (mirroring renderSectoralInsights)
+  const disabled = sum('disabled_cards', arr);
+  const permits = sum('work_permits_new', arr);
+  const permitsRenew = sum('work_permits_renew', arr);
+  const recruitment = sum('recruitment_offices', arr);
+  const domestic = sum('domestic_permits_new', arr);
+  const investment = sum('investment_spending', arr);
+  const unorganized = sum('unorganized_workers', arr);
+  const agreements = sum('social_agreements', arr);
+  const specialStudents = sum('special_students', arr);
+  const rehabCenters = sum('rehab_centers', arr);
+  const beggarCenters = sum('beggar_centers', arr);
+  const beggarInmates = sum('beggar_inmates', arr);
+  const elderlyHomes = sum('elderly_homes', arr);
+  const orphans = sum('orphan_homes', arr);
+  const sponsorInt = sum('sponsor_internal', arr);
+  const sponsorExt = sum('sponsor_external', arr);
+  const juvenileInst = sum('juvenile_inst', arr);
+  const ruralInd = sum('rural_ind_benef', arr);
+  const ruralDevActive = sum('rural_dev_active', arr);
+  const ruralDevInactive = sum('rural_dev_inactive', arr);
+  const ruralIndActive = sum('rural_ind_active', arr);
+  const ruralIndInactive = sum('rural_ind_inactive', arr);
+  const ruralRehab = sum('rural_rehab_benef', arr);
+  const newWorkers = sum('new_workers_insp', arr);
+  const inspInd = sum('insp_industrial', arr);
+  const inspAgri = sum('insp_agri', arr);
+  const ngoActive = sum('ngo_active', arr);
+  const ngoRevoked = sum('ngo_revoked', arr);
+  const seminars = sum('seminars', arr);
+  const totalPop = sum('population', arr);
+  // New indicators
+  const jobPlatformReg = sum('job_platform_registered', arr);
+  const jobPlatformEst = sum('job_platform_establishments', arr);
+  const jobPlatformJobs = sum('job_platform_jobs', arr);
+  const jobPlatformTrain = sum('job_platform_training', arr);
+  const ngo2025 = sum('ngo_active_2025', arr);
+  const foodBaskets = sum('food_baskets', arr);
+  const inkindAssist = sum('inkind_assistance', arr);
+  const cashAssist = sum('cash_assistance', arr);
+  const unhcrCenters = sum('unhcr_community_centers', arr);
+  const unfpaSpaces = sum('unfpa_safe_spaces', arr);
+  const camps = sum('camps_count', arr);
+  const campFamilies = sum('camp_families', arr);
+  const socInsPublic = sum('social_insurance_public', arr);
+  const socInsPrivate = sum('social_insurance_private', arr);
+  const socInsTotal = sum('social_insurance_total_active', arr);
+  const pensioners_ = sum('pensioners', arr);
+  const serviceMerge = sum('service_merge_decisions', arr);
+  const workInjury = sum('work_injury_compensation', arr);
+  const estJoined = sum('establishments_joined_insurance', arr);
+  const newLegal = sum('new_legal_bonds', arr);
+  const legalReview = sum('legal_bonds_under_review', arr);
+  const popMillions = sum('population_millions', arr);
+  const popUnder15 = sum('population_under_15', arr);
+  const pop15_60 = sum('population_15_60', arr);
+  const popOver60 = sum('population_over_60', arr);
+  const laborForce = sum('labor_force_millions', arr);
+  const employed_ = sum('employed', arr);
+  const unemployed_ = sum('unemployed', arr);
+  const unempRate = aggregateValue('unemployment_rate_general', arr);
+  const unempRateMales = aggregateValue('unemployment_rate_males', arr);
+  const unempRateFemales = aggregateValue('unemployment_rate_females', arr);
+  const unempRateYouth = aggregateValue('unemployment_rate_youth', arr);
+  const econActMales = aggregateValue('economic_activity_males', arr);
+  const econActFemales = aggregateValue('economic_activity_females', arr);
+  const childMarriage = aggregateValue('child_marriage_rate', arr);
+  const childLabor = aggregateValue('child_labor_rate', arr);
+  const femaleBreadwinners = aggregateValue('female_breadwinners_rate', arr);
+  const foodSecure = sum('food_secure_households', arr);
+  const foodVulnerable = sum('food_vulnerable_households', arr);
+  const foodInsecure = sum('food_insecure_households', arr);
+
   // Correlation: Population vs Services
   const popServices = [];
   ALL_GOVS.forEach(gov => {
@@ -1677,6 +2305,184 @@ function renderPatterns(arr){
           <h4>كثافة المنظمات غير الحكومية</h4>
         </div>
         <p><strong>${topNgo.gov}</strong> تتصدر بأعلى كثافة منظمات: <span class="metric good">${topNgo.density.toFixed(2)}</span> منظمة لكل 100 ألف نسمة. ${topNgo.density < 1 ? '⚠️ الكثافة منخفضة عموماً — فرصة لتشجيع تأسيس منظمات مجتمعية.' : '✅ حضور مجتمع مدني نشط.'}</p>
+      </div>`;
+  }
+
+  // Permits insights
+  const totalPermits = permits + permitsRenew;
+  if(totalPermits > 0){
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">تراخيص</span>
+          <h4>حركة تراخيص العمل للأجانب</h4>
+        </div>
+        <p>إجمالي التراخيص الجديدة والمجددة: <span class="metric good">${fmt(totalPermits)}</span>. مكاتب الاستقدام: <span class="metric">${fmt(recruitment)}</span>. ${recruitment === 0 ? '⚠️ لا توجد مكاتب استقدام مسجّلة — قد يشير إلى ضعور في تنظيم استقدام العمالة المنزلية.' : '✅ توجد بنية تحتية للاستقدام.'}</p>
+      </div>`;
+  }
+
+  // Financial insights
+  if(investment > 0 || unorganized > 0){
+    html += `
+      <div class="insight-card ${parseFloat(unorganized) > 50 ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(unorganized) > 50 ? 'warning' : ''}">مالية</span>
+          <h4>المؤشرات الاقتصادية والاستثمارية</h4>
+        </div>
+        <p>متوسط الإنفاق الاستثماري: <span class="metric">${investment > 0 && arr.length > 0 ? (investment/arr.length).toFixed(1) : 0}%</span>. العمال غير المنظمين: <span class="metric ${parseFloat(unorganized) > 50 ? '' : 'good'}">${unorganized > 0 && arr.length > 0 ? (unorganized/arr.length).toFixed(1) : 0}%</span>. ${parseFloat(unorganized) > 50 ? '⚠️ نسبة مرتفعة من العمال غير المنظمين — يستدعي تكثيف التفتيش والتوعية.' : '✅ نسبة العمال المنظمين مقبولة.'}</p>
+      </div>`;
+  }
+
+  // Comprehensive coverage check
+  // totalPop already declared above
+  if(totalPop > 0 && disabled > 0){
+    const disabledRate = ((disabled / totalPop) * 100).toFixed(3);
+    const studentRate = specialStudents > 0 ? ((specialStudents / totalPop) * 100).toFixed(3) : 0;
+    html += `
+      <div class="insight-card ${parseFloat(disabledRate) < 0.5 ? 'warning' : ''}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(disabledRate) < 0.5 ? 'warning' : ''}">تغطية</span>
+          <h4>تغطية ذوي الإعاقة والتعليم الخاص</h4>
+        </div>
+        <p>بطاقات الإعاقة: <span class="metric">${disabledRate}%</span> من السكان | الطلاب في معاهد الإعاقة: <span class="metric">${studentRate}%</span> | مراكز التأهيل: <span class="metric good">${fmt(rehabCenters)}</span>. ${parseFloat(disabledRate) < 0.5 ? '⚠️ معدل تسجيل منخفض — يحتاج لحملات توعية مكثفة.' : '✅ معدل تسجيل ضمن المدى المقبول.'}</p>
+      </div>`;
+  }
+
+  // Social care comprehensive
+  if(elderlyHomes > 0 || beggarCenters > 0 || orphans > 0){
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">رعاية</span>
+          <h4>البنية التحتية للرعاية الاجتماعية</h4>
+        </div>
+        <p>دور المسنين: <span class="metric">${fmt(elderlyHomes)}</span> | مراكز المتسولين: <span class="metric">${fmt(beggarCenters)}</span> | دور الأيتام: <span class="metric">${fmt(orphans)}</span> | كفالة داخلية: <span class="metric good">${fmt(sponsorInt)}</span> | كفالة خارجية: <span class="metric">${fmt(sponsorExt)}</span>.</p>
+      </div>`;
+  }
+
+  // Rural development comprehensive
+  if(ruralDevActive > 0 || ruralIndActive > 0){
+    const inactiveRatio = ruralDevInactive + ruralIndInactive;
+    html += `
+      <div class="insight-card ${inactiveRatio > (ruralDevActive + ruralIndActive) ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${inactiveRatio > (ruralDevActive + ruralIndActive) ? 'warning' : ''}">ريفية</span>
+          <h4>حالة مراكز التنمية والصناعات الريفية</h4>
+        </div>
+        <p>نشطة: <span class="metric good">${fmt(ruralDevActive + ruralIndActive)}</span> | خارج الخدمة: <span class="metric ${inactiveRatio > (ruralDevActive + ruralIndActive) ? '' : 'good'}">${fmt(inactiveRatio)}</span>. ${inactiveRatio > (ruralDevActive + ruralIndActive) ? '⚠️ أكثر من نصف المراكز خارج الخدمة — يستحق مراجعة عاجلة.' : '✅ معظم المراكز تعمل بكفاءة.'}</p>
+      </div>`;
+  }
+
+  // Labor inspection comprehensive
+  const totalInsp = inspInd + inspAgri;
+  if(totalInsp > 0){
+    const violationRate = violations > 0 ? ((violations / totalInsp) * 100).toFixed(1) : 0;
+    html += `
+      <div class="insight-card ${parseFloat(violationRate) > 25 ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(violationRate) > 25 ? 'warning' : ''}">تفتيش</span>
+          <h4>كفاءة التفتيش العمالي والزراعي</h4>
+        </div>
+        <p>زيارات صناعية: <span class="metric">${fmt(inspInd)}</span> | زيارات زراعية: <span class="metric">${fmt(inspAgri)}</span> | عمال جدد: <span class="metric good">${fmt(newWorkers)}</span> | معدل المخالفات: <span class="metric ${parseFloat(violationRate) > 25 ? '' : 'good'}">${violationRate}%</span>.</p>
+      </div>`;
+  }
+
+  // NGO sector
+  if(ngoActive > 0 || ngoRevoked > 0){
+    const ngoRatio = ngoRevoked > 0 ? (ngoActive / ngoRevoked).toFixed(1) : '∞';
+    html += `
+      <div class="insight-card ${ngoRevoked > ngoActive ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${ngoRevoked > ngoActive ? 'warning' : ''}">منظمات</span>
+          <h4>حالة القطاع غير الحكومي</h4>
+        </div>
+        <p>منظمات نشطة: <span class="metric good">${fmt(ngoActive)}</span> | مسحوبة: <span class="metric ${ngoRevoked > ngoActive ? '' : 'good'}">${fmt(ngoRevoked)}</span> | نسبة النشاط/السحب: <span class="metric">${ngoRatio}</span> | ندوات: <span class="metric">${fmt(seminars)}</span>. ${ngoRevoked > ngoActive ? '⚠️ عدد المنظمات المسحوبة يفوق النشطة — يستحق تحقيق.' : '✅ القطاع مستقر نسبياً.'}</p>
+      </div>`;
+  }
+
+  // Job Platform insights
+  if(jobPlatformReg > 0 || jobPlatformJobs > 0){
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">منصة العمل</span>
+          <h4>منصة سوق العمل الرقمية</h4>
+        </div>
+        <p>المسجلين: <span class="metric good">${fmt(jobPlatformReg)}</span> | المنشآت: <span class="metric">${fmt(jobPlatformEst)}</span> | فرص العمل: <span class="metric">${fmt(jobPlatformJobs)}</span> | فرص التدريب: <span class="metric">${fmt(jobPlatformTrain)}</span>.</p>
+      </div>`;
+  }
+
+  // Humanitarian assistance
+  if(foodBaskets > 0 || cashAssist > 0){
+    html += `
+      <div class="insight-card ${foodInsecure > foodSecure ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${foodInsecure > foodSecure ? 'warning' : ''}">إنساني</span>
+          <h4>المساعدات الإنسانية والمجتمعية</h4>
+        </div>
+        <p>سلل غذائية: <span class="metric good">${fmt(foodBaskets)}</span> | إعانات نقدية: <span class="metric">${fmt(cashAssist)}</span> | مساعدات عينية: <span class="metric">${fmt(inkindAssist)}</span> | مخيمات: <span class="metric">${fmt(camps)}</span> | أسر في المخيمات: <span class="metric">${fmt(campFamilies)}</span>.</p>
+      </div>`;
+  }
+
+  // Social insurance
+  if(socInsTotal > 0){
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">تأمينات</span>
+          <h4>التغطية التأمينية</h4>
+        </div>
+        <p>إجمالي المسجلين: <span class="metric good">${fmt(socInsTotal)}</span> | عام: <span class="metric">${fmt(socInsPublic)}</span> | خاص: <span class="metric">${fmt(socInsPrivate)}</span> | متقاعدين: <span class="metric">${fmt(pensioners_)}</span> | إصابات عمل: <span class="metric">${fmt(workInjury)}</span>.</p>
+      </div>`;
+  }
+
+  // Legal bonds
+  if(newLegal > 0 || legalReview > 0){
+    html += `
+      <div class="insight-card">
+        <div class="insight-header">
+          <span class="badge">قانوني</span>
+          <h4>الصكوك القانونية</h4>
+        </div>
+        <p>مشاريع جديدة: <span class="metric good">${fmt(newLegal)}</span> | قيد المراجعة: <span class="metric">${fmt(legalReview)}</span>.</p>
+      </div>`;
+  }
+
+  // Labor market
+  if(employed_ > 0 || unempRate > 0){
+    html += `
+      <div class="insight-card ${parseFloat(unempRate) > 15 ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(unempRate) > 15 ? 'warning' : ''}">سوق عمل</span>
+          <h4>مؤشرات البطالة والتوظيف</h4>
+        </div>
+        <p>معدل البطالة العام: <span class="metric ${parseFloat(unempRate) > 15 ? '' : 'good'}">${unempRate}%</span> | ذكور: ${unempRateMales}% | إناث: ${unempRateFemales}% | شباب: ${unempRateYouth}% | مشتغلون: <span class="metric good">${fmt(employed_)}</span> | متعطلون: <span class="metric">${fmt(unemployed_)}</span>.</p>
+      </div>`;
+  }
+
+  // Child protection
+  if(childMarriage > 0 || childLabor > 0){
+    html += `
+      <div class="insight-card ${parseFloat(childMarriage) > 5 || parseFloat(childLabor) > 5 ? 'warning' : 'info'}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(childMarriage) > 5 || parseFloat(childLabor) > 5 ? 'warning' : 'info'}">حماية</span>
+          <h4>حماية الطفل</h4>
+        </div>
+        <p>معدل زواج القاصرات: <span class="metric ${parseFloat(childMarriage) > 5 ? '' : 'good'}">${childMarriage}%</span> | معدل عمل الأطفال: <span class="metric ${parseFloat(childLabor) > 5 ? '' : 'good'}">${childLabor}%</span> | نساء معيلات: <span class="metric">${femaleBreadwinners}%</span>.</p>
+      </div>`;
+  }
+
+  // Food security
+  if(foodSecure > 0 || foodVulnerable > 0 || foodInsecure > 0){
+    const totalFood = foodSecure + foodVulnerable + foodInsecure;
+    const securePct = totalFood > 0 ? Math.round((foodSecure/totalFood)*100) : 0;
+    html += `
+      <div class="insight-card ${securePct < 50 ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${securePct < 50 ? 'warning' : ''}">غذاء</span>
+          <h4>الأمن الغذائي للأسر</h4>
+        </div>
+        <p>آمنة: <span class="metric good">${fmt(foodSecure)}</span> (${securePct}%) | هشاشة: <span class="metric">${fmt(foodVulnerable)}</span> | معدومة: <span class="metric ${foodInsecure > foodSecure ? '' : 'good'}">${fmt(foodInsecure)}</span>. ${securePct < 50 ? '⚠️ أكثر من نصف الأسر غير آمنة غذائياً.' : '✅ غالبية الأسر آمنة غذائياً.'}</p>
       </div>`;
   }
 
@@ -1731,56 +2537,151 @@ async function loadFromSheet(){
   statusEl.className = 'status-badge status-loading';
   if(refreshBtn) refreshBtn.disabled = true;
 
-  try {
-    // Add cache-buster to force fresh data
-    const cacheBuster = '&_cb=' + Date.now();
-    const fetchUrl = url + (url.includes('?') ? cacheBuster : '?' + cacheBuster);
+  let lastError = '';
+  let attempts = 0;
 
-    const response = await fetch(fetchUrl, { method: 'GET', mode: 'cors' });
+  // Helper to validate CSV response
+  function isValidCSV(text){
+    if(!text || text.length < 50) return false;
+    // Must contain Arabic headers or commas/tabs
+    const hasDelimiter = text.includes(',') || text.includes('؛') || text.includes(';') || text.includes('\t');
+    const hasArabic = /[\u0600-\u06FF]/.test(text);
+    const notHTML = !text.trim().startsWith('<');
+    return hasDelimiter && (hasArabic || text.split('\n')[0].split(',').length > 3) && notHTML;
+  }
+
+  // Try direct fetch first (works if hosted on HTTPS with proper CORS, or localhost)
+  try {
+    attempts++;
+    const cacheBuster = '_cb=' + Date.now();
+    const separator = url.includes('?') ? '&' : '?';
+    const fetchUrl = url + separator + cacheBuster;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const response = await fetch(fetchUrl, { 
+      method: 'GET', 
+      mode: 'cors',
+      signal: controller.signal,
+      headers: { 'Accept': 'text/csv,text/plain,*/*' }
+    });
+    clearTimeout(timeoutId);
+
     if(response.ok){ 
-      const csvText = await response.text(); 
-      if(processCSVData(csvText)) {
-        statusEl.textContent = '✅ تم التحديث بنجاح — ' + new Date().toLocaleTimeString('ar-SY');
-        statusEl.className = 'status-badge status-ok';
-        if(refreshBtn) refreshBtn.disabled = false;
-        return; 
+      const csvText = await response.text();
+      if(isValidCSV(csvText)){
+        if(processCSVData(csvText)) {
+          statusEl.textContent = '✅ تم التحديث بنجاح — ' + new Date().toLocaleTimeString('ar-SY');
+          statusEl.className = 'status-badge status-ok';
+          if(refreshBtn) refreshBtn.disabled = false;
+          return; 
+        }
+      } else {
+        lastError = 'Direct: الرد ليس CSV صالحاً (' + csvText.substring(0,50) + '...)';
       }
+    } else {
+      lastError = 'Direct: HTTP ' + response.status;
     }
   } catch(e) { 
+    lastError = 'Direct: ' + (e.name === 'AbortError' ? 'انتهى الوقت' : e.message);
     console.log('Direct fetch failed:', e.message); 
   }
 
-  // Try with proxies if direct fetch fails
-  const proxies = ['https://api.allorigins.win/raw?url=','https://api.allorigins.win/get?url=','https://corsproxy.io/?'];
+  // Try with multiple CORS proxies
+  const proxies = [
+    {name:'allorigins-raw', url:'https://api.allorigins.win/raw?url=', type:'raw'},
+    {name:'allorigins-get', url:'https://api.allorigins.win/get?url=', type:'json'},
+    {name:'corsproxy', url:'https://corsproxy.io/?', type:'raw'},
+    {name:'codetabs', url:'https://api.codetabs.com/v1/proxy?quest=', type:'raw'},
+    {name:'thingproxy', url:'https://thingproxy.freeboard.io/fetch/', type:'raw'},
+  ];
+
   for(const proxy of proxies){
     try {
-      const cacheBuster = '&_cb=' + Date.now();
-      const proxyUrl = proxy + encodeURIComponent(url + cacheBuster);
-      const response = await fetch(proxyUrl, { method: 'GET' });
-      if(!response.ok) continue;
+      attempts++;
+      const cacheBuster = '_cb=' + Date.now();
+      const separator = url.includes('?') ? '&' : '?';
+      const proxyUrl = proxy.url + encodeURIComponent(url + separator + cacheBuster);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+      const response = await fetch(proxyUrl, { 
+        method: 'GET',
+        signal: controller.signal,
+        headers: proxy.name === 'thingproxy' ? {'Origin': window.location.origin} : {}
+      });
+      clearTimeout(timeoutId);
+
+      if(!response.ok){
+        lastError += ' | ' + proxy.name + ': HTTP ' + response.status;
+        continue;
+      }
+
       let csvText;
-      if(proxy.includes('allorigins.win/get')) { 
+      if(proxy.type === 'json') { 
         const json = await response.json(); 
-        csvText = json.contents; 
+        csvText = json.contents || json.data || ''; 
       }
       else { 
         csvText = await response.text(); 
       }
-      if(processCSVData(csvText)) {
-        statusEl.textContent = '✅ تم التحديث بنجاح — ' + new Date().toLocaleTimeString('ar-SY');
-        statusEl.className = 'status-badge status-ok';
-        if(refreshBtn) refreshBtn.disabled = false;
-        return;
+
+      if(isValidCSV(csvText)){
+        if(processCSVData(csvText)) {
+          statusEl.textContent = '✅ تم التحديث بنجاح (عبر ' + proxy.name + ') — ' + new Date().toLocaleTimeString('ar-SY');
+          statusEl.className = 'status-badge status-ok';
+          if(refreshBtn) refreshBtn.disabled = false;
+          return;
+        }
+      } else {
+        lastError += ' | ' + proxy.name + ': رد غير صالح';
       }
     } catch(err) { 
-      console.warn('Proxy failed:', proxy, err.message); 
+      lastError += ' | ' + proxy.name + ': ' + (err.name === 'AbortError' ? 'timeout' : err.message);
+      console.warn('Proxy failed:', proxy.name, err.message); 
     }
   }
 
-  statusEl.textContent = '❌ فشل التحديث — جرب رفع الملف يدوياً';
+  // All attempts failed - show user-friendly message with manual option
+  statusEl.innerHTML = '❌ فشل الاتصال — <a href="#" onclick="showUploadModal();return false;" style="color:#1565c0;text-decoration:underline;">ارفع الملف يدوياً</a> أو <a href="#" onclick="loadDemoData();return false;" style="color:#8e44ad;text-decoration:underline;">جرب البيانات التجريبية</a>';
   statusEl.className = 'status-badge status-error';
   if(refreshBtn) refreshBtn.disabled = false;
-  showUploadModal();
+
+  console.error('All ' + attempts + ' fetch attempts failed. Last error:', lastError);
+
+  // Auto-open upload modal with helpful message
+  setTimeout(() => {
+    showUploadModal();
+    const modalBody = document.querySelector('#uploadModal .modal-body');
+    if(modalBody){
+      const helpDiv = document.createElement('div');
+      helpDiv.id = 'corsHelpMessage';
+      helpDiv.style.cssText = 'background:#fff3e0;border:1px solid #ef6c00;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12.5px;line-height:1.8;color:#e65100;';
+      helpDiv.innerHTML = '<strong>⚠️ فشل الاتصال بالرابط المحدد (HTTP 404)</strong><br>• <strong>الرابط:</strong> <code style="background:#fff;padding:2px 4px;border-radius:3px;font-size:10px;">2PACX-1vSYw2t1DGme6GL7bFv8FDnl3cYMbHYpm2LRjjvHsXyE2TB5Tbkum28ObIMc1jop-AQMJCWThzX9q3vL</code><br>• <strong>السبب:</strong> Google Sheets لا يعرف هذا المعرف — الورقة غير منشورة أو المعرف خطأ.<br>• <strong>الحل السريع:</strong> اضغط على زر <strong>"🧪 بيانات تجريبية"</strong> أعلى الصفحة.<br>• <strong>للتحقق من الرابط:</strong> افتح Google Sheets → ملف → مشاركة → انشر على الويب → انسخ الرابط الجديد.';
+      const existing = modalBody.querySelector('#corsHelpMessage');
+      if(existing) existing.remove();
+      modalBody.insertBefore(helpDiv, modalBody.firstChild);
+    }
+  }, 300);
+}
+
+// =====================
+// DEMO DATA LOADER
+// =====================
+function loadDemoData(){
+  const statusEl = document.getElementById('dataStatus');
+  statusEl.textContent = '⏳ جاري تحميل البيانات التجريبية...';
+  statusEl.className = 'status-badge status-loading';
+
+  setTimeout(() => {
+    if(processCSVData(DEMO_DATA_CSV)){
+      statusEl.textContent = '✅ تم تحميل البيانات التجريبية (14 محافظة) — ' + new Date().toLocaleTimeString('ar-SY');
+      statusEl.className = 'status-badge status-ok';
+      closeUploadModal();
+    }
+  }, 300);
 }
 
 // =====================
@@ -1850,7 +2751,22 @@ function getGovIntensity(gov, arr){
     total += (d.disabled_cards||0) + (d.elderly_benef||0) + (d.ngo_active||0) + 
              (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_industrial||0) +
              (d.new_workers_insp||0) + (d.special_students||0) + (d.rehab_benef||0) +
-             (d.population||0) + (d.males||0) + (d.females||0);
+             (d.population||0) + (d.males||0) + (d.females||0) +
+             (d.rehab_centers||0) + (d.beggar_centers||0) + (d.beggar_inmates||0) +
+             (d.elderly_homes||0) + (d.ngo_revoked||0) + (d.seminars||0) +
+             (d.orphan_homes||0) + (d.sponsor_internal||0) + (d.sponsor_external||0) +
+             (d.juvenile_inst||0) + (d.juvenile_inst_active||0) +
+             (d.rural_ind_benef||0) + (d.rural_dev_active||0) + (d.rural_dev_inactive||0) +
+             (d.rural_ind_active||0) + (d.rural_ind_inactive||0) + (d.rural_rehab_benef||0) +
+             (d.insp_agri||0) + (d.violations||0) +
+             (d.work_permits_new||0) + (d.work_permits_renew||0) + (d.recruitment_offices||0) +
+             (d.domestic_permits_new||0) + (d.domestic_permits_renew||0) + (d.domestic_permits_renew2||0) +
+             (d.domestic_offices_syrian||0) + (d.private_offices_syrian||0) +
+             (d.investment_spending||0) + (d.unorganized_workers||0) + (d.social_agreements||0);
+    // Include dynamic indicators in intensity calculation
+    DYNAMIC_INDICATORS.forEach(ind => {
+      total += (d[ind.key] || 0);
+    });
   });
   return total;
 }
@@ -2036,6 +2952,16 @@ function updateMapMarkers(){
           <span style="font-weight:700;color:var(--syria-red);font-size:12px;">🧰 الاحتياجات الرئيسية</span>
         </div>
         <div style="font-size:11px;color:var(--ink-soft);line-height:1.8;padding:4px 0;">${textFields.needs.join('<br>• ')}</div>
+        ` : ''}
+
+        ${DYNAMIC_INDICATORS.length > 0 ? `
+        <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
+          <span style="font-weight:700;color:var(--syria-green);font-size:12px;">📋 مؤشرات إضافية</span>
+        </div>
+        ${DYNAMIC_INDICATORS.map(ind => {
+          const val = d[ind.key];
+          return val !== undefined && val !== null ? `<div class="info-row"><span class="info-label">${ind.label.substring(0,35)}</span><span class="info-val">${fmt(val)}${ind.isPercentage ? '%' : ''}</span></div>` : '';
+        }).join('')}
         ` : ''}
       `;
     }
