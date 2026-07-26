@@ -220,6 +220,14 @@
   .gender-bar .male-part{background:#1565c0;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-family:'IBM Plex Mono';font-weight:600;transition:width .5s ease;}
   .gender-bar .female-part{background:#e91e63;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-family:'IBM Plex Mono';font-weight:600;transition:width .5s ease;}
 
+  /* ===== RANKING MODE SELECTOR ===== */
+  .ranking-mode-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px;padding:12px 16px;background:var(--sand);border-radius:10px;border:1px solid var(--line);}
+  .ranking-mode-bar .mode-label{font-family:'Tajawal';font-weight:700;font-size:13px;color:var(--ink);margin-inline-end:8px;}
+  .ranking-mode-btn{border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);padding:6px 14px;border-radius:100px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s ease;font-family:'Cairo',sans-serif;}
+  .ranking-mode-btn:hover{border-color:var(--syria-green);color:var(--syria-green);}
+  .ranking-mode-btn.active{background:var(--syria-green);color:var(--syria-white);border-color:var(--syria-green);}
+  .ranking-desc{font-size:12px;color:var(--ink-soft);margin-top:8px;padding:8px 12px;background:var(--paper);border-radius:6px;border-inline-start:3px solid var(--syria-green);line-height:1.7;}
+
 </style>
 <base target="_blank">
 
@@ -606,6 +614,7 @@ let activeGov = "all";
 let selectedMonths = new Set();
 let selectedMonthChips = new Set();
 let charts = {};
+let currentRankingMode = 'absolute'; // 'absolute' | 'perCapita' | 'coverage' | 'activityCount'
 const MONTHS_LIST = ["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
 const ALL_GOVS = ["دمشق","ريف دمشق","حلب","حمص","حماه","اللاذقية","طرطوس","السويداء","درعا","القنيطرة","ادلب","الرقة","دير الزور","الحسكة"];
 
@@ -1262,36 +1271,111 @@ function renderInsights(){
   summary.innerHTML = `تم تحليل <strong>${arr.length}</strong> سجل من <strong>${govCount}</strong> محافظة | إجمالي السكان المسجّلين: <strong>${fmt(totalPop)}</strong> نسمة`;
 }
 
+function getRankingModeLabel(mode){
+  const labels = {
+    absolute: 'النشاط الإجمالي (مجموع المؤشرات)',
+    perCapita: 'النشاط لكل 1000 نسمة (تصحيح سكاني)',
+    coverage: 'نسبة تغطية ذوي الإعاقة من السكان',
+    activityCount: 'عدد المؤشرات النشطة (وليس حجمها)'
+  };
+  return labels[mode] || labels.absolute;
+}
+
+function getRankingModeDescription(mode){
+  const desc = {
+    absolute: 'يجمع جميع المؤشرات الرقمية (بطاقات إعاقة، مستفيدون، زيارات...) دون تصحيح سكاني. المحافظات الكبيرة تتصدر تلقائياً.',
+    perCapita: 'يقسم مجموع النشاط على عدد السكان ويضرب بـ 1000. يعطي صورة عادلة عن "كفاءة" المحافظة الصغيرة مقابل الكبيرة.',
+    coverage: 'يركز على مؤشر واحد محدد: نسبة حاملي بطاقات الإعاقة من إجمالي السكان. يكشف جودة التغطية الاجتماعية.',
+    activityCount: 'يحسب كم مؤشر لدى المحافظة بقيمة أكبر من صفر (وليس حجم القيمة). يكافئ المحافظات المتنوعة النشاط.'
+  };
+  return desc[mode] || desc.absolute;
+}
+
+function setRankingMode(mode){
+  currentRankingMode = mode;
+  document.querySelectorAll('.ranking-mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+  });
+  renderInsights();
+}
+
 function renderGovComparison(arr){
-  // Rank governorates by total activity intensity
-  const govIntensity = {};
+  const govScores = {};
+
   ALL_GOVS.forEach(gov => {
     const govData = arr.filter(d => d.gov === gov);
-    if(govData.length > 0){
+    if(govData.length === 0) return;
+
+    const pop = sum('population', govData);
+
+    if(currentRankingMode === 'absolute'){
       let intensity = 0;
       govData.forEach(d => {
         intensity += (d.disabled_cards||0) + (d.elderly_benef||0) + (d.ngo_active||0) +
                      (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_industrial||0) +
                      (d.new_workers_insp||0) + (d.special_students||0) + (d.rehab_benef||0);
       });
-      govIntensity[gov] = intensity;
+      govScores[gov] = {val: intensity, unit: 'نقطة نشاط', display: fmt(intensity)};
+    }
+    else if(currentRankingMode === 'perCapita'){
+      if(pop === 0) return;
+      let intensity = 0;
+      govData.forEach(d => {
+        intensity += (d.disabled_cards||0) + (d.elderly_benef||0) + (d.ngo_active||0) +
+                     (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_industrial||0) +
+                     (d.new_workers_insp||0) + (d.special_students||0) + (d.rehab_benef||0);
+      });
+      const perCapita = (intensity / pop) * 1000;
+      govScores[gov] = {val: perCapita, unit: 'لكل 1000 نسمة', display: perCapita.toFixed(1)};
+    }
+    else if(currentRankingMode === 'coverage'){
+      if(pop === 0) return;
+      const disabled = sum('disabled_cards', govData);
+      const coverage = ((disabled / pop) * 100);
+      govScores[gov] = {val: coverage, unit: '% تغطية', display: coverage.toFixed(2) + '%'};
+    }
+    else if(currentRankingMode === 'activityCount'){
+      let count = 0;
+      const keys = ['disabled_cards','elderly_benef','ngo_active','juvenile_inmates',
+                    'rural_dev_benef','insp_industrial','new_workers_insp',
+                    'special_students','rehab_benef','beggar_inmates','orphan_homes',
+                    'sponsor_internal','sponsor_external','seminars','violations'];
+      govData.forEach(d => {
+        keys.forEach(key => {
+          if((d[key]||0) > 0) count++;
+        });
+      });
+      govScores[gov] = {val: count, unit: 'مؤشر نشط', display: fmt(count)};
     }
   });
 
-  const sortedGovs = Object.entries(govIntensity).sort((a,b) => b[1] - a[1]);
-  const maxVal = sortedGovs.length > 0 ? sortedGovs[0][1] : 1;
+  const sortedGovs = Object.entries(govScores).sort((a,b) => b[1].val - a[1].val);
+  const maxVal = sortedGovs.length > 0 ? sortedGovs[0][1].val : 1;
 
-  let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:0 0 14px;display:flex;align-items:center;gap:8px;">🏆 ترتيب المحافظات حسب حجم النشاط التشغيلي</h3>';
+  let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:0 0 14px;display:flex;align-items:center;gap:8px;">🏆 ترتيب المحافظات</h3>';
+
+  // Mode selector buttons
+  html += `
+    <div class="ranking-mode-bar">
+      <span class="mode-label">🎛️ طريقة الترتيب:</span>
+      <button class="ranking-mode-btn ${currentRankingMode==='absolute'?'active':''}" data-mode="absolute" onclick="setRankingMode('absolute')">📊 النشاط الإجمالي</button>
+      <button class="ranking-mode-btn ${currentRankingMode==='perCapita'?'active':''}" data-mode="perCapita" onclick="setRankingMode('perCapita')">👥 لكل 1000 نسمة</button>
+      <button class="ranking-mode-btn ${currentRankingMode==='coverage'?'active':''}" data-mode="coverage" onclick="setRankingMode('coverage')">🦽 تغطية الإعاقة</button>
+      <button class="ranking-mode-btn ${currentRankingMode==='activityCount'?'active':''}" data-mode="activityCount" onclick="setRankingMode('activityCount')">🔢 عدد المؤشرات</button>
+    </div>
+    <div class="ranking-desc">💡 <strong>${getRankingModeLabel(currentRankingMode)}:</strong> ${getRankingModeDescription(currentRankingMode)}</div>
+  `;
+
   html += '<div class="comparison-grid">';
 
-  sortedGovs.slice(0, 5).forEach(([gov, val], idx) => {
-    const pct = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
+  sortedGovs.slice(0, 5).forEach(([gov, data], idx) => {
+    const pct = maxVal > 0 ? Math.round((data.val / maxVal) * 100) : 0;
     const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
     html += `
       <div class="comparison-card">
         <div class="rank">${medals[idx]}</div>
         <div class="gov-name">${gov}</div>
-        <div class="metric-val">${fmt(val)} نقطة نشاط</div>
+        <div class="metric-val">${data.display} ${data.unit}</div>
         <div class="vs-bar"><div class="vs-fill" style="width:${pct}%"></div></div>
       </div>`;
   });
