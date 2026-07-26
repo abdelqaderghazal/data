@@ -179,12 +179,54 @@
   .change-pw-section .success-msg{color:var(--good);font-size:12px;margin-top:8px;display:none;}
   .change-pw-section .success-msg.show{display:block;}
 
+  /* ===== INSIGHTS & COMPARISONS SECTION ===== */
+  .insights-section{background:var(--paper);border:1px solid var(--line);border-radius:18px;margin-bottom:24px;overflow:hidden;}
+  .insights-head{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid var(--sand-2);background:linear-gradient(90deg,var(--sand) 0%,transparent 100%);cursor:pointer;}
+  .insights-head .icon{width:44px;height:44px;border-radius:50%;background:var(--syria-red);color:var(--paper);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid var(--syria-green);}
+  .insights-head h2{font-family:'Tajawal',sans-serif;font-weight:700;font-size:18px;margin:0;color:var(--ink);}
+  .insights-head p{margin:3px 0 0;font-size:13px;color:var(--ink-soft);}
+  .insights-head .chev{margin-inline-start:auto;font-size:18px;color:var(--syria-red);transition:transform .2s;}
+  .insights-body{padding:22px 24px 26px;display:none;}
+  .insights-section.open .insights-body{display:block;}
+  .insights-section.open .chev{transform:rotate(180deg);}
+
+  .insight-card{background:var(--sand);border-radius:12px;padding:16px 18px;margin-bottom:14px;border-inline-start:4px solid var(--syria-green);transition:.15s;}
+  .insight-card:hover{transform:translateX(-4px);}
+  .insight-card.warning{border-inline-start-color:var(--syria-red);background:#fff3e0;}
+  .insight-card.info{border-inline-start-color:#1565c0;background:#e3f2fd;}
+  .insight-card.success{border-inline-start-color:var(--syria-green);background:#e8f5e9;}
+  .insight-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .insight-header .badge{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:3px 10px;border-radius:100px;font-weight:600;color:white;background:var(--syria-green);}
+  .insight-header .badge.warning{background:var(--syria-red);}
+  .insight-header .badge.info{background:#1565c0;}
+  .insight-header h4{margin:0;font-family:'Tajawal';font-size:15px;color:var(--ink);}
+  .insight-card p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.8;}
+  .insight-card .metric{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--syria-red);font-size:14px;}
+  .insight-card .metric.good{color:var(--syria-green);}
+  .comparison-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:18px;}
+  .comparison-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+  .comparison-card .rank{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:700;color:var(--syria-red);margin-bottom:4px;}
+  .comparison-card .gov-name{font-family:'Tajawal';font-weight:700;font-size:15px;color:var(--ink);margin-bottom:4px;}
+  .comparison-card .metric-val{font-family:'IBM Plex Mono';font-size:14px;color:var(--ink-soft);}
+  .comparison-card .vs-bar{height:6px;background:var(--sand-2);border-radius:3px;margin-top:10px;overflow:hidden;}
+  .comparison-card .vs-fill{height:100%;background:var(--syria-green);border-radius:3px;transition:width .5s ease;}
+  .trend-indicator{display:inline-flex;align-items:center;gap:4px;font-family:'IBM Plex Mono';font-size:12px;font-weight:600;}
+  .trend-up{color:var(--syria-green);}
+  .trend-down{color:var(--syria-red);}
+  .insights-summary{background:linear-gradient(135deg,var(--syria-green),#005a2d);color:white;border-radius:12px;padding:18px 20px;margin-bottom:18px;text-align:center;}
+  .insights-summary h3{margin:0 0 8px;font-family:'Tajawal';font-size:16px;}
+  .insights-summary p{margin:0;font-size:13px;opacity:0.9;line-height:1.7;}
+  .gender-bar{display:flex;height:28px;border-radius:14px;overflow:hidden;margin-top:10px;background:var(--sand-2);}
+  .gender-bar .male-part{background:#1565c0;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-family:'IBM Plex Mono';font-weight:600;transition:width .5s ease;}
+  .gender-bar .female-part{background:#e91e63;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-family:'IBM Plex Mono';font-weight:600;transition:width .5s ease;}
+
 </style>
 <base target="_blank">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<base target="_blank">
 </head>
 <body class="locked">
 
@@ -427,6 +469,35 @@
     </div>
   </section>
 
+  <section class="category" data-cat="demographics">
+    <div class="cat-head" onclick="toggleCat(this)">
+      <div class="icon">👨‍👩‍👧‍👦</div>
+      <div><h2>المؤشرات الديموغرافية والسكانية</h2><p>عدد السكان، الذكور، الإناث، والتوزيع الجغرافي</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body">
+      <p class="cat-note" id="note-demographics">💡 ارفع ملف CSV لعرض البيانات</p>
+      <div class="chart-wrap"><canvas id="chart-demographics"></canvas></div>
+      <div class="ind-cards" id="cards-demographics"></div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS & COMPARISONS SECTION -->
+  <section class="insights-section open" data-cat="insights" id="insightsSection">
+    <div class="insights-head" onclick="toggleInsights(this)">
+      <div class="icon">💡</div>
+      <div><h2>المقارنات والدروس المستفادة</h2><p>تحليل ذكي للبيانات — رؤى ومقارنات تلقائية بين المحافظات</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="insights-body" id="insightsBody">
+      <div class="insights-summary" id="insightsSummary">
+        <h3>📊 ملخص التحليل التلقائي</h3>
+        <p id="insightsSummaryText">جاري تحليل البيانات...</p>
+      </div>
+      <div id="insightsContent"></div>
+    </div>
+  </section>
+
   <section class="category open" data-cat="details">
     <div class="cat-head" onclick="toggleCat(this)">
       <div class="icon">📖</div>
@@ -519,6 +590,8 @@ const COLUMN_MAP = {
   "عدد المخالفات الناتجة عن الزيارات": "violations",
   "عدد المستفيدين من برامج مراكز التأهيل والتدريب المهني (مراكز تنمية ريفية)": "rural_rehab_benef",
   "عدد السكان": "population",
+  "ذكور": "males",
+  "إناث": "females",
   "السنة": "year",
   "اهم ثلاث انجازات": "achievements",
   "اهم ثلال توصيات": "recommendations",
@@ -757,6 +830,8 @@ function kpiDefs(arr){
     {em:"🏗️",lbl:"زيارات تفتيش صناعي",val:sum("insp_industrial",arr)},
     {em:"⚠️",lbl:"مخالفات مسجّلة",val:sum("violations",arr)},
     {em:"👥",lbl:"إجمالي السكان",val:sum("population",arr)},
+    {em:"♂️",lbl:"الذكور",val:sum("males",arr)},
+    {em:"♀️",lbl:"الإناث",val:sum("females",arr)},
   ];
 }
 
@@ -1041,6 +1116,23 @@ function renderCategory(cat){
     document.getElementById('note-labor').textContent = 
       `💡 اللاذقية وحدها سجّلت ${fmt(latakiaWorkers)} عامل جديد (نحو ${pct}% من الإجمالي).`;
   }
+
+  if(cat === 'demographics'){
+    barChart('chart-demographics', 'population');
+    renderCards('cards-demographics', [
+      {em:'👥',n:sum('population',arr),t:'إجمالي عدد السكان'},
+      {em:'♂️',n:sum('males',arr),t:'إجمالي الذكور'},
+      {em:'♀️',n:sum('females',arr),t:'إجمالي الإناث'}
+    ]);
+    const totalPop = sum('population', arr);
+    const totalMales = sum('males', arr);
+    const totalFemales = sum('females', arr);
+    const genderRatio = totalFemales > 0 ? (totalMales / totalFemales).toFixed(2) : 0;
+    const femalePct = totalPop > 0 ? Math.round((totalFemales / totalPop) * 100) : 0;
+    const malePct = totalPop > 0 ? Math.round((totalMales / totalPop) * 100) : 0;
+    document.getElementById('note-demographics').textContent = 
+      `💡 نسبة الذكور ${malePct}% مقابل ${femalePct}% للإناث. نسبة الذكور/الإناث: ${genderRatio}.`;
+  }
 }
 
 // =====================
@@ -1088,11 +1180,14 @@ function renderGovList(){
 function renderAll(){
   console.log('Rendering with', filtered().length, 'rows, activeGov:', activeGov, 'selectedMonths:', [...selectedMonths]);
   renderKPIs();
-  ['disability','social','ngo','juvenile','rural','labor'].forEach(renderCategory);
+  ['disability','social','ngo','juvenile','rural','labor','demographics'].forEach(renderCategory);
   renderGovList();
   updateMastheadBadge();
   updateFooterNote();
   updateMapMarkers();
+  if(document.getElementById('insightsSection').classList.contains('open')){
+    renderInsights();
+  }
 }
 
 function updateMastheadBadge(){
@@ -1119,6 +1214,388 @@ function toggleCat(headEl){
   const cat = headEl.parentElement.getAttribute('data-cat');
   if(cat !== 'details') setTimeout(() => renderCategory(cat), 0);
   if(cat === 'map') initMapOnDemand();
+}
+
+function toggleInsights(headEl){
+  headEl.parentElement.classList.toggle('open');
+  if(headEl.parentElement.classList.contains('open')){
+    renderInsights();
+  }
+}
+
+// =====================
+// INSIGHTS & COMPARISONS ENGINE
+// =====================
+function renderInsights(){
+  const arr = filtered();
+  const content = document.getElementById('insightsContent');
+  const summary = document.getElementById('insightsSummaryText');
+
+  if(arr.length === 0){
+    content.innerHTML = '<p style="text-align:center;color:var(--ink-soft);padding:20px;">💡 ارفع ملف CSV لعرض التحليلات والمقارنات</p>';
+    summary.textContent = 'لا توجد بيانات للتحليل';
+    return;
+  }
+
+  let html = '';
+
+  // 1. GOVERNORATE RANKING COMPARISON
+  html += renderGovComparison(arr);
+
+  // 2. GENDER GAP ANALYSIS
+  html += renderGenderInsights(arr);
+
+  // 3. SECTORAL INSIGHTS
+  html += renderSectoralInsights(arr);
+
+  // 4. ANOMALIES & WARNINGS
+  html += renderAnomalies(arr);
+
+  // 5. CROSS-GOVERNORATE PATTERNS
+  html += renderPatterns(arr);
+
+  content.innerHTML = html;
+
+  // Update summary
+  const govCount = new Set(arr.map(d => d.gov)).size;
+  const totalPop = sum('population', arr);
+  summary.innerHTML = `تم تحليل <strong>${arr.length}</strong> سجل من <strong>${govCount}</strong> محافظة | إجمالي السكان المسجّلين: <strong>${fmt(totalPop)}</strong> نسمة`;
+}
+
+function renderGovComparison(arr){
+  // Rank governorates by total activity intensity
+  const govIntensity = {};
+  ALL_GOVS.forEach(gov => {
+    const govData = arr.filter(d => d.gov === gov);
+    if(govData.length > 0){
+      let intensity = 0;
+      govData.forEach(d => {
+        intensity += (d.disabled_cards||0) + (d.elderly_benef||0) + (d.ngo_active||0) +
+                     (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_industrial||0) +
+                     (d.new_workers_insp||0) + (d.special_students||0) + (d.rehab_benef||0);
+      });
+      govIntensity[gov] = intensity;
+    }
+  });
+
+  const sortedGovs = Object.entries(govIntensity).sort((a,b) => b[1] - a[1]);
+  const maxVal = sortedGovs.length > 0 ? sortedGovs[0][1] : 1;
+
+  let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:0 0 14px;display:flex;align-items:center;gap:8px;">🏆 ترتيب المحافظات حسب حجم النشاط التشغيلي</h3>';
+  html += '<div class="comparison-grid">';
+
+  sortedGovs.slice(0, 5).forEach(([gov, val], idx) => {
+    const pct = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
+    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    html += `
+      <div class="comparison-card">
+        <div class="rank">${medals[idx]}</div>
+        <div class="gov-name">${gov}</div>
+        <div class="metric-val">${fmt(val)} نقطة نشاط</div>
+        <div class="vs-bar"><div class="vs-fill" style="width:${pct}%"></div></div>
+      </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function renderGenderInsights(arr){
+  const totalMales = sum('males', arr);
+  const totalFemales = sum('females', arr);
+  const totalPop = sum('population', arr);
+
+  if(totalPop === 0) return '';
+
+  const malePct = Math.round((totalMales / totalPop) * 100);
+  const femalePct = Math.round((totalFemales / totalPop) * 100);
+  const genderRatio = totalFemales > 0 ? (totalMales / totalFemales).toFixed(2) : 0;
+
+  // Find governorate with highest female ratio
+  let maxFemaleGov = {gov:'', pct:0};
+  let maxMaleGov = {gov:'', pct:0};
+
+  ALL_GOVS.forEach(gov => {
+    const govData = arr.filter(d => d.gov === gov);
+    if(govData.length > 0){
+      const gMales = sum('males', govData);
+      const gFemales = sum('females', govData);
+      const gPop = sum('population', govData);
+      if(gPop > 0){
+        const fPct = (gFemales / gPop) * 100;
+        const mPct = (gMales / gPop) * 100;
+        if(fPct > maxFemaleGov.pct) maxFemaleGov = {gov, pct: fPct};
+        if(mPct > maxMaleGov.pct) maxMaleGov = {gov, pct: mPct};
+      }
+    }
+  });
+
+  let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:24px 0 14px;display:flex;align-items:center;gap:8px;">⚖️ التوازن بين الجنسين</h3>';
+
+  html += `
+    <div class="insight-card ${malePct > femalePct + 10 ? 'warning' : 'success'}">
+      <div class="insight-header">
+        <span class="badge ${malePct > femalePct + 10 ? 'warning' : ''}">تحليل</span>
+        <h4>التوزيع الجنساني العام</h4>
+      </div>
+      <div class="gender-bar">
+        <div class="male-part" style="width:${malePct}%">${malePct}% ♂️</div>
+        <div class="female-part" style="width:${femalePct}%">${femalePct}% ♀️</div>
+      </div>
+      <p style="margin-top:10px;">نسبة الذكور/الإناث: <span class="metric ${genderRatio >= 1 ? '' : 'good'}">${genderRatio}</span>. ${genderRatio > 1.1 ? 'هناك تفوق واضح للذكور — يستحق مراجعة سياسات التوظيف والتمكين النسوي.' : genderRatio < 0.9 ? 'هناك تفوق للإناث — فرصة لتعزيز مشاركة المرأة في البرامج التنموية.' : 'التوزيع متوازن نسبياً بين الجنسين.'}</p>
+    </div>`;
+
+  if(maxFemaleGov.gov){
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">مقارنة</span>
+          <h4>أعلى نسبة إناث: ${maxFemaleGov.gov}</h4>
+        </div>
+        <p>تسجّل محافظة <strong>${maxFemaleGov.gov}</strong> أعلى نسبة إناث (${maxFemaleGov.pct.toFixed(1)}%) بين جميع المحافظات. ${maxFemaleGov.pct > 55 ? 'هذا يشير إلى تركيز سكاني أنثوي قد يتطلب برامج خاصة بالتمكين الاقتصادي للنساء.' : ''}</p>
+      </div>`;
+  }
+
+  return html;
+}
+
+function renderSectoralInsights(arr){
+  const disabled = sum('disabled_cards', arr);
+  const elderly = sum('elderly_benef', arr);
+  const orphans = sum('orphan_homes', arr);
+  const juveniles = sum('juvenile_inmates', arr);
+  const rural = sum('rural_dev_benef', arr);
+  const violations = sum('violations', arr);
+  const permits = sum('work_permits_new', arr);
+
+  let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:24px 0 14px;display:flex;align-items:center;gap:8px;">📊 رؤى قطاعية</h3>';
+
+  // Disability penetration rate
+  const totalPop = sum('population', arr);
+  if(totalPop > 0 && disabled > 0){
+    const disabledRate = ((disabled / totalPop) * 100).toFixed(2);
+    html += `
+      <div class="insight-card ${parseFloat(disabledRate) < 1 ? 'warning' : ''}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(disabledRate) < 1 ? 'warning' : ''}">مؤشر</span>
+          <h4>معدل تغطية ذوي الإعاقة</h4>
+        </div>
+        <p>نسبة حاملي بطاقات الإعاقة من إجمالي السكان: <span class="metric">${disabledRate}%</span>. ${parseFloat(disabledRate) < 1 ? '⚠️ المعدل منخفض جداً — قد يشير إلى قصور في عملية التسجيل أو وعي مجتمعي ضعيف.' : '✅ المعدل ضمن المدى المقبول دولياً.'}</p>
+      </div>`;
+  }
+
+  // Juvenile ratio warning
+  const juvenileInst = sum('juvenile_inst_active', arr);
+  if(juveniles > 0 && juvenileInst > 0){
+    const inmatesPerInst = (juveniles / juvenileInst).toFixed(1);
+    html += `
+      <div class="insight-card ${parseFloat(inmatesPerInst) > 50 ? 'warning' : 'info'}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(inmatesPerInst) > 50 ? 'warning' : 'info'}">تنبيه</span>
+          <h4>الاكتظاظ في معاهد الأحداث</h4>
+        </div>
+        <p>متوسط النزلاء لكل معهد نشط: <span class="metric">${inmatesPerInst}</span> نزيل. ${parseFloat(inmatesPerInst) > 50 ? '⚠️ معدل اكتظاظ مرتفع — يحتاج إلى توسعة أو إنشاء معاهد جديدة.' : '✅ المعدل ضمن الحدود المقبولة.'}</p>
+      </div>`;
+  }
+
+  // Violations vs inspections ratio
+  const inspTotal = sum('insp_industrial', arr) + sum('insp_agri', arr);
+  if(inspTotal > 0 && violations > 0){
+    const violationRate = ((violations / inspTotal) * 100).toFixed(1);
+    html += `
+      <div class="insight-card ${parseFloat(violationRate) > 30 ? 'warning' : 'success'}">
+        <div class="insight-header">
+          <span class="badge ${parseFloat(violationRate) > 30 ? 'warning' : ''}">تفتيش</span>
+          <h4>معدل المخالفات مقابل الزيارات</h4>
+        </div>
+        <p>من كل 100 زيارة تفتيشية تُسجّل <span class="metric">${violationRate}</span> مخالفة. ${parseFloat(violationRate) > 30 ? '⚠️ نسبة مرتفعة — يشير إلى ضعف الالتزام بالمعايير أو حاجة لتوعية مكثفة.' : '✅ نسبة مقبولة تدل على التزام نسبي من المنشآت.'}</p>
+      </div>`;
+  }
+
+  // Rural development efficiency
+  const ruralActive = sum('rural_dev_active', arr);
+  if(rural > 0 && ruralActive > 0){
+    const benefPerCenter = Math.round(rural / ruralActive);
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">كفاءة</span>
+          <h4>كفاءة مراكز التنمية الريفية</h4>
+        </div>
+        <p>متوسط المستفيدين لكل مركز تنمية ريفية نشط: <span class="metric good">${fmt(benefPerCenter)}</span> مستفيد. ${benefPerCenter < 50 ? '⚠️ كفاءة منخفضة — يستحق مراجعة آليات التوعية والتسجيل.' : '✅ كفاءة جيدة في استيعاب المستفيدين.'}</p>
+      </div>`;
+  }
+
+  return html;
+}
+
+function renderAnomalies(arr){
+  let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:24px 0 14px;display:flex;align-items:center;gap:8px;">⚠️ حالات تستحق التحقق</h3>';
+  let anomaliesFound = false;
+
+  // Governorates with zero disabled cards but have population
+  const zeroDisabled = [];
+  ALL_GOVS.forEach(gov => {
+    const govData = arr.filter(d => d.gov === gov);
+    const pop = sum('population', govData);
+    const dis = sum('disabled_cards', govData);
+    if(pop > 1000 && dis === 0){
+      zeroDisabled.push(gov);
+    }
+  });
+
+  if(zeroDisabled.length > 0){
+    anomaliesFound = true;
+    html += `
+      <div class="insight-card warning">
+        <div class="insight-header">
+          <span class="badge warning">تنبيه</span>
+          <h4>محافظات بلا بطاقات إعاقة مسجّلة</h4>
+        </div>
+        <p>رغم وجود سكان، لم تسجّل محافظات <strong>${zeroDisabled.join('، ')}</strong> أي بطاقات إعاقة. هذا يشير إلى إمكانية:<br>
+        • عدم اكتمال البيانات<br>
+        • ضعف آليات التواصل مع ذوي الإعاقة<br>
+        • الحاجة لحملات توعية وتسجيل ميدانية</p>
+      </div>`;
+  }
+
+  // Governorates with institutions but zero inmates
+  const emptyInstitutions = [];
+  ALL_GOVS.forEach(gov => {
+    const govData = arr.filter(d => d.gov === gov);
+    const inst = sum('juvenile_inst_active', govData);
+    const inmates = sum('juvenile_inmates', govData);
+    if(inst > 0 && inmates === 0){
+      emptyInstitutions.push(gov);
+    }
+  });
+
+  if(emptyInstitutions.length > 0){
+    anomaliesFound = true;
+    html += `
+      <div class="insight-card warning">
+        <div class="insight-header">
+          <span class="badge warning">استفسار</span>
+          <h4>معاهد أحداث فارغة</h4>
+        </div>
+        <p>محافظات <strong>${emptyInstitutions.join('، ')}</strong> تملك معاهد أحداث نشطة لكنها خالية من النزلاء. احتمالات:<br>
+        • المعاهد جديدة ولم تبدأ الاستقبال بعد<br>
+        • بيانات النزلاء غير مُحدّثة<br>
+        • إعادة توجيه النزلاء إلى محافظات أخرى</p>
+      </div>`;
+  }
+
+  // Gender imbalance extremes
+  const genderExtremes = [];
+  ALL_GOVS.forEach(gov => {
+    const govData = arr.filter(d => d.gov === gov);
+    const males = sum('males', govData);
+    const females = sum('females', govData);
+    const pop = sum('population', govData);
+    if(pop > 1000){
+      const mPct = (males / pop) * 100;
+      const fPct = (females / pop) * 100;
+      if(Math.abs(mPct - fPct) > 15){
+        genderExtremes.push({gov, diff: Math.abs(mPct - fPct), dominant: mPct > fPct ? 'ذكور' : 'إناث'});
+      }
+    }
+  });
+
+  if(genderExtremes.length > 0){
+    anomaliesFound = true;
+    const topExtreme = genderExtremes.sort((a,b) => b.diff - a.diff)[0];
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">ديموغرافيا</span>
+          <h4>انحراف جنسي ملحوظ</h4>
+        </div>
+        <p>محافظة <strong>${topExtreme.gov}</strong> تسجّل انحرافاً جنسانياً بفارق <span class="metric">${topExtreme.diff.toFixed(1)}%</span> لصالح ${topExtreme.dominant}. يُنصح بدراسة أسباب هذا التوزيع (هجرة، نزوح، طبيعة سكانية).</p>
+      </div>`;
+  }
+
+  if(!anomaliesFound){
+    html += `
+      <div class="insight-card success">
+        <div class="insight-header">
+          <span class="badge">✅</span>
+          <h4>لا توجد حالات شاذة بارزة</h4>
+        </div>
+        <p>البيانات تبدو متسقة بشكل عام. لا توجد محافظات بمعطيات غير منطقية تستدعي التحقق الفوري.</p>
+      </div>`;
+  }
+
+  return html;
+}
+
+function renderPatterns(arr){
+  let html = '<h3 style="font-family:Tajawal;font-size:16px;color:var(--ink);margin:24px 0 14px;display:flex;align-items:center;gap:8px;">🔍 أنماط ومقارنات متقاطعة</h3>';
+
+  // Correlation: Population vs Services
+  const popServices = [];
+  ALL_GOVS.forEach(gov => {
+    const govData = arr.filter(d => d.gov === gov);
+    const pop = sum('population', govData);
+    const services = sum('disabled_cards', govData) + sum('elderly_benef', govData) +
+                     sum('rehab_benef', govData) + sum('rural_dev_benef', govData);
+    if(pop > 0){
+      popServices.push({gov, ratio: (services / pop) * 1000});
+    }
+  });
+
+  if(popServices.length > 0){
+    const bestService = popServices.sort((a,b) => b.ratio - a.ratio)[0];
+    const worstService = popServices.sort((a,b) => a.ratio - b.ratio)[0];
+
+    html += `
+      <div class="insight-card success">
+        <div class="insight-header">
+          <span class="badge">مقارنة</span>
+          <h4>كثافة الخدمات الاجتماعية مقابل السكان</h4>
+        </div>
+        <p>🥇 <strong>${bestService.gov}</strong>: أفضل تغطية خدماتية (${bestService.ratio.toFixed(1)} مستفيد لكل 1000 نسمة)<br>
+        ⚠️ <strong>${worstService.gov}</strong>: أقل تغطية (${worstService.ratio.toFixed(1)} مستفيد لكل 1000 نسمة)<br>
+        <span style="color:var(--ink-soft);font-size:12px;margin-top:6px;display:block;">💡 الفجوة بينهما تبلغ ${(bestService.ratio - worstService.ratio).toFixed(1)} نقطة — يستحق دراسة أسباب عدم التكافؤ.</span></p>
+      </div>`;
+  }
+
+  // NGO density
+  const ngoDensity = [];
+  ALL_GOVS.forEach(gov => {
+    const govData = arr.filter(d => d.gov === gov);
+    const pop = sum('population', govData);
+    const ngos = sum('ngo_active', govData);
+    if(pop > 0){
+      ngoDensity.push({gov, density: (ngos / pop) * 100000});
+    }
+  });
+
+  if(ngoDensity.length > 0){
+    const topNgo = ngoDensity.sort((a,b) => b.density - a.density)[0];
+    html += `
+      <div class="insight-card info">
+        <div class="insight-header">
+          <span class="badge info">منظمات</span>
+          <h4>كثافة المنظمات غير الحكومية</h4>
+        </div>
+        <p><strong>${topNgo.gov}</strong> تتصدر بأعلى كثافة منظمات: <span class="metric good">${topNgo.density.toFixed(2)}</span> منظمة لكل 100 ألف نسمة. ${topNgo.density < 1 ? '⚠️ الكثافة منخفضة عموماً — فرصة لتشجيع تأسيس منظمات مجتمعية.' : '✅ حضور مجتمع مدني نشط.'}</p>
+      </div>`;
+  }
+
+  // Seasonal pattern hint (if multiple months)
+  const months = [...new Set(arr.map(d => d.month))];
+  if(months.length > 1){
+    html += `
+      <div class="insight-card">
+        <div class="insight-header">
+          <span class="badge">توجيه</span>
+          <h4>إمكانية تحليل موسمي</h4>
+        </div>
+        <p>البيانات تغطي <strong>${months.length}</strong> شهراً (${months.join('، ')}). يمكنك استخدام فلتر الأشهر أعلاه لمقارنة الأداء بين الأشهر وتحديد المواسم الأكثر نشاطاً.</p>
+      </div>`;
+  }
+
+  return html;
 }
 
 // =====================
@@ -1275,7 +1752,7 @@ function getGovIntensity(gov, arr){
     total += (d.disabled_cards||0) + (d.elderly_benef||0) + (d.ngo_active||0) + 
              (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_industrial||0) +
              (d.new_workers_insp||0) + (d.special_students||0) + (d.rehab_benef||0) +
-             (d.population||0);
+             (d.population||0) + (d.males||0) + (d.females||0);
   });
   return total;
 }
@@ -1436,6 +1913,8 @@ function updateMapMarkers(){
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">📊 مؤشرات عامة</span>
         </div>
         <div class="info-row"><span class="info-label">👥 عدد السكان</span><span class="info-val">${fmt(d.population||0)}</span></div>
+        <div class="info-row"><span class="info-label">♂️ الذكور</span><span class="info-val">${fmt(d.males||0)}</span></div>
+        <div class="info-row"><span class="info-label">♀️ الإناث</span><span class="info-val">${fmt(d.females||0)}</span></div>
         <div class="info-row"><span class="info-label">نسبة الإنفاق الاستثماري</span><span class="info-val">${fmt(d.investment_spending||0)}%</span></div>
         <div class="info-row"><span class="info-label">عمال غير منظمين</span><span class="info-val">${fmt(d.unorganized_workers||0)}%</span></div>
         <div class="info-row"><span class="info-label">اتفاقيات الحماية الاجتماعية</span><span class="info-val">${fmt(d.social_agreements||0)}</span></div>
