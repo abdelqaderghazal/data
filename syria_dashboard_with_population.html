@@ -261,7 +261,7 @@
             border-radius: var(--radius);
         }
 
-        .stat-value { font-size: 1.5rem; font-weight: 900; color: var(--primary-red); margin-bottom: 0.25rem; }
+        .stat-value { font-size: 1.5rem; font-weight: 900; color: var(--primary-red); margin-bottom: 0.25rem; min-height: 2rem; display: flex; align-items: center; justify-content: center; }
         .stat-label { font-size: 0.75rem; color: var(--gray-600); font-weight: 600; }
 
         .map-section, .upload-section, .admin-panel, .analysis-section, .data-source-section {
@@ -704,7 +704,7 @@
                 </div>
                 <div class="data-status-item">
                     <i class="fas fa-table"></i>
-                    <span>عدد الصفوف: <strong id="rowCount">--</strong></span>
+                    <span>عدد المحافظات: <strong id="rowCount">--</strong></span>
                 </div>
                 <div class="data-status-item">
                     <i class="fas fa-link"></i>
@@ -717,7 +717,7 @@
                     <i class="fas fa-link"></i>
                     رابط Google Sheets أو CSV:
                 </label>
-                <input type="url" class="form-input" id="dataUrl" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv">
+                <input type="url" class="form-input" id="dataUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSYw2t1DGme6GL7bFv8FDnl3cYMbHYpm2LRjjvHsXyE2TB5Tbkum28ObIMc1jop-AQMJCWThzX9q3vL/pub?gid=1033203405&single=true&output=csv" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv">
             </div>
 
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -811,8 +811,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="disability_cards">--</div><div class="stat-label">بطاقات الإعاقة</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="students">--</div><div class="stat-label">الطلاب</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد الأشخاص ذوي الإعاقة الحاصلين على بطاقة الإعاقة">--</div><div class="stat-label">بطاقات الإعاقة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد الطلاب المسجلين في المعاهد الخاصة بذوي الاعاقة">--</div><div class="stat-label">الطلاب</div></div>
                 </div>
             </div>
 
@@ -825,8 +825,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="care_centers">--</div><div class="stat-label">دور الرعاية</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="beneficiaries">--</div><div class="stat-label">المستفيدون</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد دور الرعاية للمسنين">--</div><div class="stat-label">دور الرعاية</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المستفيدين من خدمات دور رعاية المسنين">--</div><div class="stat-label">المستفيدون</div></div>
                 </div>
             </div>
 
@@ -839,8 +839,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="ngos_licensed">--</div><div class="stat-label">المنظمات المشهرة</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="awareness_sessions">--</div><div class="stat-label">الندوات التوعوية</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المنظمات غير الحكومية المشهرة">--</div><div class="stat-label">المنظمات المشهرة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد الندوات الحوارية والدورات حول قضايا الصحة والسلامة المهنية">--</div><div class="stat-label">الندوات التوعوية</div></div>
                 </div>
             </div>
 
@@ -853,8 +853,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="reform_institutes">--</div><div class="stat-label">المعاهد</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="inmates">--</div><div class="stat-label">النزلاء</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد معاهد الاحداث">--</div><div class="stat-label">المعاهد</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد النزلاء من الاحداث">--</div><div class="stat-label">النزلاء</div></div>
                 </div>
             </div>
 
@@ -867,8 +867,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="rural_centers">--</div><div class="stat-label">المراكز</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="rural_beneficiaries">--</div><div class="stat-label">المستفيدون</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد مراكز التنمية الريفية ضمن الخدمة">--</div><div class="stat-label">المراكز</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المستفيدين من مراكز التنمية الريفية">--</div><div class="stat-label">المستفيدون</div></div>
                 </div>
             </div>
 
@@ -881,8 +881,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="inspections">--</div><div class="stat-label">الزيارات</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="violations">--</div><div class="stat-label">المخالفات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد الزيارات التفتيشية على المنشآت (صناعي)">--</div><div class="stat-label">الزيارات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المخالفات الناتجة عن الزيارات">--</div><div class="stat-label">المخالفات</div></div>
                 </div>
             </div>
 
@@ -895,8 +895,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="population">--</div><div class="stat-label">إجمالي السكان</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="males">--</div><div class="stat-label">الذكور</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد السكان">--</div><div class="stat-label">إجمالي السكان</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="ذكور">--</div><div class="stat-label">الذكور</div></div>
                 </div>
             </div>
 
@@ -909,8 +909,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="work_permits">--</div><div class="stat-label">التراخيص</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="domestic_workers">--</div><div class="stat-label">العمال المنزليون</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد تراخيص العمل الممنوحة للعاملين غير السوريين">--</div><div class="stat-label">التراخيص</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد تراخيص العمل للعاملات المنزليات غير السوريات">--</div><div class="stat-label">العمال المنزليون</div></div>
                 </div>
             </div>
 
@@ -923,8 +923,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="investment_spending">--</div><div class="stat-label">الإنفاق الاستثماري</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="agreements">--</div><div class="stat-label">الاتفاقيات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="نسبة الانفاق الاستثماري">--</div><div class="stat-label">الإنفاق الاستثماري</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد الاتفاقيات الموقعة بخصوص الحماية الاجتماعية">--</div><div class="stat-label">الاتفاقيات</div></div>
                 </div>
             </div>
 
@@ -937,8 +937,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="job_registered">--</div><div class="stat-label">المسجلين</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="job_opportunities">--</div><div class="stat-label">فرص العمل</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المسجلين على منصة سوق العمل(2024- 2025)">--</div><div class="stat-label">المسجلين</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد فرص العمل على المنصة">--</div><div class="stat-label">فرص العمل</div></div>
                 </div>
             </div>
 
@@ -951,8 +951,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="community_centers">--</div><div class="stat-label">المراكز المجتمعية</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="camps">--</div><div class="stat-label">المخيمات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المراكز المجتمعية / UNHCR">--</div><div class="stat-label">المراكز المجتمعية</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المخيمات">--</div><div class="stat-label">المخيمات</div></div>
                 </div>
             </div>
 
@@ -965,8 +965,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="insurance_registered">--</div><div class="stat-label">المسجلين</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="pensioners">--</div><div class="stat-label">المتقاعدين</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="اجمالي عدد المسجلين القائمين على رأس عملهم">--</div><div class="stat-label">المسجلين</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="عدد المتقاعدين المستفيدين">--</div><div class="stat-label">المتقاعدين</div></div>
                 </div>
             </div>
 
@@ -979,8 +979,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="new_legal_instruments">--</div><div class="stat-label">الصكوك الجديدة</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="under_review">--</div><div class="stat-label">قيد المراجعة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="مشاريع الصكوك القانونية الجديدة">--</div><div class="stat-label">الصكوك الجديدة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="مشاريع الصكوك القانونية قيد المراجعة والتحديث">--</div><div class="stat-label">قيد المراجعة</div></div>
                 </div>
             </div>
 
@@ -993,8 +993,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="labor_force">--</div><div class="stat-label">قوة العمل</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="unemployment_rate">--</div><div class="stat-label">معدل البطالة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="حجم قوة العمل (مليون)">--</div><div class="stat-label">قوة العمل</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="معدل البطالة العام">--</div><div class="stat-label">معدل البطالة</div></div>
                 </div>
             </div>
 
@@ -1007,8 +1007,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value" data-field="poverty_rate">--</div><div class="stat-label">معدل الفقر</div></div>
-                    <div class="stat-item"><div class="stat-value" data-field="food_security">--</div><div class="stat-label">الأمن الغذائي</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="تقديرات الفقر - الأمن الغذائي (الاسر المعدومة )">--</div><div class="stat-label">معدل الفقر</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا )">--</div><div class="stat-label">الأمن الغذائي</div></div>
                 </div>
             </div>
 
@@ -1041,19 +1041,6 @@
             </div>
         </div>
 
-        <!-- قسم ملف كل محافظة -->
-        <div class="analysis-section">
-            <h2 class="section-title">
-                <i class="fas fa-book"></i>
-                ملف كل محافظة: أهم الإنجازات والتوصيات والاحتياجات
-            </h2>
-            <p style="color: var(--gray-600); margin-bottom: 1rem;">انقر على اسم المحافظة لعرض التفاصيل النوعية</p>
-            <div class="analysis-box">
-                <i class="fas fa-info-circle"></i>
-                <p>ارفع ملف CSV لعرض البيانات</p>
-            </div>
-        </div>
-
         <!-- قسم رفع الملفات -->
         <div class="upload-section">
             <h2 class="section-title">
@@ -1064,9 +1051,9 @@
             <div class="help-box">
                 <h4><i class="fas fa-question-circle"></i> كيفية الاستخدام:</h4>
                 <ol>
-                    <li>اضغط على المنطقة أدناه لاختيار ملف من جهازك.</li>
-                    <li>أو اسحب الملف وأفلته في المنطقة.</li>
-                    <li>يمكنك أيضاً نسخ البيانات من Google Sheets أو Excel ولصقها في المربع أسفل.</li>
+                    <li>الرابط أعلاه مضبوط مسبقاً لمصدر البيانات الخاص بك.</li>
+                    <li>يمكنك أيضاً سحب وإفلات ملف CSV محلي في المنطقة أدناه.</li>
+                    <li>أو نسخ البيانات من Excel ولصقها في المربع أسفل.</li>
                 </ol>
                 <p class="note"><strong>الصيغ المدعومة:</strong> CSV (فاصلة إنجليزية/عربية)، TSV (تاب)، Excel CSV</p>
             </div>
@@ -1099,7 +1086,7 @@
                 © 2026 وزارة الشؤون الاجتماعية والعمل — الجمهورية العربية السورية
             </p>
             <p style="opacity: 0.6; font-size: 0.875rem; margin-top: 0.5rem;">
-                هذه اللوحة تفاعلية بالكامل: استخدم أزرار المحافظات والأشهر أعلاه للتصفية، أو ارفع ملف CSV مباشرة.
+                هذه اللوحة تفاعلية بالكامل: يتم جلب البيانات تلقائياً من رابط Google Sheets المدمج.
             </p>
         </div>
     </footer>
@@ -1151,6 +1138,14 @@
                 }
 
                 showNotification('تم تسجيل الدخول بنجاح', 'success');
+                
+                // جلب البيانات تلقائياً بعد تسجيل الدخول
+                var defaultUrl = document.getElementById('dataUrl').value.trim();
+                if (defaultUrl) {
+                    setTimeout(function() {
+                        fetchDataFromUrl();
+                    }, 500);
+                }
             } else {
                 errorDiv.style.display = 'block';
                 setTimeout(function() {
@@ -1191,20 +1186,15 @@
             showNotification('جاري جلب البيانات من الرابط...', 'info');
             document.getElementById('dataSource').textContent = 'جاري التحميل...';
 
-            // تحويل رابط Google Sheets إلى رابط CSV مباشر
-            if (url.includes('docs.google.com/spreadsheets')) {
-                url = convertGoogleSheetsUrl(url);
-            }
-
             fetch(url)
                 .then(function(response) {
                     if (!response.ok) {
-                        throw new Error('فشل في جلب البيانات');
+                        throw new Error('فشل في جلب البيانات (تأكد من أن الرابط عام ومشارك كـ CSV)');
                     }
                     return response.text();
                 })
                 .then(function(csvText) {
-                    processData(csvText, url);
+                    processData(csvText, 'Google Sheets');
                     showNotification('تم جلب البيانات بنجاح', 'success');
                 })
                 .catch(function(error) {
@@ -1214,23 +1204,12 @@
                 });
         }
 
-        // تحويل رابط Google Sheets إلى CSV
-        function convertGoogleSheetsUrl(url) {
-            // استخراج معرف الجدول
-            var match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-            if (match && match[1]) {
-                var sheetId = match[1];
-                // إنشاء رابط CSV مباشر
-                return 'https://docs.google.com/spreadsheets/d/' + sheetId + '/export?format=csv';
-            }
-            return url;
-        }
-
         // معالجة البيانات
         function processData(csvText, source) {
             try {
                 var lines = csvText.split('\n');
-                var headers = parseCSVLine(lines[0]);
+                // تنظيف العناوين من المسافات الزائدة
+                var headers = parseCSVLine(lines[0]).map(function(h) { return h.trim(); });
                 var data = [];
 
                 for (var i = 1; i < lines.length; i++) {
@@ -1238,7 +1217,7 @@
                         var values = parseCSVLine(lines[i]);
                         var row = {};
                         for (var j = 0; j < headers.length; j++) {
-                            row[headers[j]] = values[j] || '';
+                            row[headers[j]] = (values[j] || '').trim();
                         }
                         data.push(row);
                     }
@@ -1258,7 +1237,7 @@
             }
         }
 
-        // تحليل سطر CSV
+        // تحليل سطر CSV (يدعم الفاصلة العربية والإنجليزية والتاب)
         function parseCSVLine(line) {
             var result = [];
             var current = '';
@@ -1270,13 +1249,13 @@
                 if (char === '"') {
                     inQuotes = !inQuotes;
                 } else if ((char === ',' || char === '\t' || char === '،') && !inQuotes) {
-                    result.push(current.trim());
+                    result.push(current);
                     current = '';
                 } else {
                     current += char;
                 }
             }
-            result.push(current.trim());
+            result.push(current);
             
             return result;
         }
@@ -1284,50 +1263,43 @@
         // تحديث عرض البيانات
         function updateDataDisplay(data, source) {
             console.log('تم استيراد', data.length, 'صف من البيانات');
-            console.log('الأعمدة:', Object.keys(data[0] || {}));
+            console.log('الأعمدة المكتشفة:', Object.keys(data[0] || {}));
         }
 
         // تحديث البطاقات بالبيانات
         function updateCards(data) {
             if (!data || data.length === 0) return;
 
-            // حساب الإجماليات
+            // حساب الإجماليات للأرقام فقط
             var totals = {};
             data.forEach(function(row) {
                 Object.keys(row).forEach(function(key) {
-                    var value = parseFloat(row[key]);
+                    // إزالة أي فواصل أو مساحات وتحويل إلى رقم
+                    var cleanValue = row[key].replace(/[^\d.-]/g, '');
+                    var value = parseFloat(cleanValue);
                     if (!isNaN(value)) {
                         totals[key] = (totals[key] || 0) + value;
                     }
                 });
             });
 
-            // تحديث القيم في البطاقات
+            // تحديث القيم في البطاقات بناءً على اسم العمود الدقيق
             document.querySelectorAll('.stat-value[data-field]').forEach(function(element) {
-                var field = element.getAttribute('data-field');
+                var field = element.getAttribute('data-field').trim();
                 if (totals[field] !== undefined) {
                     element.textContent = totals[field].toLocaleString('ar-SA');
+                } else {
+                    element.textContent = '0';
                 }
             });
         }
 
         // تحميل بيانات تجريبية
         function loadDemoData() {
-            var demoCSV = `المحافظة,بطاقات_الإعاقة,الطلاب,دور_الرعاية,المستفيدون,المنظمات_المشهرة,الندوات_التوعوية,المعاهد,النزلاء,المراكز_الريفية,المستفيدون_الريفيون,الزيارات,المخالفات
-دمشق,1500,320,12,450,25,18,3,120,8,1200,45,12
-ريف دمشق,2200,480,18,680,32,24,4,180,12,1800,62,18
-حلب,3500,720,25,950,45,35,5,250,15,2400,85,25
-حمص,2800,580,20,780,38,28,4,200,10,2000,72,20
-حماه,2100,440,15,580,28,22,3,150,9,1600,55,15
-اللاذقية,1800,380,14,520,22,16,3,130,7,1400,48,13
-طرطوس,1600,340,12,460,20,15,2,110,6,1200,42,11
-السويداء,1200,260,10,350,15,12,2,90,5,900,35,9
-درعا,1900,400,16,540,26,20,3,140,8,1500,52,14
-القنيطرة,800,170,8,230,12,10,2,70,4,600,28,7
-ادلب,2600,540,22,720,35,26,4,190,11,1900,68,19
-الرقة,1400,300,11,400,18,14,3,100,6,1100,38,10
-دير الزور,1700,360,13,480,21,16,3,120,7,1300,45,12
-الحسكة,2000,420,17,560,27,21,3,160,9,1700,58,16`;
+            var demoCSV = `المحافظة,عدد الأشخاص ذوي الإعاقة الحاصلين على بطاقة الإعاقة,عدد الطلاب المسجلين في المعاهد الخاصة بذوي الاعاقة,عدد دور الرعاية للمسنين,عدد المستفيدين من خدمات دور رعاية المسنين,عدد المنظمات غير الحكومية المشهرة,عدد الندوات الحوارية والدورات حول قضايا الصحة والسلامة المهنية,عدد معاهد الاحداث,عدد النزلاء من الاحداث,عدد مراكز التنمية الريفية ضمن الخدمة,عدد المستفيدين من مراكز التنمية الريفية,عدد الزيارات التفتيشية على المنشآت (صناعي),عدد المخالفات الناتجة عن الزيارات,عدد السكان,ذكور,عدد تراخيص العمل الممنوحة للعاملين غير السوريين,عدد تراخيص العمل للعاملات المنزليات غير السوريات,نسبة الانفاق الاستثماري,عدد الاتفاقيات الموقعة بخصوص الحماية الاجتماعية,عدد المسجلين على منصة سوق العمل(2024- 2025),عدد فرص العمل على المنصة,عدد المراكز المجتمعية / UNHCR,عدد المخيمات,اجمالي عدد المسجلين القائمين على رأس عملهم,عدد المتقاعدين المستفيدين,مشاريع الصكوك القانونية الجديدة,مشاريع الصكوك القانونية قيد المراجعة والتحديث,حجم قوة العمل (مليون),معدل البطالة العام,تقديرات الفقر - الأمن الغذائي (الاسر المعدومة ),تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا )
+دمشق,49,648,3,228,1286,1,1,7,0,0,6,8,2002108,1006747,14,120,29.1,1,260,97,2,0,201321,100798,0,0,46212,21,17,47
+حلب,256,0,7,292,5,0,2,23,3,0,18,6,4919107,2426590,2,17,30.8,8,94,11,16,18,65098,55498,0,0,46239,15.01,8,46
+حمص,135,83,2,161,4,1,1,0,3,0,20,4,1650096,786298,0,0,32.1,1,25,6,10,4,135983,0,0,0,46209,19.88,11,50`;
 
             processData(demoCSV, 'بيانات تجريبية');
             showNotification('تم تحميل البيانات التجريبية', 'success');
