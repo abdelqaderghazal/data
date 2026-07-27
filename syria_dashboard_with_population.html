@@ -138,7 +138,7 @@
             display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;
         }
 
-        .filter-group select {
+        .filter-group select, .filter-group input {
             flex: 1;
             padding: 0.75rem 1rem;
             border: 2px solid var(--gray-200);
@@ -150,8 +150,8 @@
             transition: all 0.3s ease;
         }
 
-        .filter-group select:hover { border-color: var(--primary-red); }
-        .filter-group select:focus {
+        .filter-group select:hover, .filter-group input:hover { border-color: var(--primary-red); }
+        .filter-group select:focus, .filter-group input:focus {
             outline: none;
             border-color: var(--primary-red);
             box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.1);
@@ -186,6 +186,12 @@
             color: var(--primary-white);
         }
         .btn-success:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info) 0%, #2563eb 100%);
+            color: var(--primary-white);
+        }
+        .btn-info:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
         .cards-grid {
             display: grid;
@@ -258,7 +264,7 @@
         .stat-value { font-size: 1.5rem; font-weight: 900; color: var(--primary-red); margin-bottom: 0.25rem; }
         .stat-label { font-size: 0.75rem; color: var(--gray-600); font-weight: 600; }
 
-        .map-section, .upload-section, .admin-panel, .analysis-section {
+        .map-section, .upload-section, .admin-panel, .analysis-section, .data-source-section {
             background: var(--primary-white);
             border-radius: var(--radius-lg);
             padding: 2rem;
@@ -515,6 +521,43 @@
         .help-box h4 { color: var(--gray-700); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
         .help-box ol { color: var(--gray-600); padding-right: 1.5rem; line-height: 2; }
         .help-box .note { color: var(--gray-500); font-size: 0.875rem; margin-top: 1rem; }
+
+        .data-status {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .data-status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .data-status-item strong {
+            color: var(--gray-800);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -647,6 +690,48 @@
 
     <!-- المحتوى الرئيسي -->
     <div class="container">
+        <!-- قسم مصدر البيانات -->
+        <div class="data-source-section">
+            <h2 class="section-title">
+                <i class="fas fa-database"></i>
+                مصدر البيانات
+            </h2>
+            
+            <div class="data-status" id="dataStatus">
+                <div class="data-status-item">
+                    <i class="fas fa-clock"></i>
+                    <span>آخر تحديث: <strong id="lastUpdate">--</strong></span>
+                </div>
+                <div class="data-status-item">
+                    <i class="fas fa-table"></i>
+                    <span>عدد الصفوف: <strong id="rowCount">--</strong></span>
+                </div>
+                <div class="data-status-item">
+                    <i class="fas fa-link"></i>
+                    <span>المصدر: <strong id="dataSource">غير محدد</strong></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-link"></i>
+                    رابط Google Sheets أو CSV:
+                </label>
+                <input type="url" class="form-input" id="dataUrl" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv">
+            </div>
+
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-info" id="fetchBtn">
+                    <i class="fas fa-sync-alt"></i>
+                    تحديث من الرابط
+                </button>
+                <button type="button" class="btn btn-secondary" id="demoBtn">
+                    <i class="fas fa-flask"></i>
+                    بيانات تجريبية
+                </button>
+            </div>
+        </div>
+
         <!-- شريط الأدوات -->
         <div class="toolbar">
             <div class="filter-group">
@@ -716,7 +801,7 @@
         </div>
 
         <!-- شبكة البطاقات -->
-        <div class="cards-grid">
+        <div class="cards-grid" id="cardsGrid">
             <div class="card">
                 <div class="card-header">
                     <div class="card-icon red"><i class="fas fa-wheelchair"></i></div>
@@ -726,8 +811,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">بطاقات الإعاقة</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الطلاب</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="disability_cards">--</div><div class="stat-label">بطاقات الإعاقة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="students">--</div><div class="stat-label">الطلاب</div></div>
                 </div>
             </div>
 
@@ -740,8 +825,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">دور الرعاية</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المستفيدون</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="care_centers">--</div><div class="stat-label">دور الرعاية</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="beneficiaries">--</div><div class="stat-label">المستفيدون</div></div>
                 </div>
             </div>
 
@@ -754,8 +839,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المنظمات المشهرة</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الندوات التوعوية</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="ngos_licensed">--</div><div class="stat-label">المنظمات المشهرة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="awareness_sessions">--</div><div class="stat-label">الندوات التوعوية</div></div>
                 </div>
             </div>
 
@@ -768,8 +853,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المعاهد</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">النزلاء</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="reform_institutes">--</div><div class="stat-label">المعاهد</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="inmates">--</div><div class="stat-label">النزلاء</div></div>
                 </div>
             </div>
 
@@ -782,8 +867,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المراكز</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المستفيدون</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="rural_centers">--</div><div class="stat-label">المراكز</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="rural_beneficiaries">--</div><div class="stat-label">المستفيدون</div></div>
                 </div>
             </div>
 
@@ -796,8 +881,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الزيارات</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المخالفات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="inspections">--</div><div class="stat-label">الزيارات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="violations">--</div><div class="stat-label">المخالفات</div></div>
                 </div>
             </div>
 
@@ -810,8 +895,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">إجمالي السكان</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الذكور</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="population">--</div><div class="stat-label">إجمالي السكان</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="males">--</div><div class="stat-label">الذكور</div></div>
                 </div>
             </div>
 
@@ -824,8 +909,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">التراخيص</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">العمال المنزليون</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="work_permits">--</div><div class="stat-label">التراخيص</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="domestic_workers">--</div><div class="stat-label">العمال المنزليون</div></div>
                 </div>
             </div>
 
@@ -838,8 +923,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الإنفاق الاستثماري</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الاتفاقيات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="investment_spending">--</div><div class="stat-label">الإنفاق الاستثماري</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="agreements">--</div><div class="stat-label">الاتفاقيات</div></div>
                 </div>
             </div>
 
@@ -852,8 +937,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المسجلين</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">فرص العمل</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="job_registered">--</div><div class="stat-label">المسجلين</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="job_opportunities">--</div><div class="stat-label">فرص العمل</div></div>
                 </div>
             </div>
 
@@ -866,8 +951,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المراكز المجتمعية</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المخيمات</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="community_centers">--</div><div class="stat-label">المراكز المجتمعية</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="camps">--</div><div class="stat-label">المخيمات</div></div>
                 </div>
             </div>
 
@@ -880,8 +965,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المسجلين</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">المتقاعدين</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="insurance_registered">--</div><div class="stat-label">المسجلين</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="pensioners">--</div><div class="stat-label">المتقاعدين</div></div>
                 </div>
             </div>
 
@@ -894,8 +979,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الصكوك الجديدة</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">قيد المراجعة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="new_legal_instruments">--</div><div class="stat-label">الصكوك الجديدة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="under_review">--</div><div class="stat-label">قيد المراجعة</div></div>
                 </div>
             </div>
 
@@ -908,8 +993,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">قوة العمل</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">معدل البطالة</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="labor_force">--</div><div class="stat-label">قوة العمل</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="unemployment_rate">--</div><div class="stat-label">معدل البطالة</div></div>
                 </div>
             </div>
 
@@ -922,8 +1007,8 @@
                     </div>
                 </div>
                 <div class="card-stats">
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">معدل الفقر</div></div>
-                    <div class="stat-item"><div class="stat-value">--</div><div class="stat-label">الأمن الغذائي</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="poverty_rate">--</div><div class="stat-label">معدل الفقر</div></div>
+                    <div class="stat-item"><div class="stat-value" data-field="food_security">--</div><div class="stat-label">الأمن الغذائي</div></div>
                 </div>
             </div>
 
@@ -1023,6 +1108,7 @@
         // متغيرات عامة
         let currentUserType = 'admin';
         let isLoggedIn = false;
+        let importedData = null;
 
         // كلمات المرور الافتراضية
         const passwords = {
@@ -1093,19 +1179,183 @@
             }
         }
 
+        // جلب البيانات من الرابط
+        function fetchDataFromUrl() {
+            var url = document.getElementById('dataUrl').value.trim();
+            
+            if (!url) {
+                showNotification('الرجاء إدخال رابط البيانات', 'warning');
+                return;
+            }
+
+            showNotification('جاري جلب البيانات من الرابط...', 'info');
+            document.getElementById('dataSource').textContent = 'جاري التحميل...';
+
+            // تحويل رابط Google Sheets إلى رابط CSV مباشر
+            if (url.includes('docs.google.com/spreadsheets')) {
+                url = convertGoogleSheetsUrl(url);
+            }
+
+            fetch(url)
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('فشل في جلب البيانات');
+                    }
+                    return response.text();
+                })
+                .then(function(csvText) {
+                    processData(csvText, url);
+                    showNotification('تم جلب البيانات بنجاح', 'success');
+                })
+                .catch(function(error) {
+                    console.error('خطأ:', error);
+                    showNotification('فشل في جلب البيانات: ' + error.message, 'error');
+                    document.getElementById('dataSource').textContent = 'فشل التحميل';
+                });
+        }
+
+        // تحويل رابط Google Sheets إلى CSV
+        function convertGoogleSheetsUrl(url) {
+            // استخراج معرف الجدول
+            var match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (match && match[1]) {
+                var sheetId = match[1];
+                // إنشاء رابط CSV مباشر
+                return 'https://docs.google.com/spreadsheets/d/' + sheetId + '/export?format=csv';
+            }
+            return url;
+        }
+
+        // معالجة البيانات
+        function processData(csvText, source) {
+            try {
+                var lines = csvText.split('\n');
+                var headers = parseCSVLine(lines[0]);
+                var data = [];
+
+                for (var i = 1; i < lines.length; i++) {
+                    if (lines[i].trim()) {
+                        var values = parseCSVLine(lines[i]);
+                        var row = {};
+                        for (var j = 0; j < headers.length; j++) {
+                            row[headers[j]] = values[j] || '';
+                        }
+                        data.push(row);
+                    }
+                }
+
+                importedData = data;
+                updateDataDisplay(data, source);
+                updateCards(data);
+
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString('ar-SA');
+                document.getElementById('rowCount').textContent = data.length;
+                document.getElementById('dataSource').textContent = source || 'ملف محلي';
+
+            } catch (error) {
+                console.error('خطأ في معالجة البيانات:', error);
+                showNotification('فشل في معالجة البيانات', 'error');
+            }
+        }
+
+        // تحليل سطر CSV
+        function parseCSVLine(line) {
+            var result = [];
+            var current = '';
+            var inQuotes = false;
+            
+            for (var i = 0; i < line.length; i++) {
+                var char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if ((char === ',' || char === '\t' || char === '،') && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            
+            return result;
+        }
+
+        // تحديث عرض البيانات
+        function updateDataDisplay(data, source) {
+            console.log('تم استيراد', data.length, 'صف من البيانات');
+            console.log('الأعمدة:', Object.keys(data[0] || {}));
+        }
+
+        // تحديث البطاقات بالبيانات
+        function updateCards(data) {
+            if (!data || data.length === 0) return;
+
+            // حساب الإجماليات
+            var totals = {};
+            data.forEach(function(row) {
+                Object.keys(row).forEach(function(key) {
+                    var value = parseFloat(row[key]);
+                    if (!isNaN(value)) {
+                        totals[key] = (totals[key] || 0) + value;
+                    }
+                });
+            });
+
+            // تحديث القيم في البطاقات
+            document.querySelectorAll('.stat-value[data-field]').forEach(function(element) {
+                var field = element.getAttribute('data-field');
+                if (totals[field] !== undefined) {
+                    element.textContent = totals[field].toLocaleString('ar-SA');
+                }
+            });
+        }
+
+        // تحميل بيانات تجريبية
+        function loadDemoData() {
+            var demoCSV = `المحافظة,بطاقات_الإعاقة,الطلاب,دور_الرعاية,المستفيدون,المنظمات_المشهرة,الندوات_التوعوية,المعاهد,النزلاء,المراكز_الريفية,المستفيدون_الريفيون,الزيارات,المخالفات
+دمشق,1500,320,12,450,25,18,3,120,8,1200,45,12
+ريف دمشق,2200,480,18,680,32,24,4,180,12,1800,62,18
+حلب,3500,720,25,950,45,35,5,250,15,2400,85,25
+حمص,2800,580,20,780,38,28,4,200,10,2000,72,20
+حماه,2100,440,15,580,28,22,3,150,9,1600,55,15
+اللاذقية,1800,380,14,520,22,16,3,130,7,1400,48,13
+طرطوس,1600,340,12,460,20,15,2,110,6,1200,42,11
+السويداء,1200,260,10,350,15,12,2,90,5,900,35,9
+درعا,1900,400,16,540,26,20,3,140,8,1500,52,14
+القنيطرة,800,170,8,230,12,10,2,70,4,600,28,7
+ادلب,2600,540,22,720,35,26,4,190,11,1900,68,19
+الرقة,1400,300,11,400,18,14,3,100,6,1100,38,10
+دير الزور,1700,360,13,480,21,16,3,120,7,1300,45,12
+الحسكة,2000,420,17,560,27,21,3,160,9,1700,58,16`;
+
+            processData(demoCSV, 'بيانات تجريبية');
+            showNotification('تم تحميل البيانات التجريبية', 'success');
+        }
+
         // تحديث البيانات
         function refreshData() {
-            showNotification('جاري تحديث البيانات...', 'info');
-            setTimeout(function() {
-                showNotification('تم تحديث البيانات بنجاح', 'success');
-            }, 1500);
+            if (importedData) {
+                showNotification('جاري تحديث البيانات...', 'info');
+                setTimeout(function() {
+                    showNotification('تم تحديث البيانات بنجاح', 'success');
+                }, 1500);
+            } else {
+                showNotification('لا توجد بيانات. الرجاء رفع ملف أو تحميل من الرابط', 'warning');
+            }
         }
 
         // معالجة رفع الملفات
         function handleFileUpload(event) {
             var file = event.target.files[0];
             if (file) {
-                showNotification('تم رفع الملف: ' + file.name, 'success');
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var content = e.target.result;
+                    processData(content, file.name);
+                    showNotification('تم رفع الملف: ' + file.name, 'success');
+                };
+                reader.readAsText(file, 'UTF-8');
             }
         }
 
@@ -1113,10 +1363,8 @@
         function analyzePastedData() {
             var data = document.getElementById('pasteArea').value;
             if (data.trim()) {
-                showNotification('جاري تحليل البيانات...', 'info');
-                setTimeout(function() {
-                    showNotification('تم تحليل البيانات بنجاح', 'success');
-                }, 1500);
+                processData(data, 'لصق مباشر');
+                showNotification('تم تحليل البيانات بنجاح', 'success');
             } else {
                 showNotification('الرجاء لصق البيانات أولاً', 'warning');
             }
@@ -1173,6 +1421,24 @@
                 });
             }
 
+            // زر جلب البيانات من الرابط
+            var fetchBtn = document.getElementById('fetchBtn');
+            if (fetchBtn) {
+                fetchBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fetchDataFromUrl();
+                });
+            }
+
+            // زر البيانات التجريبية
+            var demoBtn = document.getElementById('demoBtn');
+            if (demoBtn) {
+                demoBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    loadDemoData();
+                });
+            }
+
             // زر تحليل البيانات
             var analyzeBtn = document.getElementById('analyzeBtn');
             if (analyzeBtn) {
@@ -1207,7 +1473,13 @@
                     uploadArea.classList.remove('dragover');
                     var file = e.dataTransfer.files[0];
                     if (file) {
-                        showNotification('تم رفع الملف: ' + file.name, 'success');
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var content = e.target.result;
+                            processData(content, file.name);
+                            showNotification('تم رفع الملف: ' + file.name, 'success');
+                        };
+                        reader.readAsText(file, 'UTF-8');
                     }
                 });
             }
@@ -1221,7 +1493,6 @@
                         login();
                     }
                 });
-                // التركيز التلقائي على حقل كلمة المرور
                 passwordInput.focus();
             }
 
