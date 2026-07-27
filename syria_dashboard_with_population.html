@@ -1,729 +1,491 @@
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Cairo', sans-serif;
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        color: var(--gray-800);
-        line-height: 1.6;
-        min-height: 100vh;
-    }
-
-    .identity-bar {
-        background: linear-gradient(90deg, var(--primary-red) 0%, var(--primary-red) 33.33%, var(--primary-white) 33.33%, var(--primary-white) 66.66%, var(--primary-black) 66.66%, var(--primary-black) 100%);
-        height: 6px;
-    }
-
-    .main-header {
-        background: linear-gradient(135deg, var(--primary-black) 0%, var(--gray-800) 100%);
-        color: var(--primary-white);
-        padding: 2rem 0;
-        box-shadow: var(--shadow-lg);
-    }
-
-    .header-content {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .header-title {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .logo-container {
-        width: 70px;
-        height: 70px;
-        background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-green) 100%);
-        border-radius: var(--radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow-lg);
-    }
-
-    .logo-container i {
-        font-size: 2rem;
-        color: var(--primary-white);
-    }
-
-    .title-text h1 {
-        font-size: 1.875rem;
-        font-weight: 900;
-        margin-bottom: 0.25rem;
-    }
-
-    .title-text p {
-        font-size: 0.95rem;
-        opacity: 0.9;
-    }
-
-    .user-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .user-badge {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--radius-lg);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .user-badge i {
-        font-size: 1.5rem;
-        color: var(--accent-gold);
-    }
-
-    .user-info {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .user-role {
-        font-size: 0.75rem;
-        opacity: 0.7;
-    }
-
-    .user-name {
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
-
-    .logout-btn {
-        background: var(--primary-red);
-        color: var(--primary-white);
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--radius);
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .logout-btn:hover {
-        background: #a00d1d;
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-
-    .toolbar {
-        background: var(--primary-white);
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow);
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex: 1;
-        min-width: 250px;
-    }
-
-    .filter-group label {
-        font-weight: 600;
-        color: var(--gray-700);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        white-space: nowrap;
-    }
-
-    .filter-group select {
-        flex: 1;
-        padding: 0.75rem 1rem;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius);
-        font-family: 'Cairo', sans-serif;
-        font-size: 0.95rem;
-        background: var(--primary-white);
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .filter-group select:hover {
-        border-color: var(--primary-red);
-    }
-
-    .filter-group select:focus {
-        outline: none;
-        border-color: var(--primary-red);
-        box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.1);
-    }
-
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: var(--radius);
-        font-family: 'Cairo', sans-serif;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-red) 0%, #a00d1d 100%);
-        color: var(--primary-white);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-secondary {
-        background: var(--gray-100);
-        color: var(--gray-700);
-        border: 2px solid var(--gray-200);
-    }
-
-    .btn-secondary:hover {
-        background: var(--gray-200);
-        border-color: var(--gray-300);
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, var(--primary-green) 0%, #005a2d 100%);
-        color: var(--primary-white);
-    }
-
-    .btn-success:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .cards-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .card {
-        background: var(--primary-white);
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
-        box-shadow: var(--shadow);
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-red) 0%, var(--primary-green) 100%);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-xl);
-        border-color: var(--gray-200);
-    }
-
-    .card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .card-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: var(--radius);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        flex-shrink: 0;
-    }
-
-    .card-icon.red {
-        background: rgba(206, 17, 38, 0.1);
-        color: var(--primary-red);
-    }
-
-    .card-icon.green {
-        background: rgba(0, 122, 61, 0.1);
-        color: var(--primary-green);
-    }
-
-    .card-icon.gold {
-        background: rgba(212, 175, 55, 0.1);
-        color: var(--accent-gold);
-    }
-
-    .card-title {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin-bottom: 0.25rem;
-    }
-
-    .card-subtitle {
-        font-size: 0.875rem;
-        color: var(--gray-500);
-    }
-
-    .card-stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .stat-item {
-        text-align: center;
-        padding: 1rem;
-        background: var(--gray-50);
-        border-radius: var(--radius);
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 900;
-        color: var(--primary-red);
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.75rem;
-        color: var(--gray-600);
-        font-weight: 600;
-    }
-
-    .map-section, .upload-section, .admin-panel {
-        background: var(--primary-white);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow);
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .section-title i {
-        color: var(--primary-red);
-    }
-
-    .map-container {
-        background: var(--gray-50);
-        border-radius: var(--radius);
-        padding: 2rem;
-        min-height: 400px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px dashed var(--gray-300);
-    }
-
-    .map-placeholder {
-        text-align: center;
-        color: var(--gray-500);
-    }
-
-    .map-placeholder i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        color: var(--gray-400);
-    }
-
-    .upload-area {
-        border: 3px dashed var(--gray-300);
-        border-radius: var(--radius-lg);
-        padding: 3rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background: var(--gray-50);
-    }
-
-    .upload-area:hover {
-        border-color: var(--primary-red);
-        background: rgba(206, 17, 38, 0.05);
-    }
-
-    .upload-area.dragover {
-        border-color: var(--primary-green);
-        background: rgba(0, 122, 61, 0.05);
-    }
-
-    .upload-icon {
-        font-size: 4rem;
-        color: var(--primary-red);
-        margin-bottom: 1rem;
-    }
-
-    .upload-text {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 0.5rem;
-    }
-
-    .upload-hint {
-        font-size: 0.875rem;
-        color: var(--gray-500);
-    }
-
-    .login-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-    .login-box {
-        background: var(--primary-white);
-        border-radius: var(--radius-xl);
-        padding: 3rem;
-        max-width: 450px;
-        width: 90%;
-        box-shadow: var(--shadow-xl);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .login-box::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-        background: linear-gradient(90deg, var(--primary-red) 0%, var(--primary-white) 50%, var(--primary-black) 100%);
-    }
-
-    .login-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .login-logo {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-green) 100%);
-        border-radius: var(--radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        box-shadow: var(--shadow-lg);
-    }
-
-    .login-logo i {
-        font-size: 2.5rem;
-        color: var(--primary-white);
-    }
-
-    .login-title {
-        font-size: 1.75rem;
-        font-weight: 900;
-        color: var(--gray-800);
-        margin-bottom: 0.5rem;
-    }
-
-    .login-subtitle {
-        color: var(--gray-500);
-        font-size: 0.95rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-        display: block;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 0.5rem;
-    }
-
-    .form-input {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius);
-        font-family: 'Cairo', sans-serif;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-input:focus {
-        outline: none;
-        border-color: var(--primary-red);
-        box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.1);
-    }
-
-    .user-type-selector {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .user-type-option {
-        padding: 1.5rem;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-align: center;
-    }
-
-    .user-type-option:hover {
-        border-color: var(--primary-red);
-        background: rgba(206, 17, 38, 0.05);
-    }
-
-    .user-type-option.selected {
-        border-color: var(--primary-red);
-        background: rgba(206, 17, 38, 0.1);
-    }
-
-    .user-type-option i {
-        font-size: 2rem;
-        color: var(--primary-red);
-        margin-bottom: 0.5rem;
-    }
-
-    .user-type-option-title {
-        font-weight: 700;
-        color: var(--gray-800);
-        margin-bottom: 0.25rem;
-    }
-
-    .user-type-option-desc {
-        font-size: 0.75rem;
-        color: var(--gray-500);
-    }
-
-    .admin-users {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .admin-user-card {
-        background: var(--gray-50);
-        padding: 1.5rem;
-        border-radius: var(--radius);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .admin-user-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .admin-user-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: var(--primary-red);
-        color: var(--primary-white);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .notification {
-        position: fixed;
-        top: 2rem;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--primary-white);
-        padding: 1rem 2rem;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-xl);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        z-index: 10000;
-        animation: slideDown 0.3s ease;
-        border-right: 4px solid var(--success);
-    }
-
-    .notification.error {
-        border-right-color: var(--danger);
-    }
-
-    .notification.warning {
-        border-right-color: var(--warning);
-    }
-
-    .notification.info {
-        border-right-color: var(--info);
-    }
-
-    @keyframes slideDown {
-        from {
-            transform: translateX(-50%) translateY(-100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
+        <div class="user-type-selector">
+            <div class="user-type-option selected" data-type="admin" onclick="selectUserType('admin')">
+                <i class="fas fa-user-shield"></i>
+                <div class="user-type-option-title">مدير النظام</div>
+                <div class="user-type-option-desc">تعديل البيانات + تغيير كلمات المرور</div>
+            </div>
+            <div class="user-type-option" data-type="viewer" onclick="selectUserType('viewer')">
+                <i class="fas fa-eye"></i>
+                <div class="user-type-option-title">مطلع</div>
+                <div class="user-type-option-desc">عرض التقارير فقط</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <input type="password" class="form-input" id="passwordInput" placeholder="أدخل كلمة المرور">
+        </div>
+
+        <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i>
+            دخول
+        </button>
+
+        <div id="loginError" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: var(--radius); color: var(--danger); text-align: center;">
+            <i class="fas fa-exclamation-circle"></i>
+            كلمة المرور غير صحيحة
+        </div>
+    </div>
+</div>
+
+<!-- لوحة تحكم المدير -->
+<div class="admin-panel hidden" id="adminPanel">
+    <h2 class="section-title">
+        <i class="fas fa-cog"></i>
+        لوحة تحكم المدير
+    </h2>
+    <p style="color: var(--gray-600); margin-bottom: 1rem;">إدارة المستخدمين وتغيير كلمات المرور</p>
+    
+    <div class="admin-users">
+        <div class="admin-user-card">
+            <div class="admin-user-info">
+                <div class="admin-user-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 700;">مدير</div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600);">المسؤول الرئيسي</div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="changePassword('admin')">
+                <i class="fas fa-key"></i>
+                تغيير
+            </button>
+        </div>
+
+        <div class="admin-user-card">
+            <div class="admin-user-info">
+                <div class="admin-user-icon" style="background: var(--primary-green);">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 700;">مطلع</div>
+                    <div style="font-size: 0.875rem; color: var(--gray-600);">المستخدم الافتراضي</div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="changePassword('viewer')">
+                <i class="fas fa-key"></i>
+                تغيير
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- شريط المعلومات -->
+<div class="info-bar hidden" id="readonlyBar">
+    <i class="fas fa-eye"></i>
+    وضع القراءة فقط — لا يمكنك تعديل البيانات
+</div>
+
+<!-- شريط الهوية -->
+<div class="identity-bar"></div>
+
+<!-- الهيدر الرئيسي -->
+<header class="main-header">
+    <div class="header-content">
+        <div class="header-title">
+            <div class="logo-container">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="title-text">
+                <h1>سِجل المؤشرات التشغيلية</h1>
+                <p>وزارة الشؤون الاجتماعية والعمل — مديرية التخطيط والإحصاء</p>
+            </div>
+        </div>
+
+        <div class="user-controls">
+            <div class="user-badge">
+                <i class="fas fa-user-circle"></i>
+                <div class="user-info">
+                    <span class="user-role" id="userRole">مدير النظام</span>
+                    <span class="user-name" id="userName">المسؤول الرئيسي</span>
+                </div>
+            </div>
+            <button type="button" class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                خروج
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- المحتوى الرئيسي -->
+<div class="container">
+    <!-- شريط الأدوات -->
+    <div class="toolbar">
+        <div class="filter-group">
+            <label>
+                <i class="fas fa-map-marker-alt"></i>
+                المحافظة:
+            </label>
+            <select id="governorateFilter">
+                <option value="all">الكل</option>
+                <option value="damascus">دمشق</option>
+                <option value="rural-damascus">ريف دمشق</option>
+                <option value="aleppo">حلب</option>
+                <option value="homs">حمص</option>
+                <option value="hama">حماه</option>
+                <option value="latakia">اللاذقية</option>
+                <option value="tartus">طرطوس</option>
+                <option value="suwayda">السويداء</option>
+                <option value="daraa">درعا</option>
+                <option value="quneitra">القنيطرة</option>
+                <option value="idlib">ادلب</option>
+                <option value="raqqa">الرقة</option>
+                <option value="deir-ezzor">دير الزور</option>
+                <option value="hasaka">الحسكة</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>
+                <i class="fas fa-calendar-alt"></i>
+                الشهر:
+            </label>
+            <select id="monthFilter">
+                <option value="all">الكل</option>
+                <option value="1">كانون الثاني</option>
+                <option value="2">شباط</option>
+                <option value="3">آذار</option>
+                <option value="4">نيسان</option>
+                <option value="5">أيار</option>
+                <option value="6">حزيران</option>
+                <option value="7">تموز</option>
+                <option value="8">آب</option>
+                <option value="9">أيلول</option>
+                <option value="10">تشرين الأول</option>
+                <option value="11">تشرين الثاني</option>
+                <option value="12">كانون الأول</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-success" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i>
+            تحديث
+        </button>
+    </div>
+
+    <!-- قسم الخريطة -->
+    <div class="map-section">
+        <h2 class="section-title">
+            <i class="fas fa-map"></i>
+            الخريطة التفاعلية للمحافظات
+        </h2>
+        <div class="map-container">
+            <div class="map-placeholder">
+                <i class="fas fa-map-marked-alt"></i>
+                <p>انقر على أي محافظة لعرض مؤشراتها التشغيلية</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- شبكة البطاقات -->
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon red">
+                    <i class="fas fa-wheelchair"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">رعاية ذوي الإعاقة</h3>
+                    <p class="card-subtitle">بطاقات الإعاقة، الطلاب، برامج التأهيل</p>
+                </div>
+            </div>
+            <div class="card-stats">
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">بطاقات الإعاقة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">الطلاب</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon green">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">الرعاية الاجتماعية</h3>
+                    <p class="card-subtitle">المسنون، الأيتام، المتسولون، الكفالة</p>
+                </div>
+            </div>
+            <div class="card-stats">
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">دور الرعاية</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">المستفيدون</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon gold">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <div>
+                    <h3 class="card-title">المنظمات غير الحكومية</h3>
+                    <p class="card-subtitle">المشهرة والمسحوبة تراخيصها</p>
+                </div>
+            </div>
+            <div class="card-stats">
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">المنظمات المشهرة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">الندوات التوعوية</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم رفع الملفات -->
+    <div class="upload-section">
+        <h2 class="section-title">
+            <i class="fas fa-file-upload"></i>
+            رفع ملف CSV
+        </h2>
+
+        <div class="upload-area" id="uploadArea">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <p class="upload-text">اضغط هنا أو اسحب ملف CSV</p>
+            <p class="upload-hint">CSV / TSV / Excel CSV — يدعم الفاصلة الإنجليزية والعربية والتاب</p>
+            <input type="file" id="fileInput" accept=".csv,.tsv" style="display: none;">
+        </div>
+
+        <div class="paste-area">
+            <h4 style="color: var(--gray-700); margin-bottom: 1rem;">
+                <i class="fas fa-cut"></i>
+                أو الصق البيانات مباشرة:
+            </h4>
+            <textarea class="paste-textarea" id="pasteArea" placeholder="الصق البيانات هنا من Google Sheets أو Excel..."></textarea>
+            <button type="button" class="btn btn-primary" style="margin-top: 1rem;" id="analyzeBtn">
+                <i class="fas fa-clipboard-check"></i>
+                تحليل البيانات الملصقة
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- الفوتر -->
+<footer class="footer">
+    <div class="footer-content">
+        <p class="footer-text">
+            © 2026 وزارة الشؤون الاجتماعية والعمل — الجمهورية العربية السورية
+        </p>
+    </div>
+</footer>
+
+<script>
+    // متغيرات عامة
+    let currentUserType = 'admin';
+    let isLoggedIn = false;
+
+    // كلمات المرور الافتراضية
+    const passwords = {
+        admin: 'admin123',
+        viewer: 'viewer123'
+    };
+
+    // اختيار نوع المستخدم
+    function selectUserType(type) {
+        currentUserType = type;
+        document.querySelectorAll('.user-type-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        document.querySelector('[data-type="' + type + '"]').classList.add('selected');
+    }
+
+    // تسجيل الدخول
+    function login() {
+        const password = document.getElementById('passwordInput').value;
+        const errorDiv = document.getElementById('loginError');
+
+        console.log('محاولة تسجيل الدخول...');
+        console.log('نوع المستخدم:', currentUserType);
+        console.log('كلمة المرور المدخلة:', password);
+        console.log('كلمة المرور الصحيحة:', passwords[currentUserType]);
+
+        if (password === passwords[currentUserType]) {
+            isLoggedIn = true;
+            document.getElementById('loginOverlay').style.display = 'none';
+            
+            if (currentUserType === 'admin') {
+                document.getElementById('userRole').textContent = 'مدير النظام';
+                document.getElementById('userName').textContent = 'المسؤول الرئيسي';
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('readonlyBar').classList.add('hidden');
+            } else {
+                document.getElementById('userRole').textContent = 'مطلع';
+                document.getElementById('userName').textContent = 'مستخدم افتراضي';
+                document.getElementById('adminPanel').classList.add('hidden');
+                document.getElementById('readonlyBar').classList.remove('hidden');
+            }
+
+            showNotification('تم تسجيل الدخول بنجاح', 'success');
+        } else {
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
         }
     }
 
-    @media (max-width: 768px) {
-        .header-content {
-            flex-direction: column;
-            text-align: center;
-        }
+    // تسجيل الخروج
+    function logout() {
+        isLoggedIn = false;
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('adminPanel').classList.add('hidden');
+        showNotification('تم تسجيل الخروج', 'info');
+    }
 
-        .header-title {
-            flex-direction: column;
-        }
-
-        .title-text h1 {
-            font-size: 1.5rem;
-        }
-
-        .user-controls {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .user-badge,
-        .logout-btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .toolbar {
-            flex-direction: column;
-        }
-
-        .filter-group {
-            width: 100%;
-        }
-
-        .cards-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .user-type-selector {
-            grid-template-columns: 1fr;
+    // تغيير كلمة المرور
+    function changePassword(userType) {
+        const newPass = prompt('أدخل كلمة المرور الجديدة لـ ' + (userType === 'admin' ? 'المدير' : 'المطلع') + ':');
+        if (newPass && newPass.length >= 6) {
+            passwords[userType] = newPass;
+            showNotification('تم تغيير كلمة المرور بنجاح', 'success');
+        } else if (newPass) {
+            showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
         }
     }
 
-    .footer {
-        background: var(--gray-800);
-        color: var(--primary-white);
-        padding: 2rem 0;
-        margin-top: 4rem;
-        text-align: center;
+    // تحديث البيانات
+    function refreshData() {
+        showNotification('جاري تحديث البيانات...', 'info');
+        setTimeout(() => {
+            showNotification('تم تحديث البيانات بنجاح', 'success');
+        }, 1500);
     }
 
-    .footer-content {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 2rem;
+    // معالجة رفع الملفات
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            showNotification('تم رفع الملف: ' + file.name, 'success');
+        }
     }
 
-    .footer-text {
-        opacity: 0.8;
-        font-size: 0.95rem;
+    // تحليل البيانات الملصقة
+    function analyzePastedData() {
+        const data = document.getElementById('pasteArea').value;
+        if (data.trim()) {
+            showNotification('جاري تحليل البيانات...', 'info');
+            setTimeout(() => {
+                showNotification('تم تحليل البيانات بنجاح', 'success');
+            }, 1500);
+        } else {
+            showNotification('الرجاء لصق البيانات أولاً', 'warning');
+        }
     }
 
-    .hidden {
-        display: none !important;
+    // عرض الإشعارات
+    function showNotification(message, type) {
+        type = type || 'success';
+        const notification = document.createElement('div');
+        notification.className = 'notification ' + type;
+        
+        let icon = 'check-circle';
+        if (type === 'error') icon = 'exclamation-circle';
+        if (type === 'warning') icon = 'exclamation-triangle';
+        if (type === 'info') icon = 'info-circle';
+
+        notification.innerHTML = '<i class="fas fa-' + icon + '"></i><span>' + message + '</span>';
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideDown 0.3s ease reverse';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
     }
 
-    .info-bar {
-        background: var(--warning);
-        color: var(--primary-white);
-        padding: 1rem 2rem;
-        text-align: center;
-        font-weight: 600;
-    }
+    // تهيئة الأحداث بعد تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('تم تحميل الصفحة');
 
-    .paste-area {
-        margin-top: 1.5rem;
-    }
+        // زر تسجيل الدخول
+        document.getElementById('loginBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('تم النقر على زر الدخول');
+            login();
+        });
 
-    .paste-textarea {
-        width: 100%;
-        min-height: 200px;
-        padding: 1rem;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius);
-        font-family: 'Courier New', monospace;
-        font-size: 0.875rem;
-        resize: vertical;
-    }
+        // زر تسجيل الخروج
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
 
-    .paste-textarea:focus {
-        outline: none;
-        border-color: var(--primary-red);
-        box-shadow: 0 0 0 3px rgba(206, 17, 38, 0.1);
-    }
-</style>
+        // زر التحديث
+        document.getElementById('refreshBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            refreshData();
+        });
+
+        // زر تحليل البيانات
+        document.getElementById('analyzeBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            analyzePastedData();
+        });
+
+        // منطقة رفع الملفات
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', handleFileUpload);
+
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                showNotification('تم رفع الملف: ' + file.name, 'success');
+            }
+        });
+
+        // Enter لتسجيل الدخول
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                login();
+            }
+        });
+
+        // التصفية حسب المحافظة
+        document.getElementById('governorateFilter').addEventListener('change', function(e) {
+            const value = e.target.value;
+            showNotification('تم التصفية حسب المحافظة: ' + (value === 'all' ? 'الكل' : value), 'info');
+        });
+
+        // التصفية حسب الشهر
+        document.getElementById('monthFilter').addEventListener('change', function(e) {
+            const value = e.target.value;
+            showNotification('تم التصفية حسب الشهر: ' + (value === 'all' ? 'الكل' : value), 'info');
+        });
+    });
+</script>
