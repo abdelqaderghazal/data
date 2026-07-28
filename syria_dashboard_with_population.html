@@ -238,6 +238,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<base target="_blank">
 </head>
 <body class="locked">
 
@@ -628,6 +629,7 @@
 // =====================
 // COLUMN MAPPING (Arabic headers from actual CSV)
 // =====================
+const COLUMN_MAP_INV = {};
 const COLUMN_MAP = {
   // === Core identifiers ===
   "المحافظة": "gov",
@@ -766,6 +768,9 @@ const COLUMN_MAP = {
   "اهم ثلال توصيات": "recommendations",
   "الاحتياجات الرئيسية": "needs",
 };
+
+// Build inverse mapping
+Object.keys(COLUMN_MAP).forEach(k => { COLUMN_MAP_INV[COLUMN_MAP[k]] = k; });
 
 // =====================
 // STATE
@@ -1038,7 +1043,7 @@ function barChart(canvasId, dataField){
     return;
   }
 
-  // Default: show all governorates
+  // Default: show all governorates (aggregate by gov)
   const grouped = {};
   arr.forEach(d => {
     if(!grouped[d.gov]) grouped[d.gov] = {...d};
@@ -1107,27 +1112,47 @@ function barChart(canvasId, dataField){
 
 // NEW: Chart for single governorate showing all indicators
 function renderSingleGovChart(canvasId, arr, categoryField){
-  const d = arr[0]; // Single governorate data
+  // Aggregate ALL rows for this governorate (multiple months)
+  const agg = {};
+  let govName = '';
+  arr.forEach(row => {
+    govName = row.gov || govName;
+    Object.keys(row).forEach(key => {
+      if (key === 'gov' || key === 'month') return;
+      const val = row[key];
+      if (typeof val === 'number') {
+        agg[key] = (agg[key] || 0) + val;
+      } else if (typeof val === 'string' && val.trim()) {
+        // Keep text fields as-is (take first non-empty)
+        if (!agg[key]) agg[key] = val;
+      }
+    });
+  });
 
   // Define indicators for each category
   const indicatorMap = {
     'disabled_cards': [
       {key:'disabled_cards', label:'بطاقات إعاقة'},
-      {key:'special_students', label:'طلاب معاهد'},
-      {key:'rehab_centers', label:'مراكز تأهيل'},
-      {key:'rehab_benef', label:'مستفيدو تأهيل'}
+      {key:'disability_centers', label:'معاهد الإعاقة'},
+      {key:'disability_benef', label:'مستفيدو المعاهد'},
+      {key:'mobility_aids', label:'معينات حركية'},
+      {key:'disability_cash', label:'معونة نقدية'}
     ],
     'elderly_benef': [
+      {key:'elderly_homes', label:'دور مسنين'},
       {key:'elderly_benef', label:'مستفيدو مسنين'},
+      {key:'beggar_centers_total', label:'مراكز تسول'},
+      {key:'beggar_centers_active', label:'مراكز تسول نشطة'},
       {key:'beggar_inmates', label:'نزلاء تسول'},
       {key:'orphan_homes', label:'دور أيتام'},
       {key:'sponsor_internal', label:'كفالة داخلية'},
-      {key:'sponsor_external', label:'كفالة خارجية'}
+      {key:'sponsor_external', label:'كفالة خارجية'},
+      {key:'dar_lahn_benef', label:'مستفيدو دار لحن'}
     ],
     'ngo_active': [
-      {key:'ngo_active', label:'منظمات نشطة'},
-      {key:'ngo_revoked', label:'منظمات مسحوبة'},
-      {key:'seminars', label:'ندوات توعوية'}
+      {key:'ngo_total', label:'إجمالي المنظمات'},
+      {key:'ngo_active', label:'منظمات مشهرة 2025'},
+      {key:'ngo_new_pct', label:'نسبة جديدة %'}
     ],
     'juvenile_inmates': [
       {key:'juvenile_inst', label:'معاهد أحداث'},
@@ -1135,45 +1160,113 @@ function renderSingleGovChart(canvasId, arr, categoryField){
       {key:'juvenile_inmates', label:'نزلاء أحداث'}
     ],
     'rural_dev_benef': [
-      {key:'rural_dev_benef', label:'مستفيدو تنمية ريفية'},
-      {key:'rural_ind_benef', label:'مستفيدو صناعات ريفية'},
-      {key:'rural_dev_active', label:'مراكز تنمية'},
-      {key:'rural_ind_active', label:'وحدات صناعية'}
+      {key:'rural_dev_total', label:'مراكز تنمية'},
+      {key:'rural_dev_active', label:'مراكز تنمية نشطة'},
+      {key:'rural_ind_total', label:'وحدات صناعة'},
+      {key:'rural_ind_active', label:'وحدات صناعة نشطة'},
+      {key:'rural_dev_benef', label:'مستفيدو تنمية'},
+      {key:'rural_ind_benef', label:'مستفيدو صناعة'},
+      {key:'vocational_centers', label:'مراكز تأهيل'},
+      {key:'vocational_active', label:'مراكز تأهيل نشطة'},
+      {key:'vocational_benef', label:'مستفيدو تأهيل'}
     ],
-    'insp_industrial': [
+    'insp_total': [
+      {key:'insp_total', label:'زيارات تفتيش'},
+      {key:'violations', label:'مخالفات'},
       {key:'new_workers_insp', label:'عمال جدد'},
-      {key:'insp_industrial', label:'تفتيش صناعي'},
-      {key:'insp_agri', label:'تفتيش زراعي'},
-      {key:'violations', label:'مخالفات'}
+      {key:'work_permits_new', label:'تراخيص جديدة'},
+      {key:'work_permits_renew', label:'تجديد تراخيص'},
+      {key:'recruitment_offices', label:'مكاتب استقدام'},
+      {key:'domestic_permits_new', label:'تراخيص منزليات'},
+      {key:'domestic_offices_syrian', label:'مكاتب تشغيل سوريين'},
+      {key:'private_offices_syrian', label:'مكاتب خاصة سوريين'},
+      {key:'legal_docs_new', label:'صكوك جديدة'},
+      {key:'legal_docs_review', label:'صكوك قيد المراجعة'}
     ],
     'population': [
-      {key:'population', label:'👥 إجمالي السكان'},
-      {key:'males', label:'♂️ الذكور'},
-      {key:'females', label:'♀️ الإناث'}
+      {key:'population', label:'السكان'},
+      {key:'males', label:'الذكور'},
+      {key:'females', label:'الإناث'},
+      {key:'pop_under15', label:'دون 15'},
+      {key:'pop_15_60', label:'15-60'},
+      {key:'pop_over60', label:'60+'}
+    ],
+    'food_baskets': [
+      {key:'food_baskets', label:'سلل غذائية'},
+      {key:'in_kind_aid', label:'مساعدات عينية'},
+      {key:'cash_assistance', label:'إعانات مالية'},
+      {key:'unhcr_centers', label:'مراكز UNHCR'},
+      {key:'unfpa_safe_spaces', label:'مساحات آمنة'}
+    ],
+    'platform_registered': [
+      {key:'platform_registered', label:'مسجّلون'},
+      {key:'platform_establishments', label:'منشآت'},
+      {key:'platform_jobs', label:'فرص عمل'},
+      {key:'platform_training', label:'فرص تدريب'}
+    ],
+    'insurance_total': [
+      {key:'insurance_public', label:'قطاع عام'},
+      {key:'insurance_private', label:'قطاع خاص'},
+      {key:'insurance_total', label:'إجمالي'},
+      {key:'pensioners', label:'متقاعدون'},
+      {key:'work_injury_comp', label:'تعويضات'},
+      {key:'service_merge_decisions', label:'ضم خدمة'},
+      {key:'injury_beneficiaries', label:'مستفيدو إصابات'},
+      {key:'insurance_establishments', label:'منشآت مشمولة'}
+    ],
+    'employed': [
+      {key:'labor_force', label:'قوة العمل'},
+      {key:'employed', label:'مشتغلون'},
+      {key:'unemployed', label:'متعطلون'},
+      {key:'unemployment_rate', label:'بطالة %'},
+      {key:'male_unemployment', label:'بطالة ذكور %'},
+      {key:'female_unemployment', label:'بطالة إناث %'},
+      {key:'youth_unemployment', label:'بطالة شباب %'},
+      {key:'male_participation', label:'مشاركة ذكور %'},
+      {key:'female_participation', label:'مشاركة إناث %'},
+      {key:'unorganized_workers', label:'غير منظم %'}
+    ],
+    'camps_count': [
+      {key:'camps_count', label:'المخيمات'},
+      {key:'camp_families', label:'الأسر'}
     ]
   };
 
-  // Find the right indicator set based on the category field
+  // Find the right indicator set
   let indicators = indicatorMap[categoryField];
+
+  // Fallback: search all sets for a matching key
   if(!indicators){
-    // Fallback: try to find any matching key
-    indicators = Object.keys(indicatorMap).map(k => indicatorMap[k]).find(set => 
-      set.some(item => item.key === categoryField)
-    ) || [];
+    for(const set of Object.values(indicatorMap)){
+      if(set.some(item => item.key === categoryField)){
+        indicators = set;
+        break;
+      }
+    }
   }
 
-  // If still no match, use a generic set of numeric fields
-  if(indicators.length === 0){
-    const numericKeys = Object.keys(d).filter(k => typeof d[k] === 'number' && k !== 'year' && k !== 'population' && k !== 'males' && k !== 'females');
-    indicators = numericKeys.slice(0, 8).map(k => ({key:k, label:k}));
+  // Ultimate fallback: show all numeric fields with values > 0
+  if(!indicators || indicators.length === 0){
+    indicators = Object.keys(agg)
+      .filter(k => typeof agg[k] === 'number' && agg[k] > 0)
+      .slice(0, 10)
+      .map(k => ({key:k, label: COLUMN_MAP_INV[k] || k}));
   }
 
-  const labels = indicators.map(i => i.label);
-  const data = indicators.map(i => d[i.key] || 0);
+  // Filter out indicators with zero values for cleaner display
+  const activeIndicators = indicators.filter(i => (agg[i.key] || 0) > 0);
+
+  // If ALL zeros, show them anyway so user sees something
+  const finalIndicators = activeIndicators.length > 0 ? activeIndicators : indicators;
+
+  const labels = finalIndicators.map(i => i.label);
+  const data = finalIndicators.map(i => agg[i.key] || 0);
 
   const canvas = document.getElementById(canvasId);
-  if(canvas && canvas.parentElement){
-    canvas.parentElement.style.height = '350px';
+  if(!canvas) return;
+
+  if(canvas.parentElement){
+    canvas.parentElement.style.height = Math.max(280, labels.length * 42) + 'px';
   }
 
   if(charts[canvasId]) charts[canvasId].destroy();
@@ -1183,29 +1276,38 @@ function renderSingleGovChart(canvasId, arr, categoryField){
     data: { 
       labels, 
       datasets: [{ 
-        label: d.gov,
+        label: govName,
         data, 
         backgroundColor: labels.map((_,i) => PALETTE[i % PALETTE.length]), 
         borderRadius: 6, 
-        maxBarThickness: 45,
-        barPercentage: 0.6
+        maxBarThickness: 32,
+        barPercentage: 0.65
       }] 
     },
     options: { 
-      indexAxis: 'x', 
+      indexAxis: 'y', 
       plugins: { 
-        legend: { display: true, position: 'top', labels: { font: { family: 'Cairo' }, text: d.gov } }, 
-        tooltip: { rtl: true, titleFont: { family: 'Cairo' }, bodyFont: { family: 'Cairo' } } 
+        legend: { display: false }, 
+        tooltip: { 
+          rtl: true, 
+          titleFont: { family: 'Cairo' }, 
+          bodyFont: { family: 'Cairo' },
+          callbacks: {
+            label: function(context) {
+              return context.parsed.x.toLocaleString('en-US') + ' ' + context.dataset.label;
+            }
+          }
+        } 
       }, 
       scales: { 
         x: { 
-          grid: { display: false }, 
-          ticks: { font: { family: 'Cairo', size: 11 }, autoSkip: false, maxRotation: 45, minRotation: 0 } 
-        }, 
-        y: { 
           grid: { color: '#e2d8c2' }, 
           ticks: { font: { family: 'IBM Plex Mono', size: 11 } },
           beginAtZero: true
+        }, 
+        y: { 
+          grid: { display: false }, 
+          ticks: { font: { family: 'Cairo', size: 12 } } 
         } 
       }, 
       responsive: true, 
@@ -1227,9 +1329,10 @@ function renderCategory(cat){
     barChart('chart-disability', 'disabled_cards');
     renderCards('cards-disability', [
       {em:'🦽',n:sum('disabled_cards',arr),t:'إجمالي بطاقات الإعاقة الصادرة'},
-      {em:'🎓',n:sum('special_students',arr),t:'الطلاب في معاهد ذوي الإعاقة'},
-      {em:'🛠️',n:sum('rehab_centers',arr),t:'مراكز التأهيل المهني'},
-      {em:'👨‍🔧',n:sum('rehab_benef',arr),t:'مستفيدو برامج التأهيل'}
+      {em:'🏛️',n:sum('disability_centers',arr),t:'معاهد رعاية وتأهيل الأشخاص ذوي الإعاقة'},
+      {em:'👨‍🎓',n:sum('disability_benef',arr),t:'المستفيدين من خدمات المعاهد'},
+      {em:'🦽',n:sum('mobility_aids',arr),t:'المستفيدين من توزيع المعينات الحركية'},
+      {em:'💰',n:sum('disability_cash',arr),t:'المعونة النقدية لأسر ذوي الإعاقة'}
     ]);
     const zeroGovs = arr.filter(d => (d.disabled_cards||0) === 0).map(d => d.gov);
     document.getElementById('note-disability').textContent = zeroGovs.length > 0 
@@ -1256,12 +1359,12 @@ function renderCategory(cat){
   if(cat === 'ngo'){
     barChart('chart-ngo', 'ngo_active');
     renderCards('cards-ngo', [
-      {em:'🤝',n:sum('ngo_active',arr),t:'منظمات غير حكومية نشطة (مشهرة)'},
-      {em:'🚫',n:sum('ngo_revoked',arr),t:'منظمات مسحوبة الترخيص'},
-      {em:'📋',n:sum('seminars',arr),t:'ندوات ودورات توعوية'}
+      {em:'🤝',n:sum('ngo_active',arr),t:'منظمات غير حكومية مشهرة في 2025'},
+      {em:'📊',n:sum('ngo_total',arr),t:'إجمالي عدد المنظمات غير الحكومية'},
+      {em:'📈',n:avg('ngo_new_pct',arr)+'%',t:'نسبة المنظمات الجديدة المشهرة'}
     ]);
     document.getElementById('note-ngo').textContent = 
-      `💡 ${sum('ngo_active',arr)} منظمة نشطة مقابل ${sum('ngo_revoked',arr)} فقط مسحوبة الترخيص — مؤشر استقرار نسبي للقطاع.`;
+      `💡 ${sum('ngo_active',arr)} منظمة مشهرة في 2025 من إجمالي ${sum('ngo_total',arr)} منظمة — نسبة المنظمات الجديدة ${avg('ngo_new_pct',arr)}%.`;
   }
 
   if(cat === 'juvenile'){
@@ -1298,7 +1401,9 @@ function renderCategory(cat){
       {em:'🏗️',n:sum('insp_total',arr),t:'زيارات تفتيش (صناعي+زراعي)'},
       {em:'⚠️',n:sum('violations',arr),t:'مخالفات مسجّلة'},
       {em:'📜',n:sum('legal_docs_new',arr),t:'صكوك قانونية جديدة'},
-      {em:'📝',n:sum('legal_docs_review',arr),t:'صكوك قيد المراجعة'}
+      {em:'📝',n:sum('legal_docs_review',arr),t:'صكوك قيد المراجعة'},
+      {em:'📋',n:sum('work_permits_new',arr),t:'تراخيص عمل جديدة (غير سوريين)'},
+      {em:'🔄',n:sum('work_permits_renew',arr),t:'تجديد تراخيص العمل'}
     ]);
     const totalInsp = sum('insp_total', arr);
     const totalViol = sum('violations', arr);
@@ -1592,8 +1697,8 @@ function renderGovComparison(arr){
       let intensity = 0;
       govData.forEach(d => {
         intensity += (d.disabled_cards||0) + (d.elderly_benef||0) + (d.ngo_active||0) +
-                     (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_industrial||0) +
-                     (d.new_workers_insp||0) + (d.special_students||0) + (d.rehab_benef||0);
+                     (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_total||0) +
+                     (d.new_workers_insp||0) + (d.disability_benef||0) + (d.vocational_benef||0);
       });
       govScores[gov] = {val: intensity, unit: 'نقطة نشاط', display: fmt(intensity)};
     }
@@ -1618,9 +1723,9 @@ function renderGovComparison(arr){
     else if(currentRankingMode === 'activityCount'){
       let count = 0;
       const keys = ['disabled_cards','elderly_benef','ngo_active','juvenile_inmates',
-                    'rural_dev_benef','insp_industrial','new_workers_insp',
-                    'special_students','rehab_benef','beggar_inmates','orphan_homes',
-                    'sponsor_internal','sponsor_external','seminars','violations'];
+                    'rural_dev_benef','insp_total','new_workers_insp',
+                    'disability_benef','vocational_benef','beggar_inmates','orphan_homes',
+                    'sponsor_internal','sponsor_external','violations','platform_registered'];
       govData.forEach(d => {
         keys.forEach(key => {
           if((d[key]||0) > 0) count++;
@@ -2118,7 +2223,7 @@ function getGovIntensity(gov, arr){
              (d.juvenile_inmates||0) + (d.rural_dev_benef||0) + (d.insp_total||0) +
              (d.new_workers_insp||0) + (d.employed||0) + (d.platform_registered||0) +
              (d.food_baskets||0) + (d.insurance_total||0) + (d.camp_families||0) +
-             (d.population||0) + (d.males||0) + (d.females||0);
+             (d.disability_benef||0) + (d.vocational_benef||0) + (d.cash_assistance||0);
   });
   return total;
 }
@@ -2220,16 +2325,17 @@ function updateMapMarkers(){
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">🦽 رعاية ذوي الإعاقة</span>
         </div>
         <div class="info-row"><span class="info-label">بطاقات إعاقة</span><span class="info-val">${fmt(d.disabled_cards||0)}</span></div>
-        <div class="info-row"><span class="info-label">طلاب معاهد الإعاقة</span><span class="info-val">${fmt(d.special_students||0)}</span></div>
-        <div class="info-row"><span class="info-label">مراكز التأهيل المهني</span><span class="info-val">${fmt(d.rehab_centers||0)}</span></div>
-        <div class="info-row"><span class="info-label">مستفيدو التأهيل</span><span class="info-val">${fmt(d.rehab_benef||0)}</span></div>
+        <div class="info-row"><span class="info-label">مستفيدو خدمات الإعاقة</span><span class="info-val">${fmt(d.disability_benef||0)}</span></div>
+        <div class="info-row"><span class="info-label">معينات حركية</span><span class="info-val">${fmt(d.mobility_aids||0)}</span></div>
+        <div class="info-row"><span class="info-label">معونة نقدية لأسر الإعاقة</span><span class="info-val">${fmt(d.disability_cash||0)}</span></div>
 
         <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">👵 الرعاية الاجتماعية</span>
         </div>
         <div class="info-row"><span class="info-label">دور رعاية المسنين</span><span class="info-val">${fmt(d.elderly_homes||0)}</span></div>
         <div class="info-row"><span class="info-label">مستفيدو رعاية المسنين</span><span class="info-val">${fmt(d.elderly_benef||0)}</span></div>
-        <div class="info-row"><span class="info-label">مراكز رعاية المتسولين</span><span class="info-val">${fmt(d.beggar_centers||0)}</span></div>
+        <div class="info-row"><span class="info-label">مراكز رعاية المتسولين (الكلي)</span><span class="info-val">${fmt(d.beggar_centers_total||0)}</span></div>
+        <div class="info-row"><span class="info-label">مراكز رعاية المتسولين (النشطة)</span><span class="info-val">${fmt(d.beggar_centers_active||0)}</span></div>
         <div class="info-row"><span class="info-label">نزلاء مراكز التسول</span><span class="info-val">${fmt(d.beggar_inmates||0)}</span></div>
         <div class="info-row"><span class="info-label">دور رعاية الأيتام</span><span class="info-val">${fmt(d.orphan_homes||0)}</span></div>
         <div class="info-row"><span class="info-label">كفالة داخلية</span><span class="info-val">${fmt(d.sponsor_internal||0)}</span></div>
@@ -2239,8 +2345,8 @@ function updateMapMarkers(){
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">🤝 المنظمات غير الحكومية</span>
         </div>
         <div class="info-row"><span class="info-label">منظمات نشطة</span><span class="info-val">${fmt(d.ngo_active||0)}</span></div>
-        <div class="info-row"><span class="info-label">منظمات مسحوبة</span><span class="info-val">${fmt(d.ngo_revoked||0)}</span></div>
-        <div class="info-row"><span class="info-label">ندوات ودورات</span><span class="info-val">${fmt(d.seminars||0)}</span></div>
+        <div class="info-row"><span class="info-label">إجمالي المنظمات</span><span class="info-val">${fmt(d.ngo_total||0)}</span></div>
+        <div class="info-row"><span class="info-label">نسبة المنظمات الجديدة</span><span class="info-val">${fmt(d.ngo_new_pct||0)}%</span></div>
 
         <div style="border-top:2px solid var(--syria-green);margin:10px 0;padding-top:8px;">
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">⚖️ معاهد الأحداث</span>
@@ -2264,14 +2370,12 @@ function updateMapMarkers(){
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">🏗️ التفتيش والعمالة</span>
         </div>
         <div class="info-row"><span class="info-label">عمال مسجّلون جدد</span><span class="info-val">${fmt(d.new_workers_insp||0)}</span></div>
-        <div class="info-row"><span class="info-label">زيارات تفتيش صناعي</span><span class="info-val">${fmt(d.insp_industrial||0)}</span></div>
-        <div class="info-row"><span class="info-label">زيارات تفتيش زراعي</span><span class="info-val">${fmt(d.insp_agri||0)}</span></div>
+        <div class="info-row"><span class="info-label">إجمالي الزيارات التفتيشية</span><span class="info-val">${fmt(d.insp_total||0)}</span></div>
         <div class="info-row"><span class="info-label">مخالفات مسجّلة</span><span class="info-val">${fmt(d.violations||0)}</span></div>
         <div class="info-row"><span class="info-label">تراخيص عمل جديدة (غير سوريين)</span><span class="info-val">${fmt(d.work_permits_new||0)}</span></div>
-        <div class="info-row"><span class="info-label">تراخيص عمل مجددة (غير سوريين)</span><span class="info-val">${fmt(d.work_permits_renew||0)}</span></div>
+        <div class="info-row"><span class="info-label">تجديد تراخيص العمل</span><span class="info-val">${fmt(d.work_permits_renew||0)}</span></div>
         <div class="info-row"><span class="info-label">مكاتب استقدام عاملات</span><span class="info-val">${fmt(d.recruitment_offices||0)}</span></div>
-        <div class="info-row"><span class="info-label">تراخيص عاملات منزليات جديدة</span><span class="info-val">${fmt(d.domestic_permits_new||0)}</span></div>
-        <div class="info-row"><span class="info-label">تراخيص عاملات منزليات مجددة</span><span class="info-val">${fmt((d.domestic_permits_renew||0)+(d.domestic_permits_renew2||0))}</span></div>
+        <div class="info-row"><span class="info-label">عاملات منزليات (تراخيص جديدة)</span><span class="info-val">${fmt(d.domestic_permits_new||0)}</span></div>
         <div class="info-row"><span class="info-label">مكاتب تشغيل سوريين</span><span class="info-val">${fmt(d.domestic_offices_syrian||0)}</span></div>
         <div class="info-row"><span class="info-label">مكاتب خاصة سوريين</span><span class="info-val">${fmt(d.private_offices_syrian||0)}</span></div>
 
