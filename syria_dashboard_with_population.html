@@ -772,6 +772,24 @@ const COLUMN_MAP = {
 // Build inverse mapping
 Object.keys(COLUMN_MAP).forEach(k => { COLUMN_MAP_INV[COLUMN_MAP[k]] = k; });
 
+// Fields that are rates/percentages - should use AVERAGE not SUM
+const RATE_FIELDS = new Set([
+  "pop_under15", "pop_15_60", "pop_over60",
+  "unemployment_rate", "male_unemployment", "female_unemployment", "youth_unemployment",
+  "male_participation", "female_participation", "unorganized_workers",
+  "child_marriage_rate", "child_labor_rate", "basic_edu_completion", "female_breadwinners",
+  "food_secure_pct", "food_vulnerable_pct", "food_extreme_pct",
+  "investment_spending_pct", "ngo_new_pct"
+]);
+
+function smartAggregate(field, arr) {
+  if (RATE_FIELDS.has(field)) {
+    return avg(field, arr);
+  }
+  return sum(field, arr);
+}
+
+
 // =====================
 // STATE
 // =====================
@@ -894,6 +912,11 @@ function processCSVData(csvText){
     }
 
     ALL_DATA = parsed;
+    ALL_DATA.forEach(d => {
+      d.insp_total = (d.insp_industrial || 0) + (d.insp_agri || 0);
+      d.rural_dev_total = (d.rural_dev_active || 0) + (d.rural_dev_inactive || 0);
+      d.rural_ind_total = (d.rural_ind_active || 0) + (d.rural_ind_inactive || 0);
+    });
     selectedMonths = new Set([...new Set(ALL_DATA.map(d => d.month))]);
     selectedMonthChips.clear();
 
@@ -1114,6 +1137,7 @@ function barChart(canvasId, dataField){
 function renderSingleGovChart(canvasId, arr, categoryField){
   // Aggregate ALL rows for this governorate (multiple months)
   const agg = {};
+  const aggCounts = {};
   let govName = '';
   arr.forEach(row => {
     govName = row.gov || govName;
@@ -1122,11 +1146,18 @@ function renderSingleGovChart(canvasId, arr, categoryField){
       const val = row[key];
       if (typeof val === 'number') {
         agg[key] = (agg[key] || 0) + val;
+        aggCounts[key] = (aggCounts[key] || 0) + 1;
       } else if (typeof val === 'string' && val.trim()) {
         // Keep text fields as-is (take first non-empty)
         if (!agg[key]) agg[key] = val;
       }
     });
+  });
+  // Average rate fields
+  RATE_FIELDS.forEach(field => {
+    if (typeof agg[field] === 'number' && aggCounts[field] > 1) {
+      agg[field] = agg[field] / aggCounts[field];
+    }
   });
 
   // Define indicators for each category
@@ -1343,17 +1374,22 @@ function renderCategory(cat){
   if(cat === 'social'){
     barChart('chart-social', 'elderly_benef');
     renderCards('cards-social', [
-      {em:'👵',n:sum('elderly_benef',arr),t:'مستفيدو دور رعاية المسنين'},
-      {em:'🏚️',n:sum('beggar_inmates',arr),t:'نزلاء مراكز رعاية المتسولين'},
+      {em:'👵',n:sum('elderly_homes',arr),t:'دور رعاية كبار السن'},
+      {em:'🧓',n:sum('elderly_benef',arr),t:'مستفيدو دور رعاية المسنين'},
+      {em:'🏚️',n:sum('beggar_centers_total',arr),t:'دور رعاية المتسولين (الكلي)'},
+      {em:'🏠',n:sum('beggar_centers_active',arr),t:'دور رعاية المتسولين (النشطة)'},
+      {em:'🚶',n:sum('beggar_inmates',arr),t:'نزلاء مراكز رعاية المتسولين'},
       {em:'👶',n:sum('orphan_homes',arr),t:'دور رعاية الأيتام'},
       {em:'💞',n:sum('sponsor_internal',arr),t:'مستفيدو الكفالة الداخلية'},
-      {em:'🌍',n:sum('sponsor_external',arr),t:'مستفيدو الكفالة الخارجية'}
+      {em:'🌍',n:sum('sponsor_external',arr),t:'مستفيدو الكفالة الخارجية'},
+      {em:'🎵',n:sum('dar_lahn_benef',arr),t:'مستفيدو دار لحن الحياة'}
     ]);
     const extTotal = sum('sponsor_external', arr);
     const idlibExt = arr.filter(d => d.gov === 'ادلب').reduce((a,d) => a + (d.sponsor_external||0), 0);
     const pct = extTotal > 0 ? Math.round((idlibExt/extTotal)*100) : 0;
+    const darLahn = sum('dar_lahn_benef', arr);
     document.getElementById('note-social').textContent = 
-      `💡 تتركز الكفالة الخارجية بنسبة ~${pct}% في ادلب وحدها. نزلاء مراكز التسوّل شبه محصورين في حلب (${sum('beggar_inmates',arr)} من الإجمالي).`;
+      `💡 تتركز الكفالة الخارجية بنسبة ~${pct}% في ادلب. نزلاء التسوّل: ${fmt(sum('beggar_inmates',arr))}. مستفيدو دار لحن: ${fmt(darLahn)}.`;
   }
 
   if(cat === 'ngo'){
@@ -1370,7 +1406,8 @@ function renderCategory(cat){
   if(cat === 'juvenile'){
     barChart('chart-juvenile', 'juvenile_inmates');
     renderCards('cards-juvenile', [
-      {em:'🏛️',n:sum('juvenile_inst',arr),t:'معاهد إصلاح الأحداث'},
+      {em:'🏛️',n:sum('juvenile_inst',arr),t:'معاهد إصلاح الأحداث (الكلي)'},
+      {em:'✅',n:sum('juvenile_inst_active',arr),t:'معاهد الأحداث في الخدمة'},
       {em:'⚖️',n:sum('juvenile_inmates',arr),t:'نزلاء معاهد الأحداث'}
     ]);
     const total = sum('juvenile_inmates', arr);
@@ -1383,15 +1420,21 @@ function renderCategory(cat){
   if(cat === 'rural'){
     barChart('chart-rural', 'rural_dev_benef');
     renderCards('cards-rural', [
-      {em:'🌾',n:sum('rural_dev_benef',arr),t:'مستفيدو مراكز التنمية الريفية'},
-      {em:'🏭',n:sum('rural_ind_benef',arr),t:'مستفيدو وحدات الصناعات الريفية'},
-      {em:'🏘️',n:sum('rural_dev_active',arr),t:'مراكز التنمية الريفية ضمن الخدمة'},
-      {em:'🏗️',n:sum('rural_ind_active',arr),t:'وحدات الصناعات الريفية ضمن الخدمة'}
+      {em:'🌾',n:sum('rural_dev_total',arr),t:'مراكز التنمية الريفية (الكلي)'},
+      {em:'🏘️',n:sum('rural_dev_active',arr),t:'مراكز التنمية في الخدمة'},
+      {em:'🏭',n:sum('rural_ind_total',arr),t:'وحدات الصناعات الريفية (الكلي)'},
+      {em:'🏗️',n:sum('rural_ind_active',arr),t:'وحدات الصناعة في الخدمة'},
+      {em:'👥',n:sum('rural_dev_benef',arr),t:'مستفيدو مراكز التنمية الريفية'},
+      {em:'👷',n:sum('rural_ind_benef',arr),t:'مستفيدو وحدات الصناعات الريفية'},
+      {em:'🎓',n:sum('vocational_centers',arr),t:'مراكز التأهيل والإرشاد (قدرات)'},
+      {em:'✅',n:sum('vocational_active',arr),t:'مراكز التأهيل في الخدمة'},
+      {em:'👨‍🔧',n:sum('vocational_benef',arr),t:'مستفيدو التأهيل والإرشاد'}
     ]);
     const topDev = arr.reduce((a,d) => (d.rural_dev_benef||0) > (a.val||0) ? {gov:d.gov, val:d.rural_dev_benef||0} : a, {gov:'', val:0});
     const topInd = arr.reduce((a,d) => (d.rural_ind_benef||0) > (a.val||0) ? {gov:d.gov, val:d.rural_ind_benef||0} : a, {gov:'', val:0});
+    const vocTotal = sum('vocational_benef', arr);
     document.getElementById('note-rural').textContent = 
-      `💡 ${topDev.gov || 'لا توجد بيانات'} تتصدر مستفيدي التنمية الريفية (${fmt(topDev.val)})، بينما يتصدر ${topInd.gov || 'لا توجد بيانات'} مستفيدي الصناعات الريفية (${fmt(topInd.val)}).`;
+      `💡 ${topDev.gov || 'لا توجد بيانات'} تتصدر التنمية الريفية (${fmt(topDev.val)})، و${topInd.gov || 'لا'} تتصدر الصناعات الريفية (${fmt(topInd.val)}). مستفيدو التأهيل: ${fmt(vocTotal)}.`;
   }
 
   if(cat === 'labor'){
@@ -1403,7 +1446,11 @@ function renderCategory(cat){
       {em:'📜',n:sum('legal_docs_new',arr),t:'صكوك قانونية جديدة'},
       {em:'📝',n:sum('legal_docs_review',arr),t:'صكوك قيد المراجعة'},
       {em:'📋',n:sum('work_permits_new',arr),t:'تراخيص عمل جديدة (غير سوريين)'},
-      {em:'🔄',n:sum('work_permits_renew',arr),t:'تجديد تراخيص العمل'}
+      {em:'🔄',n:sum('work_permits_renew',arr),t:'تجديد تراخيص العمل'},
+      {em:'🏢',n:sum('recruitment_offices',arr),t:'مكاتب استقدام عاملات منزليات'},
+      {em:'👩',n:sum('domestic_permits_new',arr),t:'تراخيص عاملات منزليات جديدة'},
+      {em:'🏠',n:sum('domestic_offices_syrian',arr),t:'مكاتب تشغيل عمال منزليين سوريين'},
+      {em:'🔧',n:sum('private_offices_syrian',arr),t:'مكاتب تشغيل خاص للعمال السوريين'}
     ]);
     const totalInsp = sum('insp_total', arr);
     const totalViol = sum('violations', arr);
@@ -1415,17 +1462,23 @@ function renderCategory(cat){
   if(cat === 'labor_market'){
     barChart('chart-labor_market', 'employed');
     renderCards('cards-labor_market', [
-      {em:'💪',n:sum('labor_force',arr),t:'حجم قوة العمل'},
+      {em:'💪',n:sum('labor_force',arr),t:'حجم قوة العمل (مليون)'},
       {em:'💼',n:sum('employed',arr),t:'المشتغلون'},
       {em:'🚫',n:sum('unemployed',arr),t:'المتعطلون'},
-      {em:'📉',n:avg('unemployment_rate',arr)+'%',t:'معدل البطالة العام'},
-      {em:'👨‍💼',n:avg('male_unemployment',arr)+'%',t:'بطالة الذكور'},
-      {em:'👩‍💼',n:avg('female_unemployment',arr)+'%',t:'بطالة الإناث'},
-      {em:'🧑‍🎓',n:avg('youth_unemployment',arr)+'%',t:'بطالة الشباب'},
-      {em:'♂️',n:avg('male_participation',arr)+'%',t:'مشاركة الذكور اقتصادياً'},
-      {em:'♀️',n:avg('female_participation',arr)+'%',t:'مشاركة الإناث اقتصادياً'},
-      {em:'🏭',n:avg('unorganized_workers',arr)+'%',t:'عمال القطاع غير المنظم'}
+      {em:'📉',n:avg('unemployment_rate',arr)+'%',t:'معدل البطالة العام (متوسط)'},
+      {em:'👨‍💼',n:avg('male_unemployment',arr)+'%',t:'بطالة الذكور (متوسط)'},
+      {em:'👩‍💼',n:avg('female_unemployment',arr)+'%',t:'بطالة الإناث (متوسط)'},
+      {em:'🧑‍🎓',n:avg('youth_unemployment',arr)+'%',t:'بطالة الشباب (متوسط)'},
+      {em:'♂️',n:avg('male_participation',arr)+'%',t:'مشاركة الذكور اقتصادياً (متوسط)'},
+      {em:'♀️',n:avg('female_participation',arr)+'%',t:'مشاركة الإناث اقتصادياً (متوسط)'},
+      {em:'🏭',n:avg('unorganized_workers',arr)+'%',t:'عمال القطاع غير المنظم (متوسط)'}
     ]);
+    // Add text card for employment relation if exists
+    const empRelation = arr.map(d => d.employment_relation).filter(v => v && v.trim()).join(' | ');
+    if(empRelation){
+      document.getElementById('cards-labor_market').innerHTML += 
+        `<div class="ind-card" style="grid-column:1/-1;background:#e3f2fd;border-color:#1565c0;"><span class="em">📋</span><div><div class="n" style="font-size:12px;font-family:Cairo;color:#1565c0;">توزع المشتغلين حسب العلاقة برب العمل</div><div class="t" style="color:#333;font-size:11.5px;">${empRelation}</div></div></div>`;
+    }
     const emp = sum('employed', arr);
     const unemp = sum('unemployed', arr);
     const total = emp + unemp;
@@ -1444,7 +1497,8 @@ function renderCategory(cat){
       {em:'💰',n:sum('work_injury_comp',arr),t:'تعويضات إصابات العمل'},
       {em:'📋',n:sum('service_merge_decisions',arr),t:'قرارات ضم الخدمة'},
       {em:'🏥',n:sum('injury_beneficiaries',arr),t:'مستفيدو تعويضات الإصابات'},
-      {em:'🏢',n:sum('insurance_establishments',arr),t:'المنشآت المشمولة بالتأمينات'}
+      {em:'🏢',n:sum('insurance_establishments',arr),t:'المنشآت المشمولة بالتأمينات'},
+      {em:'🆕',n:sum('new_workers_insp',arr),t:'مسجّلون جدد عبر الزيارات التفتيشية'}
     ]);
     const pub = sum('insurance_public', arr);
     const priv = sum('insurance_private', arr);
@@ -1504,9 +1558,9 @@ function renderCategory(cat){
       {em:'👥',n:sum('population',arr),t:'إجمالي عدد السكان'},
       {em:'♂️',n:sum('males',arr),t:'إجمالي الذكور'},
       {em:'♀️',n:sum('females',arr),t:'إجمالي الإناث'},
-      {em:'👶',n:sum('pop_under15',arr),t:'السكان دون 15 سنة'},
-      {em:'🧑',n:sum('pop_15_60',arr),t:'السكان 15-60 سنة'},
-      {em:'👴',n:sum('pop_over60',arr),t:'السكان 60+ سنة'},
+      {em:'👶',n:avg('pop_under15',arr)+'%',t:'السكان دون 15 سنة (متوسط)'},
+      {em:'🧑',n:avg('pop_15_60',arr)+'%',t:'السكان 15-60 سنة (متوسط)'},
+      {em:'👴',n:avg('pop_over60',arr)+'%',t:'السكان 60+ سنة (متوسط)'},
       {em:'📉',n:avg('unemployment_rate',arr)+'%',t:'معدل البطالة العام (متوسط)'},
       {em:'📉',n:avg('youth_unemployment',arr)+'%',t:'معدل بطالة الشباب (متوسط)'},
       {em:'💼',n:sum('employed',arr),t:'المشتغلون'},
@@ -1517,6 +1571,12 @@ function renderCategory(cat){
       {em:'📚',n:avg('basic_edu_completion',arr)+'%',t:'معدل إكمال التعليم الأساسي'},
       {em:'🍞',n:avg('food_secure_pct',arr)+'%',t:'% الأسر الآمنة غذائياً'}
     ]);
+    // Add text card for employment relation if exists
+    const demoEmpRelation = arr.map(d => d.employment_relation).filter(v => v && v.trim()).join(' | ');
+    if(demoEmpRelation){
+      document.getElementById('cards-demographics').innerHTML += 
+        `<div class="ind-card" style="grid-column:1/-1;background:#e3f2fd;border-color:#1565c0;"><span class="em">📋</span><div><div class="n" style="font-size:12px;font-family:Cairo;color:#1565c0;">توزع المشتغلين حسب العلاقة برب العمل</div><div class="t" style="color:#333;font-size:11.5px;">${demoEmpRelation}</div></div></div>`;
+    }
     const totalPop = sum('population', arr);
     const totalMales = sum('males', arr);
     const totalFemales = sum('females', arr);
@@ -1524,8 +1584,11 @@ function renderCategory(cat){
     const femalePct = totalPop > 0 ? Math.round((totalFemales / totalPop) * 100) : 0;
     const malePct = totalPop > 0 ? Math.round((totalMales / totalPop) * 100) : 0;
     const avgUnemployment = avg('unemployment_rate', arr);
+    const avgUnder15 = avg('pop_under15', arr);
+    const avg15_60 = avg('pop_15_60', arr);
+    const avgOver60 = avg('pop_over60', arr);
     document.getElementById('note-demographics').textContent = 
-      `💡 نسبة الذكور ${malePct}% مقابل ${femalePct}% للإناث. معدل البطالة العام: ${avgUnemployment}%. نسبة الأسر الآمنة غذائياً: ${avg('food_secure_pct', arr)}%.`;
+      `💡 نسبة الذكور ${malePct}% مقابل ${femalePct}% للإناث. الفئات العمرية: دون 15 (${avgUnder15}%)، %السكان 15-60 سنة (${avg15_60}%)، %السكان 60+ سنة (${avgOver60}%). معدل البطالة: ${avgUnemployment}%. الأمن الغذائي: ${avg('food_secure_pct', arr)}%.`;
   }
 }
 
@@ -1538,7 +1601,7 @@ function renderGovList(){
 
   arr.forEach(d => {
     if(!grouped[d.gov]){
-      grouped[d.gov] = {...d};
+      grouped[d.gov] = {...d, _count: 1};
     } else {
       Object.keys(d).forEach(key => {
         if(typeof d[key] === 'number'){
@@ -1549,7 +1612,16 @@ function renderGovList(){
           else grouped[d.gov][key] += " | " + d[key];
         }
       });
+      grouped[d.gov]._count = (grouped[d.gov]._count || 1) + 1;
     }
+  });
+  // Average rate fields
+  Object.values(grouped).forEach(g => {
+    RATE_FIELDS.forEach(field => {
+      if(typeof g[field] === 'number' && g._count > 1) {
+        g[field] = g[field] / g._count;
+      }
+    });
   });
 
   const govList = Object.values(grouped);
