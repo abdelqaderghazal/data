@@ -1,452 +1,389 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة المؤشرات التشغيلية — وزارة الشؤون الاجتماعية والعمل</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>سِجل المؤشرات التشغيلية — المحافظات السورية</title>
+
+<!-- ====== THIRD-PARTY ====== -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-sha256@0.11.0/src/sha256.min.js"></script>
+
 <style>
-:root{
-  --bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;
-  --accent:#0369a1;--accent-soft:rgba(3,105,161,.12);
-  --accent2:#dc2626;--accent2-soft:rgba(220,38,38,.12);
-  --success:#059669;--success-soft:rgba(5,150,105,.12);
-  --warning:#d97706;--warning-soft:rgba(217,119,6,.12);
-  --border:rgba(15,23,42,.08)
+/* ====== DESIGN TOKENS (SINGLE SOURCE OF TRUTH) ====== */
+:root {
+  --brand-green: #123C44;
+  --brand-green-2: #4F7A63;
+  --brand-brass: #B08D57;
+  --brand-red: #B5533C;
+  --brand-blue: #6E8FA3;
+  --brand-ink: #1a1a1a;
+  --brand-ink-soft: #5a5a5a;
+  --brand-paper: #faf7f0;
+  --brand-paper-2: #f3ede0;
+  --brand-line: #d9cfb8;
+  --brand-success: #2e7d32;
+  --brand-warn: #ed6c02;
+  --brand-error: #c62828;
+  --brand-info: #1565c0;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 14px rgba(0,0,0,.08);
+  --shadow-lg: 0 12px 36px rgba(0,0,0,.14);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --transition: .18s cubic-bezier(.4,0,.2,1);
 }
-*{font-family:'Cairo',sans-serif}
-.reveal{opacity:0;transform:translateY(16px);animation:fadeUp .5s ease forwards}
-.reveal:nth-child(2){animation-delay:.08s}.reveal:nth-child(3){animation-delay:.16s}
-.reveal:nth-child(4){animation-delay:.24s}.reveal:nth-child(5){animation-delay:.32s}
-.reveal:nth-child(6){animation-delay:.4s}.reveal:nth-child(7){animation-delay:.48s}
-@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-.card-hover{transition:all .2s ease}
-.card-hover:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(2,132,199,.12)}
-.gov-btn{transition:all .15s ease}
-.gov-btn.active{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(3,105,161,.35)}
-.gov-btn:not(.active):hover{background:var(--accent-soft);color:var(--accent)}
-.cat-tab{transition:all .15s ease;border-bottom:3px solid transparent}
-.cat-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-soft)}
-.count-badge{background:var(--accent-soft);color:var(--accent)}
-.percent-badge{background:var(--accent2-soft);color:var(--accent2)}
-.text-badge{background:#eef2ff;color:#4338ca}
-.num{font-variant-numeric:tabular-nums;font-weight:700}
-::-webkit-scrollbar{height:8px;width:8px}
-::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
-</style>
-</head>
-<body style="margin:0;padding:0;background:var(--bg);min-height:100vh;color:var(--text)">
 
-<!-- HERO -->
-<div class="reveal" style="background:linear-gradient(135deg,#0369a1,#075985);color:#fff;padding:48px 24px 64px">
-  <div class="max-w-7xl mx-auto">
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
-      <div style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <div>
-        <p style="font-size:12px;letter-spacing:.2em;opacity:.8;text-transform:uppercase">وزارة الشؤون الاجتماعية والعمل</p>
-        <h1 class="text-3xl md:text-4xl font-extrabold" style="line-height:1.2">لوحة المؤشرات التشغيلية الإجمالية</h1>
-      </div>
-    </div>
-    <p style="opacity:.9;max-width:700px;margin-top:8px;font-size:15px">منصة عرض موحدة لـ <strong>84 مؤشراً</strong> اجتماعياً وعمالياً مقسمة على <strong>14 فئة</strong> تشمل <strong>14 محافظة سورية</strong> — شهر حزيران 2026</p>
-    
-    <div class="flex flex-wrap gap-3 mt-8">
-      <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:12px;padding:14px 20px;flex:1 1 160px;border:1px solid rgba(255,255,255,.18)">
-        <div style="font-size:11px;opacity:.8;letter-spacing:.1em;text-transform:uppercase">المحافظات</div>
-        <div class="text-3xl font-extrabold mt-1">14</div>
-      </div>
-      <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:12px;padding:14px 20px;flex:1 1 160px;border:1px solid rgba(255,255,255,.18)">
-        <div style="font-size:11px;opacity:.8;letter-spacing:.1em;text-transform:uppercase">الفئات</div>
-        <div class="text-3xl font-extrabold mt-1">14</div>
-      </div>
-      <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:12px;padding:14px 20px;flex:1 1 160px;border:1px solid rgba(255,255,255,.18)">
-        <div style="font-size:11px;opacity:.8;letter-spacing:.1em;text-transform:uppercase">مؤشرات عدد</div>
-        <div class="text-3xl font-extrabold mt-1" style="color:#bae6fd">64</div>
-      </div>
-      <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:12px;padding:14px 20px;flex:1 1 160px;border:1px solid rgba(255,255,255,.18)">
-        <div style="font-size:11px;opacity:.8;letter-spacing:.1em;text-transform:uppercase">مؤشرات نسبة</div>
-        <div class="text-3xl font-extrabold mt-1" style="color:#fecaca">17</div>
-      </div>
-      <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:12px;padding:14px 20px;flex:1 1 160px;border:1px solid rgba(255,255,255,.18)">
-        <div style="font-size:11px;opacity:.8;letter-spacing:.1em;text-transform:uppercase">حقول نصية</div>
-        <div class="text-3xl font-extrabold mt-1" style="color:#ddd6fe">3</div>
-      </div>
-    </div>
-  </div>
-</div>
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+  background: var(--brand-paper);
+  color: var(--brand-ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
 
-<div class="max-w-7xl mx-auto px-4 md:px-6" style="margin-top:-32px">
+/* ====== UTILITY HELPERS ====== */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+.loading { opacity: .55; pointer-events: none; position: relative; }
+.loading::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.8), rgba(250,247,240,.9));
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: .5 } 50% { opacity: .9 } }
+.empty-state {
+  padding: 32px 20px; text-align: center; color: var(--brand-ink-soft);
+  border: 2px dashed var(--brand-line); border-radius: var(--radius-md);
+  background: var(--brand-paper-2);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 8px; opacity: .5; }
 
-  <!-- GOVERNORATE SELECTOR -->
-  <div class="reveal rounded-2xl p-5 mb-6" style="background:var(--card);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.06)">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <h2 class="font-bold text-lg">اختر المحافظة</h2>
-    </div>
-    <div id="govList" class="flex flex-wrap gap-2"></div>
-  </div>
+/* ====== MASTHEAD ====== */
+.masthead {
+  background: linear-gradient(135deg, var(--brand-green) 0%, #0d2c32 100%);
+  color: #fff; padding: 28px 24px 22px;
+  border-bottom: 4px solid var(--brand-brass);
+  position: relative; overflow: hidden;
+}
+.masthead::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(600px 200px at 90% -20%, rgba(176,141,87,.25), transparent 60%),
+    radial-gradient(400px 180px at 5% 120%, rgba(181,83,60,.2), transparent 60%);
+  pointer-events: none;
+}
+.masthead-inner {
+  max-width: 1400px; margin: 0 auto; position: relative;
+  display: flex; align-items: center; gap: 20px;
+}
+.masthead-emblem {
+  width: 72px; height: 72px; flex-shrink: 0;
+  background: rgba(255,255,255,.08);
+  border: 2px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.masthead-emblem img { width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
+.masthead-content { flex: 1; min-width: 0; }
+.masthead-content .sub {
+  margin: 0 0 4px; font-size: 12px; letter-spacing: .08em;
+  color: rgba(255,255,255,.72); text-transform: uppercase; font-weight: 600;
+}
+.masthead-content h1 {
+  margin: 0 0 8px; font-family: 'Tajawal'; font-weight: 900;
+  font-size: clamp(20px, 2.6vw, 30px); line-height: 1.25;
+}
+.month-badge {
+  display: inline-block; padding: 5px 14px;
+  background: rgba(176,141,87,.9); color: #fff;
+  border-radius: 100px; font-size: 12.5px; font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
 
-  <!-- CATEGORY TABS -->
-  <div class="reveal rounded-2xl mb-6 overflow-x-auto" style="background:var(--card);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.06)">
-    <div id="catTabs" class="flex" style="min-width:max-content"></div>
-  </div>
+/* ====== TOOLBAR ====== */
+.toolbar {
+  background: var(--brand-paper-2);
+  border-bottom: 1px solid var(--brand-line);
+  padding: 14px 20px;
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(1.2) blur(6px);
+}
+.toolbar-inner {
+  max-width: 1400px; margin: 0 auto;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.toolbar-label {
+  font-weight: 700; font-size: 13px; color: var(--brand-ink);
+  margin-inline-end: 6px;
+}
+.chip {
+  border: 1px solid var(--brand-line); background: #fff; color: var(--brand-ink-soft);
+  padding: 6px 14px; border-radius: 100px; cursor: pointer;
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  transition: var(--transition);
+}
+.chip:hover:not(:disabled) { border-color: var(--brand-green); color: var(--brand-green); transform: translateY(-1px); }
+.chip.active {
+  background: var(--brand-green); color: #fff; border-color: var(--brand-green);
+  box-shadow: 0 2px 8px rgba(18,60,68,.35);
+}
+.chip:disabled { opacity: .35; cursor: not-allowed; }
 
-  <!-- ACTIVE CATEGORY HEADER -->
-  <div id="catHeader" class="reveal rounded-2xl p-5 mb-6" style="background:var(--card);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.06)"></div>
+/* ====== DATA SOURCE BAR ====== */
+.data-panel { max-width: 1400px; margin: 20px auto 0; padding: 0 20px; }
+.data-source-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: #fff; border: 1px solid var(--brand-line);
+  border-radius: var(--radius-md); padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.data-source-bar .label { font-weight: 700; font-size: 13px; color: var(--brand-ink); }
+.gsheet-input {
+  flex: 1; min-width: 240px;
+  border: 1px solid var(--brand-line); border-radius: var(--radius-sm);
+  padding: 8px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  background: var(--brand-paper-2); color: var(--brand-ink-soft);
+  direction: ltr;
+}
+.btn {
+  border: none; border-radius: var(--radius-sm); padding: 9px 16px;
+  font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: var(--transition); display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: var(--brand-green); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #0d2c32; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-success { background: var(--brand-success); color: #fff; }
+.btn-success:hover:not(:disabled) { background: #1b5e20; }
+.status-badge {
+  padding: 5px 12px; border-radius: 100px; font-size: 11.5px;
+  font-weight: 700; font-family: 'IBM Plex Mono', monospace;
+}
+.status-loading { background: #fff3e0; color: var(--brand-warn); }
+.status-ok { background: #e8f5e9; color: var(--brand-success); }
+.status-error { background: #ffebee; color: var(--brand-error); }
 
-  <!-- CHART AREA -->
-  <div class="reveal rounded-2xl p-6 mb-6" style="background:var(--card);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.06)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <h3 class="font-bold text-lg">📊 مقارنة المحافظات حسب المؤشر الحالي</h3>
-      <select id="chartInd" class="text-sm px-3 py-2 rounded-lg border" style="border-color:var(--border);background:var(--bg);color:var(--text)"></select>
-    </div>
-    <div id="chart" style="height:380px;width:100%"></div>
-  </div>
+/* ====== KPI GRID ====== */
+main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+.kpi-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  margin-bottom: 24px;
+}
+.kpi {
+  background: #fff; border: 1px solid var(--brand-line);
+  border-radius: var(--radius-md); padding: 16px;
+  box-shadow: var(--shadow-sm); transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--brand-brass); }
+.kpi::before {
+  content: ""; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--brand-green), var(--brand-brass));
+}
+.kpi .seal {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--brand-paper-2); display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 10px;
+}
+.kpi .val {
+  font-family: 'IBM Plex Mono', monospace; font-weight: 700;
+  font-size: 22px; color: var(--brand-ink); line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.kpi .lbl { font-size: 12px; color: var(--brand-ink-soft); margin-top: 4px; line-height: 1.4; }
 
-  <!-- INDICATORS GRID -->
-  <div id="indicatorsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
+/* ====== CATEGORY SECTIONS ====== */
+.category {
+  background: #fff; border: 1px solid var(--brand-line);
+  border-radius: var(--radius-lg); margin-bottom: 20px;
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.cat-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 22px; cursor: pointer; user-select: none;
+  background: linear-gradient(90deg, var(--brand-paper-2), transparent 70%);
+  border-bottom: 1px solid var(--brand-line);
+  transition: var(--transition);
+}
+.cat-head:hover { background: linear-gradient(90deg, #ece3cd, transparent 70%); }
+.cat-head .icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: var(--brand-green); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  box-shadow: 0 4px 12px rgba(18,60,68,.3);
+}
+.cat-head h2 { margin: 0; font-family: 'Tajawal'; font-weight: 900; font-size: 17px; }
+.cat-head p { margin: 2px 0 0; font-size: 12.5px; color: var(--brand-ink-soft); }
+.cat-head .chev {
+  margin-inline-start: auto; font-size: 20px; color: var(--brand-brass);
+  transition: transform var(--transition);
+}
+.category:not(.open) .cat-head .chev { transform: rotate(-90deg); }
+.cat-body { padding: 22px; display: none; }
+.category.open .cat-body { display: block; }
+.cat-note {
+  background: var(--brand-paper-2); border-inline-start: 3px solid var(--brand-brass);
+  padding: 10px 14px; border-radius: 6px; font-size: 12.5px;
+  color: var(--brand-ink-soft); margin: 0 0 16px;
+}
+.chart-wrap { position: relative; width: 100%; }
+.ind-cards {
+  display: grid; gap: 10px; margin-top: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+.ind-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--brand-paper-2); border: 1px solid var(--brand-line);
+  border-radius: 10px; padding: 12px 14px; transition: var(--transition);
+}
+.ind-card:hover { border-color: var(--brand-green); transform: translateY(-1px); }
+.ind-card .em { font-size: 24px; }
+.ind-card .n {
+  font-family: 'IBM Plex Mono', monospace; font-weight: 700;
+  font-size: 16px; color: var(--brand-ink); font-variant-numeric: tabular-nums;
+}
+.ind-card .t { font-size: 11.5px; color: var(--brand-ink-soft); line-height: 1.4; }
 
-  <!-- TEXT FIELDS AREA -->
-  <div id="textArea" class="mb-10"></div>
+/* ====== MAP ====== */
+.map-section .cat-body { padding: 0; }
+#govMap { height: 520px; width: 100%; }
+.map-legend {
+  position: absolute; top: 14px; inset-inline-end: 14px; z-index: 400;
+  background: rgba(255,255,255,.96); backdrop-filter: blur(6px);
+  border: 1px solid var(--brand-line); border-radius: 10px;
+  padding: 10px 14px; font-size: 12px;
+  box-shadow: var(--shadow-md);
+}
+.legend-item { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.15); }
 
-  <!-- FOOTER -->
-  <div class="text-center py-8 text-xs" style="color:var(--muted);border-top:1px solid var(--border)">
-    <p>📅 البيانات لشهر حزيران 2026 — وزارة الشؤون الاجتماعية والعمل — سوريا</p>
-    <p class="mt-1">تم بناء اللوحة بناءً على 84 مؤشراً مصنفاً في 14 فئة تشغيلية</p>
-  </div>
+/* ====== GOV LIST ====== */
+.gov-list { display: grid; gap: 8px; }
+.gov-item { border: 1px solid var(--brand-line); border-radius: 10px; overflow: hidden; }
+.gh {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; cursor: pointer; background: var(--brand-paper-2);
+  transition: var(--transition);
+}
+.gh:hover { background: #ece3cd; }
+.gh .stamp {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--brand-green); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-family: 'Tajawal';
+}
+.gh strong { flex: 1; }
+.gh .chev { color: var(--brand-brass); transition: transform var(--transition); }
+.gov-item.open .gh .chev { transform: rotate(180deg); }
+.gb { padding: 0 16px; display: none; }
+.gov-item.open .gb { display: block; padding: 14px 16px; border-top: 1px solid var(--brand-line); }
+.gb .row { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--brand-line); }
+.gb .row:last-child { border-bottom: none; }
+.gb .row b { min-width: 150px; color: var(--brand-green); font-size: 13px; }
+.gb .row span { flex: 1; font-size: 13px; color: var(--brand-ink); }
+.empty-note { color: var(--brand-ink-soft); font-style: italic; }
 
-</div>
+/* ====== FOOTER ====== */
+footer {
+  max-width: 1400px; margin: 20px auto 40px; padding: 0 20px;
+  color: var(--brand-ink-soft); font-size: 12.5px; text-align: center;
+}
+footer .line {
+  background: #fff8e1; border: 1px solid #ffe082; color: #8d6e00;
+  padding: 10px 16px; border-radius: 8px; margin-bottom: 10px; font-weight: 600;
+}
 
-<script>
-(function(){
-  // ====== DATA ======
-  var DATA = {
-    meta: {
-      governorates: ["دمشق","ريف دمشق","درعا","القنيطرة","السويداء","حمص","حماه","طرطوس","اللاذقية","ادلب","حلب","دير الزور","الحسكة","الرقة"],
-      year: 2026, month: "حزيران"
-    },
-    categories: [
-{name:"الإعاقة والتأهيل المهني",type:"count",icon:"🧑‍🦯",indicators:[
-{name:"عدد الأشخاص ذوي الإعاقة الحاصلين على بطاقة الإعاقة",type:"count",values:{"دمشق":49,"ريف دمشق":114,"درعا":0,"القنيطرة":0,"السويداء":21,"حمص":140,"حماه":0,"طرطوس":33,"اللاذقية":137,"ادلب":0,"حلب":132,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد الطلاب المسجلين في المعاهد الخاصة بذوي الاعاقة",type:"count",values:{"دمشق":648,"ريف دمشق":0,"درعا":0,"القنيطرة":0,"السويداء":110,"حمص":0,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":0,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد المستفيدين من مراكز التأهيل المهني (تمكين الشباب)",type:"count",values:{"دمشق":0,"ريف دمشق":120,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":260,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":0,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد المستفيدين من مراكز التأهيل (تنمية ريفية)",type:"count",values:{"دمشق":0,"ريف دمشق":0,"درعا":180,"القنيطرة":0,"السويداء":0,"حمص":0,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":0,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد مراكز التأهيل المهني",type:"count",values:{"دمشق":1,"ريف دمشق":2,"درعا":1,"القنيطرة":0,"السويداء":1,"حمص":3,"حماه":1,"طرطوس":1,"اللاذقية":2,"ادلب":0,"حلب":3,"دير الزور":0,"الحسكة":0,"الرقة":0}}
-]},
-{name:"الرعاية الاجتماعية",type:"count",icon:"🤝",indicators:[
-{name:"عدد مراكز رعاية المتسولين",type:"count",values:{"دمشق":2,"ريف دمشق":2,"درعا":1,"القنيطرة":0,"السويداء":1,"حمص":2,"حماه":2,"طرطوس":1,"اللاذقية":1,"ادلب":0,"حلب":3,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد النزلاء في مراكز التسول",type:"count",values:{"دمشق":70,"ريف دمشق":45,"درعا":12,"القنيطرة":0,"السويداء":8,"حمص":55,"حماه":30,"طرطوس":15,"اللاذقية":20,"ادلب":0,"حلب":80,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد دور الرعاية للمسنين",type:"count",values:{"دمشق":3,"ريف دمشق":2,"درعا":1,"القنيطرة":0,"السويداء":1,"حمص":2,"حماه":1,"طرطوس":1,"اللاذقية":2,"ادلب":0,"حلب":3,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد المستفيدين من خدمات دور رعاية المسنين",type:"count",values:{"دمشق":228,"ريف دمشق":156,"درعا":42,"القنيطرة":0,"السويداء":38,"حمص":180,"حماه":95,"طرطوس":52,"اللاذقية":78,"ادلب":0,"حلب":210,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد دور رعاية الايتام",type:"count",values:{"دمشق":5,"ريف دمشق":4,"درعا":2,"القنيطرة":0,"السويداء":1,"حمص":4,"حماه":2,"طرطوس":1,"اللاذقية":3,"ادلب":0,"حلب":6,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد المستفيدين من الكفالة الداخلية",type:"count",values:{"دمشق":385,"ريف دمشق":520,"درعا":180,"القنيطرة":0,"السويداء":95,"حمص":410,"حماه":220,"طرطوس":110,"اللاذقية":165,"ادلب":0,"حلب":580,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد المستفيدين من الكفالة الخارجية",type:"count",values:{"دمشق":46450,"ريف دمشق":78200,"درعا":28500,"القنيطرة":0,"السويداء":12400,"حمص":61800,"حماه":35600,"طرطوس":18900,"اللاذقية":24700,"ادلب":0,"حلب":92300,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد معاهد الأحداث",type:"count",values:{"دمشق":1,"ريف دمشق":1,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":1,"حماه":0,"طرطوس":0,"اللاذقية":1,"ادلب":0,"حلب":1,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد معاهد الأحداث ضمن الخدمة",type:"count",values:{"دمشق":0,"ريف دمشق":1,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":1,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":1,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"عدد نزلاء الأحداث",type:"count",values:{"دمشق":7,"ريف دمشق":14,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":11,"حماه":0,"طرطوس":0,"اللاذقية":5,"ادلب":0,"حلب":18,"دير الزور":0,"الحسكة":0,"الرقة":0}}
-]},
-{name:"التنمية الريفية والصناعات الريفية",type:"count",icon:"🌾",indicators:[
-{name:"عدد مراكز التنمية الريفية خارج الخدمة",type:"count",values:{"دمشق":0,"ريف دمشق":8,"درعا":3,"القنيطرة":1,"السويداء":2,"حمص":12,"حماه":9,"طرطوس":4,"اللاذقية":6,"ادلب":0,"حلب":15,"دير الزور":5,"الحسكة":7,"الرقة":4}},
-{name:"عدد مراكز التنمية الريفية ضمن الخدمة",type:"count",values:{"دمشق":0,"ريف دمشق":15,"درعا":7,"القنيطرة":2,"السويداء":5,"حمص":20,"حماه":14,"طرطوس":8,"اللاذقية":11,"ادلب":0,"حلب":25,"دير الزور":9,"الحسكة":12,"الرقة":6}},
-{name:"عدد وحدات الصناعات الريفية خارج الخدمة",type:"count",values:{"دمشق":0,"ريف دمشق":12,"درعا":5,"القنيطرة":0,"السويداء":3,"حمص":18,"حماه":11,"طرطوس":6,"اللاذقية":9,"ادلب":0,"حلب":22,"دير الزور":4,"الحسكة":8,"الرقة":3}},
-{name:"عدد وحدات الصناعات الريفية ضمن الخدمة",type:"count",values:{"دمشق":0,"ريف دمشق":28,"درعا":14,"القنيطرة":3,"السويداء":9,"حمص":35,"حماه":22,"طرطوس":15,"اللاذقية":19,"ادلب":0,"حلب":42,"دير الزور":11,"الحسكة":18,"الرقة":8}},
-{name:"عدد المستفيدين من مراكز التنمية الريفية",type:"count",values:{"دمشق":0,"ريف دمشق":3850,"درعا":1620,"القنيطرة":280,"السويداء":950,"حمص":4920,"حماه":2780,"طرطوس":1340,"اللاذقية":1890,"ادلب":0,"حلب":6250,"دير الزور":1120,"الحسكة":2050,"الرقة":890}},
-{name:"عدد المستفيدين من وحدات الصناعات الريفية",type:"count",values:{"دمشق":0,"ريف دمشق":2140,"درعا":890,"القنيطرة":120,"السويداء":540,"حمص":2980,"حماه":1560,"طرطوس":780,"اللاذقية":1120,"ادلب":0,"حلب":3780,"دير الزور":560,"الحسكة":1240,"الرقة":480}}
-]},
-{name:"سوق العمل والتشغيل",type:"count",icon:"💼",indicators:[
-{name:"المسجلون الجدد من العاملين (الزيارات التفتيشية)",type:"count",values:{"دمشق":35,"ريف دمشق":58,"درعا":12,"القنيطرة":0,"السويداء":8,"حمص":42,"حماه":25,"طرطوس":14,"اللاذقية":19,"ادلب":0,"حلب":67,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"تراخيص العمل الجديدة (غير السوريين)",type:"count",values:{"دمشق":0,"ريف دمشق":25,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":18,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":32,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"تراخيص العمل المجددة (غير السوريين)",type:"count",values:{"دمشق":0,"ريف دمشق":14,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":9,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":21,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"مكاتب استقدام العاملات غير السوريات المرخصة",type:"count",values:{"دمشق":14,"ريف دمشق":8,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":5,"حماه":0,"طرطوس":0,"اللاذقية":2,"ادلب":0,"حلب":11,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"تراخيص العمل للعاملات المنزليات غير السوريات",type:"count",values:{"دمشق":120,"ريف دمشق":85,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":45,"حماه":0,"طرطوس":0,"اللاذقية":18,"ادلب":0,"حلب":95,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"تراخيص العمل المجددة (عاملات منزليات غير سوريات)",type:"count",values:{"دمشق":0,"ريف دمشق":42,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":22,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":58,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"مكاتب تشغيل العمال المنزليين السوريين المرخصة",type:"count",values:{"دمشق":0,"ريف دمشق":6,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":3,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":8,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"مكاتب خاصة لتشغيل العمال السوريين المرخصة",type:"count",values:{"دمشق":0,"ريف دمشق":12,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":7,"حماه":0,"طرطوس":0,"اللاذقية":3,"ادلب":0,"حلب":15,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"المسجلون على منصة سوق العمل (2024-2025)",type:"count",values:{"دمشق":28500,"ريف دمشق":42300,"درعا":15600,"القنيطرة":2400,"السويداء":8900,"حمص":36800,"حماه":21500,"طرطوس":12400,"اللاذقية":17800,"ادلب":0,"حلب":58200,"دير الزور":9800,"الحسكة":14500,"الرقة":7600}},
-{name:"المنشآت المسجلة في المنصة",type:"count",values:{"دمشق":1850,"ريف دمشق":2420,"درعا":890,"القنيطرة":140,"السويداء":520,"حمص":2180,"حماه":1340,"طرطوس":780,"اللاذقية":1050,"ادلب":0,"حلب":3250,"دير الزور":560,"الحسكة":820,"الرقة":430}},
-{name:"فرص العمل المتاحة على المنصة",type:"count",values:{"دمشق":4280,"ريف دمشق":5920,"درعا":2150,"القنيطرة":320,"السويداء":1240,"حمص":5180,"حماه":3020,"طرطوس":1780,"اللاذقية":2450,"ادلب":0,"حلب":7850,"دير الزور":1340,"الحسكة":1980,"الرقة":980}},
-{name:"فرص التدريب المتاحة على المنصة",type:"count",values:{"دمشق":890,"ريف دمشق":1240,"درعا":450,"القنيطرة":80,"السويداء":280,"حمص":1080,"حماه":620,"طرطوس":360,"اللاذقية":490,"ادلب":0,"حلب":1650,"دير الزور":240,"الحسكة":380,"الرقة":180}}
-]},
-{name:"التفتيش والرقابة على المنشآت",type:"count",icon:"🔍",indicators:[
-{name:"الزيارات التفتيشية (قطاع صناعي)",type:"count",values:{"دمشق":320,"ريف دمشق":450,"درعا":120,"القنيطرة":15,"السويداء":65,"حمص":380,"حماه":210,"طرطوس":95,"اللاذقية":145,"ادلب":0,"حلب":520,"دير الزور":45,"الحسكة":75,"الرقة":35}},
-{name:"الزيارات التفتيشية (قطاع زراعي)",type:"count",values:{"دمشق":45,"ريف دمشق":180,"درعا":220,"القنيطرة":60,"السويداء":95,"حمص":280,"حماه":195,"طرطوس":120,"اللاذقية":150,"ادلب":0,"حلب":340,"دير الزور":165,"الحسكة":210,"الرقة":120}},
-{name:"عدد المخالفات الناتجة عن الزيارات",type:"count",values:{"دمشق":42,"ريف دمشق":68,"درعا":18,"القنيطرة":2,"السويداء":7,"حمص":55,"حماه":28,"طرطوس":11,"اللاذقية":19,"ادلب":0,"حلب":82,"دير الزور":6,"الحسكة":10,"الرقة":4}}
-]},
-{name:"المنظمات غير الحكومية",type:"count",icon:"🏢",indicators:[
-{name:"عدد المنظمات غير الحكومية المشهرة (الكل)",type:"count",values:{"دمشق":1286,"ريف دمشق":420,"درعا":185,"القنيطرة":28,"السويداء":95,"حمص":365,"حماه":210,"طرطوس":125,"اللاذقية":178,"ادلب":0,"حلب":540,"دير الزور":85,"الحسكة":145,"الرقة":72}},
-{name:"عدد المنظمات المسحوب ترخيصها",type:"count",values:{"دمشق":3,"ريف دمشق":5,"درعا":1,"القنيطرة":0,"السويداء":0,"حمص":4,"حماه":2,"طرطوس":0,"اللاذقية":1,"ادلب":0,"حلب":7,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"المنظمات المشهرة في العام 2025",type:"count",values:{"دمشق":145,"ريف دمشق":68,"درعا":22,"القنيطرة":3,"السويداء":12,"حمص":58,"حماه":31,"طرطوس":18,"اللاذقية":25,"ادلب":0,"حلب":85,"دير الزور":10,"الحسكة":17,"الرقة":8}},
-{name:"الندوات والدورات (صحة وسلامة مهنية)",type:"count",values:{"دمشق":18,"ريف دمشق":12,"درعا":5,"القنيطرة":0,"السويداء":3,"حمص":15,"حماه":8,"طرطوس":4,"اللاذقية":6,"ادلب":0,"حلب":22,"دير الزور":2,"الحسكة":3,"الرقة":1}}
-]},
-{name:"التأمينات الاجتماعية والحماية",type:"count",icon:"🛡️",indicators:[
-{name:"المسجلون في التأمينات (قطاع عام)",type:"count",values:{"دمشق":185000,"ريف دمشق":95000,"درعا":32000,"القنيطرة":4500,"السويداء":18000,"حمص":78000,"حماه":48000,"طرطوس":28000,"اللاذقية":38000,"ادلب":0,"حلب":125000,"دير الزور":15000,"الحسكة":25000,"الرقة":12000}},
-{name:"المسجلون في التأمينات (قطاع خاص)",type:"count",values:{"دمشق":142000,"ريف دمشق":88000,"درعا":28000,"القنيطرة":3800,"السويداء":15000,"حمص":65000,"حماه":42000,"طرطوس":24000,"اللاذقية":32000,"ادلب":0,"حلب":98000,"دير الزور":12000,"الحسكة":20000,"الرقة":9500}},
-{name:"إجمالي المسجلين القائمين على رأس عملهم",type:"count",values:{"دمشق":327000,"ريف دمشق":183000,"درعا":60000,"القنيطرة":8300,"السويداء":33000,"حمص":143000,"حماه":90000,"طرطوس":52000,"اللاذقية":70000,"ادلب":0,"حلب":223000,"دير الزور":27000,"الحسكة":45000,"الرقة":21500}},
-{name:"عدد المتقاعدين المستفيدين",type:"count",values:{"دمشق":48500,"ريف دمشق":28200,"درعا":9800,"القنيطرة":1450,"السويداء":5600,"حمص":22800,"حماه":14200,"طرطوس":8500,"اللاذقية":11200,"ادلب":0,"حلب":36500,"دير الزور":4200,"الحسكة":7200,"الرقة":3400}},
-{name:"قرارات ضم الخدمة",type:"count",values:{"دمشق":125,"ريف دمشق":85,"درعا":28,"القنيطرة":4,"السويداء":15,"حمص":98,"حماه":58,"طرطوس":32,"اللاذقية":45,"ادلب":0,"حلب":158,"دير الزور":12,"الحسكة":22,"الرقة":10}},
-{name:"المستفيدون من تعويضات إصابات العمل",type:"count",values:{"دمشق":38,"ريف دمشق":52,"درعا":12,"القنيطرة":0,"السويداء":5,"حمص":45,"حماه":25,"طرطوس":14,"اللاذقية":19,"ادلب":0,"حلب":68,"دير الزور":4,"الحسكة":8,"الرقة":3}},
-{name:"المنشآت التي تم إشراكها بالتأمينات",type:"count",values:{"دمشق":2850,"ريف دمشق":3620,"درعا":1250,"القنيطرة":180,"السويداء":680,"حمص":3180,"حماه":1950,"طرطوس":1080,"اللاذقية":1520,"ادلب":0,"حلب":4580,"دير الزور":720,"الحسكة":1050,"الرقة":560}},
-{name:"الاتفاقيات الموقعة (حماية اجتماعية)",type:"count",values:{"دمشق":8,"ريف دمشق":3,"درعا":1,"القنيطرة":0,"السويداء":1,"حمص":4,"حماه":2,"طرطوس":1,"اللاذقية":2,"ادلب":0,"حلب":5,"دير الزور":0,"الحسكة":1,"الرقة":0}}
-]},
-{name:"السكان والتركيبة السكانية",type:"mixed",icon:"👥",indicators:[
-{name:"عدد السكان",type:"count",values:{"دمشق":2002108,"ريف دمشق":3873881,"درعا":1125000,"القنيطرة":90000,"السويداء":520000,"حمص":1765000,"حماه":1780629,"طرطوس":800000,"اللاذقية":1100000,"ادلب":2759951,"حلب":4919107,"دير الزور":1200000,"الحسكة":1500000,"الرقة":900000}},
-{name:"عدد الذكور",type:"count",values:{"دمشق":985000,"ريف دمشق":1920000,"درعا":558000,"القنيطرة":44500,"السويداء":258000,"حمص":875000,"حماه":885000,"طرطوس":396000,"اللاذقية":545000,"ادلب":1370000,"حلب":2435000,"دير الزور":595000,"الحسكة":745000,"الرقة":447000}},
-{name:"عدد الإناث",type:"count",values:{"دمشق":1017108,"ريف دمشق":1953881,"درعا":567000,"القنيطرة":45500,"السويداء":262000,"حمص":890000,"حماه":895629,"طرطوس":404000,"اللاذقية":555000,"ادلب":1389951,"حلب":2484107,"دير الزور":605000,"الحسكة":755000,"الرقة":453000}},
-{name:"نسبة السكان دون 15 سنة",type:"percent",values:{"دمشق":28.5,"ريف دمشق":35.2,"درعا":38.0,"القنيطرة":36.0,"السويداء":32.0,"حمص":33.5,"حماه":34.8,"طرطوس":30.0,"اللاذقية":31.0,"ادلب":40.5,"حلب":36.8,"دير الزور":39.0,"الحسكة":37.5,"الرقة":38.2}},
-{name:"نسبة السكان 15-60 سنة",type:"percent",values:{"دمشق":62.0,"ريف دمشق":57.5,"درعا":54.5,"القنيطرة":56.0,"السويداء":59.0,"حمص":58.0,"حماه":56.8,"طرطوس":61.0,"اللاذقية":60.0,"ادلب":52.5,"حلب":55.2,"دير الزور":53.8,"الحسكة":54.5,"الرقة":54.0}},
-{name:"نسبة السكان 60 سنة فأكثر",type:"percent",values:{"دمشق":9.5,"ريف دمشق":7.3,"درعا":7.5,"القنيطرة":8.0,"السويداء":9.0,"حمص":8.5,"حماه":8.4,"طرطوس":9.0,"اللاذقية":9.0,"ادلب":7.0,"حلب":8.0,"دير الزور":7.2,"الحسكة":8.0,"الرقة":7.8}}
-]},
-{name:"مؤشرات سوق العمل الاقتصادية",type:"mixed",icon:"📈",indicators:[
-{name:"حجم قوة العمل (مليون نسمة)",type:"count",values:{"دمشق":0.85,"ريف دمشق":1.62,"درعا":0.48,"القنيطرة":0.04,"السويداء":0.22,"حمص":0.75,"حماه":0.76,"طرطوس":0.34,"اللاذقية":0.47,"ادلب":1.15,"حلب":2.05,"دير الزور":0.51,"الحسكة":0.64,"الرقة":0.38}},
-{name:"عدد المشتغلين",type:"count",values:{"دمشق":671500,"ريف دمشق":1085400,"درعا":302400,"القنيطرة":23200,"السويداء":147400,"حمص":577500,"حماه":589000,"طرطوس":275400,"اللاذقية":371300,"ادلب":724500,"حلب":1742500,"دير الزور":326400,"الحسكة":428800,"الرقة":247000}},
-{name:"عدد المتعطلين",type:"count",values:{"دمشق":178500,"ريف دمشق":534600,"درعا":177600,"القنيطرة":16800,"السويداء":72600,"حمص":172500,"حماه":171000,"طرطوس":64600,"اللاذقية":98700,"ادلب":425500,"حلب":307500,"دير الزور":183600,"الحسكة":211200,"الرقة":133000}},
-{name:"معدل البطالة العام",type:"percent",values:{"دمشق":21.0,"ريف دمشق":33.0,"درعا":37.0,"القنيطرة":42.0,"السويداء":33.0,"حمص":23.0,"حماه":15.1,"طرطوس":19.0,"اللاذقية":21.0,"ادلب":23.6,"حلب":15.0,"دير الزور":36.0,"الحسكة":33.0,"الرقة":35.0}},
-{name:"معدل بطالة الذكور",type:"percent",values:{"دمشق":18.0,"ريف دمشق":29.5,"درعا":33.0,"القنيطرة":38.0,"السويداء":29.0,"حمص":20.0,"حماه":13.0,"طرطوس":16.5,"اللاذقية":18.0,"ادلب":20.5,"حلب":13.0,"دير الزور":32.0,"الحسكة":29.5,"الرقة":31.5}},
-{name:"معدل بطالة الإناث",type:"percent",values:{"دمشق":26.5,"ريف دمشق":39.5,"درعا":44.0,"القنيطرة":49.0,"السويداء":40.0,"حمص":28.5,"حماه":19.5,"طرطوس":24.5,"اللاذقية":26.8,"ادلب":30.5,"حلب":18.5,"دير الزور":42.0,"الحسكة":39.0,"الرقة":41.0}},
-{name:"معدل بطالة الشباب",type:"percent",values:{"دمشق":38.0,"ريف دمشق":52.0,"درعا":58.0,"القنيطرة":62.0,"السويداء":54.0,"حمص":42.0,"حماه":32.0,"طرطوس":36.0,"اللاذقية":39.0,"ادلب":45.0,"حلب":30.0,"دير الزور":56.0,"الحسكة":51.0,"الرقة":54.0}},
-{name:"معدل المشاركة الاقتصادية (ذكور)",type:"percent",values:{"دمشق":68.0,"ريف دمشق":72.0,"درعا":70.0,"القنيطرة":65.0,"السويداء":66.0,"حمص":69.0,"حماه":71.0,"طرطوس":67.0,"اللاذقية":68.0,"ادلب":64.0,"حلب":70.0,"دير الزور":66.0,"الحسكة":67.0,"الرقة":65.0}},
-{name:"معدل المشاركة الاقتصادية (إناث)",type:"percent",values:{"دمشق":16.5,"ريف دمشق":14.0,"درعا":12.5,"القنيطرة":10.0,"السويداء":13.0,"حمص":15.0,"حماه":16.0,"طرطوس":14.5,"اللاذقية":15.5,"ادلب":11.5,"حلب":15.5,"دير الزور":12.0,"الحسكة":13.0,"الرقة":11.8}},
-{name:"نسبة الإنفاق الاستثماري",type:"percent",values:{"دمشق":22.0,"ريف دمشق":18.0,"درعا":12.0,"القنيطرة":8.0,"السويداء":14.0,"حمص":16.0,"حماه":15.0,"طرطوس":13.0,"اللاذقية":17.0,"ادلب":9.0,"حلب":20.0,"دير الزور":10.0,"الحسكة":11.0,"الرقة":9.5}},
-{name:"نسبة العمال في القطاع الخاص غير المنظم",type:"percent",values:{"دمشق":42.0,"ريف دمشق":55.0,"درعا":62.0,"القنيطرة":68.0,"السويداء":58.0,"حمص":50.0,"حماه":48.0,"طرطوس":52.0,"اللاذقية":49.0,"ادلب":70.0,"حلب":45.0,"دير الزور":65.0,"الحسكة":60.0,"الرقة":64.0}}
-]},
-{name:"مؤشرات اجتماعية حساسة",type:"percent",icon:"⚠️",indicators:[
-{name:"معدل زواج القاصرات",type:"percent",values:{"دمشق":13.0,"ريف دمشق":19.5,"درعا":25.0,"القنيطرة":28.0,"السويداء":17.0,"حمص":18.0,"حماه":16.5,"طرطوس":14.0,"اللاذقية":15.0,"ادلب":30.0,"حلب":21.0,"دير الزور":27.0,"الحسكة":24.0,"الرقة":26.0}},
-{name:"معدل عمل الأطفال",type:"percent",values:{"دمشق":27.0,"ريف دمشق":30.0,"درعا":35.0,"القنيطرة":38.0,"السويداء":25.0,"حمص":32.0,"حماه":40.0,"طرطوس":22.0,"اللاذقية":24.0,"ادلب":31.0,"حلب":32.0,"دير الزور":36.0,"الحسكة":34.0,"الرقة":35.5}},
-{name:"نسبة النساء المعيلات",type:"percent",values:{"دمشق":18.0,"ريف دمشق":22.0,"درعا":26.0,"القنيطرة":28.0,"السويداء":20.0,"حمص":23.0,"حماه":21.0,"طرطوس":19.0,"اللاذقية":20.5,"ادلب":32.0,"حلب":25.0,"دير الزور":29.0,"الحسكة":27.0,"الرقة":30.0}}
-]},
-{name:"مؤشرات الفقر والأمن الغذائي",type:"percent",icon:"🍞",indicators:[
-{name:"نسبة الأسر الأمنة غذائياً",type:"percent",values:{"دمشق":48.0,"ريف دمشق":32.0,"درعا":22.0,"القنيطرة":18.0,"السويداء":38.0,"حمص":30.0,"حماه":34.0,"طرطوس":40.0,"اللاذقية":42.0,"ادلب":15.0,"حلب":28.0,"دير الزور":19.0,"الحسكة":21.0,"الرقة":17.0}},
-{name:"نسبة الأسر ذات الهشاشة الغذائية",type:"percent",values:{"دمشق":35.0,"ريف دمشق":42.0,"درعا":45.0,"القنيطرة":44.0,"السويداء":40.0,"حمص":43.0,"حماه":41.0,"طرطوس":38.0,"اللاذقية":37.0,"ادلب":43.0,"حلب":44.0,"دير الزور":45.0,"الحسكة":44.0,"الرقة":44.0}},
-{name:"نسبة الأسر المعدومة الأمن الغذائي",type:"percent",values:{"دمشق":17.0,"ريف دمشق":26.0,"درعا":33.0,"القنيطرة":38.0,"السويداء":22.0,"حمص":27.0,"حماه":25.0,"طرطوس":22.0,"اللاذقية":21.0,"ادلب":42.0,"حلب":28.0,"دير الزور":36.0,"الحسكة":35.0,"الرقة":39.0}}
-]},
-{name:"المساعدات والاستجابة الإنسانية",type:"count",icon:"🆘",indicators:[
-{name:"عدد السلل الغذائية الموزعة",type:"count",values:{"دمشق":28500,"ريف دمشق":62000,"درعا":38000,"القنيطرة":4500,"السويداء":15000,"حمص":48000,"حماه":32000,"طرطوس":18000,"اللاذقية":24000,"ادلب":85000,"حلب":78000,"دير الزور":22000,"الحسكة":35000,"الرقة":28000}},
-{name:"المساعدات العينية (أدوية - عمليات - منظفات)",type:"count",values:{"دمشق":12500,"ريف دمشق":28000,"درعا":15000,"القنيطرة":1800,"السويداء":6500,"حمص":22000,"حماه":14000,"طرطوس":8000,"اللاذقية":10500,"ادلب":38000,"حلب":35000,"دير الزور":9500,"الحسكة":15000,"الرقة":12000}},
-{name:"قيمة الإعانات المالية",type:"count",values:{"دمشق":580000000,"ريف دمشق":1250000000,"درعا":620000000,"القنيطرة":75000000,"السويداء":240000000,"حمص":980000000,"حماه":650000000,"طرطوس":360000000,"اللاذقية":480000000,"ادلب":1850000000,"حلب":1580000000,"دير الزور":420000000,"الحسكة":680000000,"الرقة":550000000}},
-{name:"عدد المراكز المجتمعية (UNHCR)",type:"count",values:{"دمشق":8,"ريف دمشق":15,"درعا":12,"القنيطرة":2,"السويداء":4,"حمص":18,"حماه":10,"طرطوس":5,"اللاذقية":7,"ادلب":25,"حلب":22,"دير الزور":9,"الحسكة":14,"الرقة":11}},
-{name:"عدد المساحات الآمنة للنساء (UNFPA)",type:"count",values:{"دمشق":5,"ريف دمشق":9,"درعا":6,"القنيطرة":1,"السويداء":2,"حمص":10,"حماه":6,"طرطوس":3,"اللاذقية":4,"ادلب":14,"حلب":13,"دير الزور":4,"الحسكة":7,"الرقة":5}},
-{name:"عدد المخيمات",type:"count",values:{"دمشق":2,"ريف دمشق":12,"درعا":18,"القنيطرة":3,"السويداء":0,"حمص":8,"حماه":5,"طرطوس":0,"اللاذقية":3,"ادلب":42,"حلب":25,"دير الزور":15,"الحسكة":22,"الرقة":18}},
-{name:"عدد الأسر المقيمة في المخيمات",type:"count",values:{"دمشق":1250,"ريف دمشق":8500,"درعا":15800,"القنيطرة":1800,"السويداء":0,"حمص":5200,"حماه":3100,"طرطوس":0,"اللاذقية":1900,"ادلب":58000,"حلب":28500,"دير الزور":12400,"الحسكة":19800,"الرقة":15200}}
-]},
-{name:"التشريعات والصكوك القانونية",type:"count",icon:"📜",indicators:[
-{name:"مشاريع الصكوك القانونية الجديدة",type:"count",values:{"دمشق":5,"ريف دمشق":0,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":0,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":0,"دير الزور":0,"الحسكة":0,"الرقة":0}},
-{name:"مشاريع الصكوك قيد المراجعة والتحديث",type:"count",values:{"دمشق":8,"ريف دمشق":0,"درعا":0,"القنيطرة":0,"السويداء":0,"حمص":0,"حماه":0,"طرطوس":0,"اللاذقية":0,"ادلب":0,"حلب":0,"دير الزور":0,"الحسكة":0,"الرقة":0}}
-]},
-{name:"بيانات نصية",type:"text",icon:"📝",indicators:[
-{name:"أهم ثلاث إنجازات",type:"text",values:{"دمشق":"تحديث بيانات 1286 منظمة غير حكومية | تدشين منصة سوق العمل الموحدة | إصدار 5 صكوك قانونية جديدة","ريف دمشق":"تسجيل 42300 باحث عن عمل | إعادة تأهيل 15 مركز تنمية ريفية | توزيع 62 ألف سلة غذائية","درعا":"تأهيل 180 شاب في الحرف اليدوية | دعم 7 منشآت صناعية ريفية | توزيع 38 ألف سلة غذائية","القنيطرة":"مسح 28 منظمة محلية | توزيع 4500 سلة غذائية | إعداد دراسة احتياجات القنيطرة","السويداء":"تسجيل 110 طالب في معاهذ الإعاقة | تشغيل 5 مراكز تنمية ريفية | دعم 95 منظمة مجتمعية","حمص":"تأهيل 260 شاب في مراكز التمكين | إعادة فتح 20 مركز تنمية ريفية | تشغيل 3 مراكز تأهيل مهني","حماه":"تسجيل 21500 في منصة العمل | ربط 1340 منشأة بالتأمينات | تنفيذ 8 ندوات للسلامة المهنية","طرطوس":"تشغيل 8 مراكز تنمية ريفية | تسجيل 12400 في المنصة | دعم 125 منظمة محلية","اللاذقية":"تسجيل 137 شخصاً ذوي إعاقة | تشغيل 11 مركز تنمية ريفية | افتتاح مساحتين آمنتين للنساء","ادلب":"توزيع 85 ألف سلة غذائية | دعم 42 مخيماً | تشغيل 25 مركزاً مجتمعياً","حلب":"تسجيل 58200 في منصة العمل | تأهيل 3 مراكز إعاقة | دعم 540 منظمة غير حكومية","دير الزور":"توزيع 22 ألف سلة غذائية | دعم 15 مخيماً | مسح 9 مراكز تنمية ريفية","الحسكة":"تسجيل 14500 في المنصة | دعم 22 مخيماً | تشغيل 14 مركزاً مجتمعياً","الرقة":"توزيع 28 ألف سلة غذائية | دعم 18 مخيماً | إعادة تأهيل 6 مراكز تنمية ريفية"}},
-{name:"أهم ثلاث توصيات",type:"text",values:{"دمشق":"تسريع إصدار الصكوك القانونية المتبقية | توسيع نطاق منصة سوق العمل | زيادة مراكز التأهيل المهني","ريف دمشق":"دعم القطاع الخاص المنظم | بناء قدرات المنظمات المحلية | توسيع برامج التأهيل المهني","درعا":"إعادة تأهيل مراكز التنمية الريفية المدمرّة | دعم المشاريع الصغيرة الريفية | برامج إعادة إدماج الأطفال العاملين","القنيطرة":"تأسيس بنية تحتية اجتماعية | جذب منظمات دولية | برامج تأهيل للشباب","السويداء":"توسيع معاهذ ذوي الإعاقة | دعم الصناعات الريفية التقليدية | برامج تمكين اقتصادي للنساء","حمص":"إعادة إعمار مراكز الرعاية الاجتماعية | توسيع برامج التأهيل المهني | دعم المنشآت الصغيرة والمتوسطة","حماه":"خفض معدل عمل الأطفال (40%) | برامج تمكين للنساء المعيلات | توسيع التغطية التأمينية","طرطوس":"تطوير الصناعات البحرية والريفية | برامج تشغيل للشباب | دعم منظمات المجتمع المدني","اللاذقية":"توسيع مراكز رعاية ذوي الإعاقة | تطوير السياحة الاجتماعية | برامج تمكين المرأة","ادلب":"توسيع الاستجابة الإنسانية | برامج إعادة إدماج الأطفال | بناء قدرات المنظمات المحلية","حلب":"إعادة إعمار البنية التحتية الاجتماعية | برامج تأهيل واسعة النطاق | جذب الاستثمار للقطاع الخاص","دير الزور":"برامج معالجة عمل الأطفال | إعادة تأهيل مراكز الخدمة | استقرار الوضع الأمني والخدمي","الحسكة":"توحيد آليات الخدمة الاجتماعية | برامج لمعالجة زواج القاصرات | دعم الاقتصاد المحلي","الرقة":"إعادة بناء النظام الاجتماعي | برامج نزع سلاح وتسريح وإعادة إدماج | معالجة ظاهرة عمل الأطفال"}},
-{name:"الاحتياجات الرئيسية",type:"text",values:{"دمشق":"ميزانية إضافية للتأهيل المهني | دعم تقني لمنصة العمل | خبراء في التشريعات الاجتماعية","ريف دمشق":"مراكز تأهيل متنقلة | دعم مالي للمشاريع الصغيرة | معدات لمراكز التنمية الريفية","درعا":"معدات صناعية ريفية | مراكز رعاية نفسية للأطفال | برامج تغذية مدرسية","القنيطرة":"بناء مراكز اجتماعية من الصفر | سيارات إسعاف اجتماعي | دعم لوجستي كامل","السويداء":"تجهيزات لمعاهذ الإعاقة | آلات للصناعات الريفية | برامج تدريب للمعلمين","حمص":"إعادة تأهيل مباني الرعاية الاجتماعية | معدات طبية لدور المسنين | مواد بناء","حماه":"برامج متخصصة لمعالجة عمل الأطفال | مستشارين نفسيين | دعم للمنشآت العائلية","طرطوس":"قوارب ومعدات للصيد التعاوني | أفران مجتمعية | وحدات صناعية متنقلة","اللاذقية":"أجهزة طبية متطورة لذوي الإعاقة | مراكز تأهيل سمعي وبصري | حافلات نقل للأشخاص ذوي الإعاقة","ادلب":"مواد إغاثة ضخمة | خيام ومستلزمات مخيمات | فرق طبية متنقلة ومستشفيات ميدانية","حلب":"إعادة إعمار 100 مبنى اجتماعي | معدات ثقيلة لإزالة الأنقاض | 500 حافلة نقل مدرسي واجتماعي","دير الزور":"برامج تغذية طارئة | آليات للري الزراعي | فرق معالجة نفسية للأطفال","الحسكة":"معدات زراعية | مشروعات مياه وصرف صحي | برامج تعليم غير رسمي","الرقة":"مباني مؤقتة للخدمات الاجتماعية | برامج إعادة إدماج المقاتلين السابقين | دعم نفسي واجتماعي شامل"}}
-]}
-    ]
-  };
+/* ====== MODAL ====== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(10,10,10,.55);
+  z-index: 1000; display: none; align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(3px);
+}
+.modal-overlay.open { display: flex; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.modal-box {
+  background: var(--brand-paper); border-radius: var(--radius-lg);
+  width: 100%; max-width: 560px; max-height: 90vh; overflow: auto;
+  box-shadow: var(--shadow-lg); border: 2px solid var(--brand-brass);
+  animation: slideUp .25s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0 } to { transform: none; opacity: 1 } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px; border-bottom: 1px solid var(--brand-line);
+}
+.modal-header h3 { margin: 0; font-family: 'Tajawal'; font-weight: 900; font-size: 17px; }
+.modal-close {
+  background: none; border: none; font-size: 26px; cursor: pointer;
+  color: var(--brand-ink-soft); line-height: 1; padding: 0 4px;
+}
+.modal-close:hover { color: var(--brand-error); }
+.modal-body { padding: 20px 22px; }
+.help-box {
+  background: #e3f2fd; border: 1px solid #90caf9; color: #0d47a1;
+  border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.8; margin-bottom: 16px;
+}
+.file-drop-zone {
+  border: 2.5px dashed var(--brand-line); border-radius: 14px;
+  padding: 30px 20px; text-align: center; cursor: pointer;
+  transition: var(--transition); background: var(--brand-paper-2);
+}
+.file-drop-zone:hover, .file-drop-zone.dragover {
+  border-color: var(--brand-green); background: #e8f5e9; color: var(--brand-green);
+}
 
-  var state = { activeGov: 0, activeCat: 0, chart: null, chartIndIdx: 0 };
+/* ====== AUTH OVERLAY ====== */
+.password-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background:
+    radial-gradient(1000px 600px at 20% 0%, rgba(176,141,87,.35), transparent 60%),
+    radial-gradient(800px 500px at 100% 100%, rgba(181,83,60,.3), transparent 60%),
+    linear-gradient(135deg, var(--brand-green) 0%, #0a1f24 100%);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.password-box {
+  background: var(--brand-paper); border-radius: 20px; padding: 36px 32px;
+  max-width: 440px; width: 100%; text-align: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,.45);
+  border: 2px solid var(--brand-brass);
+  animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from { transform: scale(.92); opacity: 0 } to { transform: none; opacity: 1 } }
+.password-box .lock-icon { font-size: 52px; margin-bottom: 10px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.2)); }
+.password-box h2 { font-family: 'Tajawal'; font-weight: 900; font-size: 22px; margin: 0 0 6px; color: var(--brand-green); }
+.password-box p { color: var(--brand-ink-soft); font-size: 13px; margin: 0 0 20px; }
+.password-box input {
+  width: 100%; border: 2px solid var(--brand-line); border-radius: 10px;
+  padding: 12px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 16px;
+  text-align: center; letter-spacing: 4px; background: #fff; margin-bottom: 12px;
+  transition: var(--transition);
+}
+.password-box input:focus { outline: none; border-color: var(--brand-green); box-shadow: 0 0 0 4px rgba(18,60,68,.12); }
+.btn-login {
+  width: 100%; padding: 13px; font-family: inherit; font-size: 15px; font-weight: 900;
+  background: var(--brand-green); color: #fff; border: none; border-radius: 10px;
+  cursor: pointer; transition: var(--transition);
+}
+.btn-login:hover:not(:disabled) { background: #0a1f24; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-login:disabled { opacity: .6; cursor: not-allowed; }
+.error-msg { color: var(--brand-error); font-size: 12.5px; margin-top: 10px; display: none; font-weight: 700; }
+.error-msg.show { display: block; animation: shake .35s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+body.locked { overflow: hidden; }
+body.locked > *:not(.password-overlay) { display: none; }
 
-  var govList = document.getElementById('govList');
-  var catTabs = document.getElementById('catTabs');
-  var catHeader = document.getElementById('catHeader');
-  var indicatorsGrid = document.getElementById('indicatorsGrid');
-  var textArea = document.getElementById('textArea');
-  var chartIndSel = document.getElementById('chartInd');
-
-  function fmtNum(v, type) {
-    if (v === null || v === undefined || isNaN(v)) return "—";
-    if (type === "percent") return Number(v).toFixed(1) + "%";
-    if (type === "text") return v;
-    v = Number(v);
-    if (v >= 1000000) return (v/1000000).toFixed(2) + " مليون";
-    if (v >= 1000) return v.toLocaleString('ar-EG');
-    return v.toLocaleString('ar-EG');
-  }
-
-  function renderGovs() {
-    govList.innerHTML = "";
-    DATA.meta.governorates.forEach(function(g, i) {
-      var b = document.createElement('button');
-      b.className = "gov-btn px-4 py-2 rounded-xl text-sm font-semibold border";
-      b.style.cssText = "border-color:var(--border);background:var(--bg);color:var(--text)";
-      b.textContent = g;
-      if (i === state.activeGov) b.classList.add('active');
-      b.onclick = function(){ state.activeGov = i; renderGovs(); renderAll(); };
-      govList.appendChild(b);
-    });
-  }
-
-  function renderCatTabs() {
-    catTabs.innerHTML = "";
-    DATA.categories.forEach(function(c, i) {
-      var t = document.createElement('button');
-      t.className = "cat-tab px-4 py-3 text-sm font-semibold whitespace-nowrap";
-      t.style.cssText = "color:var(--muted)";
-      var bg = c.type==='percent'?'var(--accent2-soft);color:var(--accent2)':c.type==='text'?'#eef2ff;color:#4338ca':'var(--accent-soft);color:var(--accent)';
-      t.innerHTML = c.icon + " " + c.name + " <span style='font-size:11px;padding:2px 8px;border-radius:10px;background:" + bg + "'>" + c.indicators.length + "</span>";
-      if (i === state.activeCat) t.classList.add('active');
-      t.onclick = function(){ state.activeCat = i; state.chartIndIdx = 0; renderCatTabs(); renderAll(); };
-      catTabs.appendChild(t);
-    });
-  }
-
-  function renderCatHeader() {
-    var cat = DATA.categories[state.activeCat];
-    var gov = DATA.meta.governorates[state.activeGov];
-    var typeLabel = cat.type==='count'?'<span style="color:var(--accent)">أرقام وعدادات</span>':cat.type==='percent'?'<span style="color:var(--accent2)">نسب مئوية</span>':cat.type==='mixed'?'<span style="color:#7c3aed">مختلط (عدد + نسبة)</span>':'<span style="color:#4338ca">بيانات وصفية نصية</span>';
-    catHeader.innerHTML = `
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-        <div style="width:52px;height:52px;border-radius:14px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:26px">${cat.icon}</div>
-        <div style="flex:1;min-width:200px">
-          <div style="font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase">الفئة ${String(state.activeCat+1).padStart(2,'0')} / ${DATA.categories.length} — ${gov}</div>
-          <h2 class="text-2xl font-extrabold mt-1">${cat.name}</h2>
-          <div style="color:var(--muted);font-size:14px;margin-top:4px">${cat.indicators.length} مؤشر${cat.indicators.length>1?'ات':''} · النوع: ${typeLabel}</div>
-        </div>
-      </div>`;
-  }
-
-  function renderChartSelect() {
-    var cat = DATA.categories[state.activeCat];
-    chartIndSel.innerHTML = "";
-    cat.indicators.forEach(function(ind, i) {
-      if (ind.type === "text") return;
-      var o = document.createElement('option');
-      o.value = i; o.textContent = ind.name;
-      if (i === state.chartIndIdx) o.selected = true;
-      chartIndSel.appendChild(o);
-    });
-    var show = chartIndSel.options.length > 0;
-    document.getElementById('chart').style.display = show?'block':'none';
-    chartIndSel.parentElement.style.display = show?'flex':'none';
-  }
-
-  function renderChart() {
-    var cat = DATA.categories[state.activeCat];
-    var ind = cat.indicators[state.chartIndIdx];
-    if (!ind || ind.type === "text") { if(state.chart){state.chart.dispose();state.chart=null;} return; }
-    var el = document.getElementById('chart');
-    if (!state.chart) state.chart = echarts.init(el);
-    var sorted = DATA.meta.governorates.map(function(g){return{g:g,v:ind.values[g]||0}}).sort(function(a,b){return a.v-b.v});
-    var grad = {type:'linear',x:0,y:0,x2:1,y2:0,colorStops:[{offset:0,color:'#0ea5e9'},{offset:1,color:'#0369a1'}]};
-    var activeGov = DATA.meta.governorates[state.activeGov];
-    state.chart.setOption({
-      backgroundColor:'transparent',
-      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},backgroundColor:'#fff',borderColor:'#e2e8f0',
-        textStyle:{color:'#0f172a'},formatter:function(p){
-          p=p[0];return "<div style='font-weight:700;margin-bottom:4px'>"+p.name+"</div>"+
-            ind.name+": <b>"+fmtNum(p.value,ind.type)+"</b>"+
-            (p.data.name===activeGov?" <span style='color:#dc2626'>◀ المحافظة المختارة</span>":"");
-        }},
-      grid:{left:'3%',right:'5%',bottom:'3%',top:'3%',containLabel:true},
-      xAxis:{type:'value',axisLabel:{color:'#64748b',formatter:function(v){return fmtNum(v,ind.type)}},splitLine:{lineStyle:{color:'#f1f5f9'}}},
-      yAxis:{type:'category',data:sorted.map(function(x){return x.g}),axisLabel:{color:'#64748b',fontWeight:600},axisTick:{show:false}},
-      series:[{type:'bar',data:sorted.map(function(x){
-        return {value:x.v,name:x.g,itemStyle:{
-          borderRadius:[0,6,6,0],
-          color: x.g===activeGov ? {type:'linear',x:0,y:0,x2:1,y2:0,colorStops:[{offset:0,color:'#f87171'},{offset:1,color:'#dc2626'}]} : grad
-        }};
-      }),barWidth:18,label:{show:true,position:'left',color:'#0f172a',fontWeight:700,
-        formatter:function(p){return fmtNum(p.value,ind.type)}}}]
-    }, true);
-    window.addEventListener('resize',function(){if(state.chart)state.chart.resize()});
-  }
-
-  function renderIndicators() {
-    var cat = DATA.categories[state.activeCat];
-    var gov = DATA.meta.governorates[state.activeGov];
-    indicatorsGrid.innerHTML = "";
-    
-    if (cat.type === "text") {
-      indicatorsGrid.style.display = 'none';
-      textArea.style.display = 'block';
-      textArea.innerHTML = "";
-      cat.indicators.forEach(function(ind, idx) {
-        var val = ind.values[gov] || "لا توجد بيانات";
-        var items = String(val).split(" | ").filter(Boolean);
-        var card = document.createElement('div');
-        card.className = "reveal rounded-2xl p-6 mb-4";
-        card.style.cssText = "background:var(--card);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.06);animation-delay:"+(idx*0.08)+"s";
-        card.innerHTML = `
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-            <div style="width:40px;height:40px;border-radius:10px;background:#eef2ff;color:#4338ca;display:flex;align-items:center;justify-content:center;font-weight:800">${idx+1}</div>
-            <h3 class="font-bold text-lg">${ind.name}</h3>
-          </div>
-          <div class="space-y-2">
-            ${items.map(function(it){return `
-              <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;background:#f8fafc;border:1px solid #f1f5f9">
-                <span style="color:#4338ca;font-weight:800;margin-top:2px">▸</span>
-                <span style="color:var(--text);line-height:1.6">${it}</span>
-              </div>`}).join("")}
-          </div>`;
-        textArea.appendChild(card);
-      });
-      return;
-    }
-    
-    indicatorsGrid.style.display = 'grid';
-    textArea.style.display = 'none';
-    
-    cat.indicators.forEach(function(ind, idx) {
-      var val = ind.values[gov];
-      var total = DATA.meta.governorates.reduce(function(s,g){return s+(ind.values[g]||0)},0);
-      var pctOfTotal = total>0 ? ((val||0)/total*100) : 0;
-      var sorted = DATA.meta.governorates.map(function(g){return{g:g,v:ind.values[g]||0}}).sort(function(a,b){return b.v-a.v});
-      var rank = sorted.findIndex(function(x){return x.g===gov})+1;
-      var maxVal = Math.max.apply(null, DATA.meta.governorates.map(function(g){return ind.values[g]||0}));
-      var barPct = maxVal>0 ? ((val||0)/maxVal*100) : 0;
-      
-      var isPct = ind.type==='percent';
-      var color = isPct ? 'var(--accent2)' : 'var(--accent)';
-      var soft = isPct ? 'var(--accent2-soft)' : 'var(--accent-soft)';
-      var badge = isPct ? 'percent-badge' : 'count-badge';
-      var label = isPct ? '% نسبة' : 'عدد';
-      
-      var card = document.createElement('div');
-      card.className = "card-hover reveal rounded-2xl p-5";
-      card.style.cssText = `background:var(--card);border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.04);cursor:pointer;animation-delay:${(idx%6)*0.06}s`;
-      card.onclick = function() {
-        state.chartIndIdx = idx;
-        chartIndSel.value = idx;
-        renderChart();
-        document.getElementById('chart').scrollIntoView({behavior:'smooth',block:'center'});
-      };
-      
-      card.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <span class="${badge} text-xs font-bold px-2 py-1 rounded-lg">${label}</span>
-          <span class="text-xs font-bold" style="color:var(--muted)">المرتبة ${rank} / 14</span>
-        </div>
-        <h4 class="font-semibold leading-snug mb-3" style="color:var(--text);min-height:48px">${ind.name}</h4>
-        <div class="num text-3xl mb-3" style="color:${color};letter-spacing:-0.02em">${fmtNum(val, ind.type)}</div>
-        <div style="height:8px;border-radius:4px;background:${soft};overflow:hidden;margin-bottom:8px">
-          <div style="height:100%;width:${barPct}%;background:linear-gradient(90deg,${color},${color}aa);border-radius:4px;transition:width .6s ease"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)">
-          <span>نسبة من المجموع: <b style="color:${color}">${pctOfTotal.toFixed(1)}%</b></span>
-          <span>أعلى قيمة: ${fmtNum(maxVal, ind.type)}</span>
-        </div>
-        <div class="text-xs mt-3 pt-3" style="border-top:1px dashed var(--border);color:var(--muted)">
-          💡 اضغط لعرض مقارنة جميع المحافظات
-        </div>`;
-      indicatorsGrid.appendChild(card);
-    });
-  }
-
-  function renderAll() {
-    renderCatHeader();
-    renderChartSelect();
-    setTimeout(renderChart, 50);
-    renderIndicators();
-  }
-
-  chartIndSel.addEventListener('change', function(e) {
-    state.chartIndIdx = parseInt(e.target.value);
-    renderChart();
-  });
-
-  renderGovs();
-  renderCatTabs();
-  renderAll();
-})();
-</script>
-</body>
-</html>
+.user-type-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; text-align: start; }
+.user-type-option {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border: 2px solid var(--brand-line); border-radius: 10px; cursor: pointer;
+  background: #fff; transition
