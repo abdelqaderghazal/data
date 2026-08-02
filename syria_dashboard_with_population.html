@@ -238,6 +238,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<base target="_blank">
 </head>
 <body class="locked">
 
@@ -664,7 +665,7 @@ const COLUMN_MAP = {
 
   // === Elderly Care ===
   "دور رعاية كبار السن": "elderly_homes",
-  "عدد المستفيدين من خدمات دور رعاية المسنين": "elderly_benef",
+  "النزلاء المستفيدين من الخدمات": "elderly_benef",
 
   // === Disability ===
   "عدد  معاهد رعاية وتأهيل الأشخاص ذوي الاعاقة": "disability_centers",
@@ -680,8 +681,8 @@ const COLUMN_MAP = {
 
   // === Beggars ===
   "دور رعاية المتسولين الاجمالي": "beggar_centers_total",
-  "عدد مراكز رعاية المتسولين": "beggar_centers_active",
-  "عدد النزلاء في مراكز التسول": "beggar_inmates",
+  "دور رعاية المتسولين في الخدمة": "beggar_centers_active",
+  "عدد النزلاء": "beggar_inmates",
 
   // === Juvenile ===
   "معاهد الاحداث/ مراكز الملاحظة": "juvenile_inst",
@@ -707,11 +708,11 @@ const COLUMN_MAP = {
   "مراكز التنمية في الخدمة": "rural_dev_active",
   "وحدات الصناعات الريفية /كلي": "rural_ind_total",
   "عدد وحدات الصناعة في الخدمة": "rural_ind_active",
-  "المستفيديين من مراكز التنمية الريفية ": "rural_dev_benef",
+  "المستفيديين من المراكز": "rural_dev_benef",
   " المستفيديين من وحدات الصناعات الريفية": "rural_ind_benef",
 
   // === NGOs ===
-  "عدد المنظمات غير الحكومية المشهرة": "ngo_total",
+  "اجمالي عدد المنظمات غير الحكومية": "ngo_total",
   "عدد المنظمات غير الحكومية المسحوب ترخيصها": "ngo_active",
   "عدد المنظمات غير الحكومية المشهرة": "ngo_new_pct",
 
@@ -1267,7 +1268,19 @@ function renderSingleGovChart(canvasId, arr, categoryField){
   const finalIndicators = activeIndicators.length > 0 ? activeIndicators : indicators;
 
   const labels = finalIndicators.map(i => i.label);
-  const data = finalIndicators.map(i => agg[i.key] || 0);
+  let data = finalIndicators.map(i => agg[i.key] || 0);
+
+  // Convert age group values to percentages of total population for demographic charts
+  if (categoryField === 'population') {
+    const totalPop = agg['population'] || 1;
+    const ageKeys = ['pop_under15','pop_15_60','pop_over60'];
+    data = data.map((val, idx) => {
+      if (ageKeys.includes(finalIndicators[idx].key)) {
+        return parseFloat(((val / totalPop) * 100).toFixed(1));
+      }
+      return val;
+    });
+  }
 
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
@@ -1535,9 +1548,9 @@ function renderCategory(cat){
       {em:'👥',n:sum('population',arr),t:'إجمالي عدد السكان'},
       {em:'♂️',n:sum('males',arr),t:'إجمالي الذكور'},
       {em:'♀️',n:sum('females',arr),t:'إجمالي الإناث'},
-      {em:'👶',n:sum('pop_under15',arr),t:'السكان دون 15 سنة'},
-      {em:'🧑',n:sum('pop_15_60',arr),t:'السكان 15-60 سنة'},
-      {em:'👴',n:sum('pop_over60',arr),t:'السكان 60+ سنة'},
+      {em:'👶',n:(()=>{const t=sum('population',arr);return t>0?((sum('pop_under15',arr)/t)*100).toFixed(1)+'%':'0%';})(),t:'السكان دون 15 سنة',raw:true},
+      {em:'🧑',n:(()=>{const t=sum('population',arr);return t>0?((sum('pop_15_60',arr)/t)*100).toFixed(1)+'%':'0%';})(),t:'السكان 15-60 سنة',raw:true},
+      {em:'👴',n:(()=>{const t=sum('population',arr);return t>0?((sum('pop_over60',arr)/t)*100).toFixed(1)+'%':'0%';})(),t:'السكان 60+ سنة',raw:true},
       {em:'📉',n:avg('unemployment_rate',arr)+'%',t:'معدل البطالة العام (متوسط)'},
       {em:'📉',n:avg('youth_unemployment',arr)+'%',t:'معدل بطالة الشباب (متوسط)'},
       {em:'💼',n:sum('employed',arr),t:'المشتغلون'},
@@ -2422,9 +2435,9 @@ function updateMapMarkers(){
         <div class="info-row"><span class="info-label">👥 عدد السكان</span><span class="info-val">${fmt(d.population||0)}</span></div>
         <div class="info-row"><span class="info-label">♂️ الذكور</span><span class="info-val">${fmt(d.males||0)}</span></div>
         <div class="info-row"><span class="info-label">♀️ الإناث</span><span class="info-val">${fmt(d.females||0)}</span></div>
-        <div class="info-row"><span class="info-label">👶 دون 15 سنة</span><span class="info-val">${fmt(d.pop_under15||0)}%</span></div>
-        <div class="info-row"><span class="info-label">🧑 15-60 سنة</span><span class="info-val">${fmt(d.pop_15_60||0)}%</span></div>
-        <div class="info-row"><span class="info-label">👴 60+ سنة</span><span class="info-val">${fmt(d.pop_over60||0)}%</span></div>
+        <div class="info-row"><span class="info-label">👶 دون 15 سنة</span><span class="info-val">${((d.population||0)>0?((d.pop_under15||0)/d.population*100).toFixed(1):0)}%</span></div>
+        <div class="info-row"><span class="info-label">🧑 15-60 سنة</span><span class="info-val">${((d.population||0)>0?((d.pop_15_60||0)/d.population*100).toFixed(1):0)}%</span></div>
+        <div class="info-row"><span class="info-label">👴 60+ سنة</span><span class="info-val">${((d.population||0)>0?((d.pop_over60||0)/d.population*100).toFixed(1):0)}%</span></div>
 
         <div style="border-top:2px solid #0B5A7A;margin:10px 0;padding-top:8px;">
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">💼 سوق العمل</span>
