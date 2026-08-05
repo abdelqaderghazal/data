@@ -134,6 +134,250 @@ body { background: #f0f4f8; }
 <base target="_blank">
 </head>
 <body class="min-h-screen">
+
+<!-- ==================== LOGIN PAGE ==================== -->
+<style>
+.login-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #312e81 100%);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    direction: rtl;
+    font-family: 'Tajawal', sans-serif;
+}
+.login-box {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+    text-align: center;
+    animation: loginSlideIn 0.6s ease-out;
+}
+@keyframes loginSlideIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.login-logo {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+}
+.login-logo i { color: white; font-size: 28px; }
+.login-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+.login-subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 32px;
+}
+.login-input-group {
+    text-align: right;
+    margin-bottom: 16px;
+}
+.login-input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+.login-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Tajawal', sans-serif;
+    background: #f8fafc;
+    transition: all 0.2s;
+    box-sizing: border-box;
+    text-align: right;
+}
+.login-input:focus {
+    border-color: #3b82f6;
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+}
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.35);
+}
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59,130,246,0.45);
+}
+.login-btn:active {
+    transform: translateY(0);
+}
+.login-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    margin-top: 14px;
+    display: none;
+    animation: shake 0.4s ease;
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+.login-footer {
+    margin-top: 24px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+.login-hidden { display: none !important; }
+</style>
+
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+        <div class="login-logo"><i class="fas fa-shield-halved"></i></div>
+        <div class="login-title">تسجيل الدخول</div>
+        <div class="login-subtitle">لوحة معلومات واقع الوحدات والمراكز</div>
+
+        <div class="login-input-group">
+            <label for="loginUsername"><i class="fas fa-user ml-1"></i> اسم المستخدم</label>
+            <input type="text" id="loginUsername" class="login-input" placeholder="أدخل اسم المستخدم" autocomplete="off">
+        </div>
+
+        <div class="login-input-group">
+            <label for="loginPassword"><i class="fas fa-lock ml-1"></i> كلمة المرور</label>
+            <input type="password" id="loginPassword" class="login-input" placeholder="أدخل كلمة المرور" autocomplete="off">
+        </div>
+
+        <button onclick="doLogin()" class="login-btn">
+            <i class="fas fa-arrow-left-to-bracket ml-2"></i> دخول
+        </button>
+
+        <div id="loginError" class="login-error">
+            <i class="fas fa-circle-exclamation ml-1"></i> اسم المستخدم أو كلمة المرور غير صحيحة
+        </div>
+
+        <div class="login-footer">
+            وزارة الشؤون الاجتماعية والعمل — الجمهورية العربية السورية
+        </div>
+    </div>
+</div>
+
+<script>
+// ====== إعدادات المستخدمين ======
+const USERS = {
+    "admin":   { password: "admin123",   role: "admin",   label: "مسؤول" },
+    "viewer":  { password: "viewer123",  role: "viewer",  label: "مطلع" }
+};
+const LOGIN_SESSION_KEY = "dashboard_auth_v2";
+
+let currentUser = null;
+
+function checkLogin() {
+    try {
+        const saved = sessionStorage.getItem(LOGIN_SESSION_KEY);
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            if (currentUser && currentUser.role) {
+                document.getElementById("loginOverlay").classList.add("login-hidden");
+                applyUserPermissions();
+                return true;
+            }
+        }
+    } catch(e) {}
+    return false;
+}
+
+function doLogin() {
+    const userInput = document.getElementById("loginUsername");
+    const passInput = document.getElementById("loginPassword");
+    const errorBox = document.getElementById("loginError");
+    const username = userInput.value.trim();
+    const password = passInput.value.trim();
+
+    const user = USERS[username];
+    if (user && user.password === password) {
+        currentUser = { username: username, role: user.role, label: user.label };
+        try { sessionStorage.setItem(LOGIN_SESSION_KEY, JSON.stringify(currentUser)); } catch(e) {}
+        document.getElementById("loginOverlay").classList.add("login-hidden");
+        errorBox.style.display = "none";
+        applyUserPermissions();
+    } else {
+        errorBox.style.display = "block";
+        passInput.value = "";
+        passInput.focus();
+        errorBox.style.animation = "none";
+        void errorBox.offsetWidth;
+        errorBox.style.animation = "shake 0.4s ease";
+    }
+}
+
+function applyUserPermissions() {
+    // إظهار اسم المستخدم في الواجهة
+    const badge = document.getElementById("userBadge");
+    if (badge && currentUser) {
+        badge.innerHTML = '<i class="fas fa-user-circle ml-1"></i> ' + currentUser.label + ' <span style="opacity:0.7;font-size:0.7rem;">(' + currentUser.username + ')</span>';
+        badge.style.display = "inline-flex";
+    }
+
+    // إخفاء/تعطيل عناصر التعديل للمستخدم المطلع
+    if (currentUser && currentUser.role === "viewer") {
+        // أزرار التعديل
+        const hideIds = ['btnSync','btnUpload','btnDemo'];
+        hideIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = "none";
+        });
+        // إخفاء حقل رفع الملف
+        const fileWrap = document.querySelector('.file-input-wrapper');
+        if (fileWrap) fileWrap.style.display = "none";
+    }
+}
+
+// دخول بالضغط على Enter
+document.addEventListener("DOMContentLoaded", function() {
+    const inputs = [document.getElementById("loginUsername"), document.getElementById("loginPassword")];
+    inputs.forEach(inp => {
+        if (inp) {
+            inp.addEventListener("keypress", function(e) {
+                if (e.key === "Enter") doLogin();
+            });
+        }
+    });
+    if (inputs[0]) inputs[0].focus();
+    checkLogin();
+});
+</script>
+<!-- ==================== END LOGIN PAGE ==================== -->
+
 <div id="loadingOverlay" class="loading-overlay show">
     <div class="loading-spinner"></div>
     <div class="loading-text">جاري تحميل البيانات...</div>
@@ -154,15 +398,19 @@ body { background: #f0f4f8; }
 <div class="flex gap-3 text-sm items-center flex-wrap justify-center">
 <span class="bg-white/20 px-4 py-2 rounded-lg backdrop-blur"><i class="fas fa-calendar-alt ml-2"></i> 2025</span>
 <span class="bg-white/20 px-4 py-2 rounded-lg backdrop-blur"><i class="fas fa-map-marker-alt ml-2"></i> <span id="provinceCountBadge">0</span> محافظة</span>
-<button onclick="loadData()" class="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-lg transition-colors font-bold">
+<span id="userBadge" class="bg-white/20 px-4 py-2 rounded-lg backdrop-blur" style="display:none;align-items:center;"></span>
+<button id="btnSync" onclick="loadData()" class="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-lg transition-colors font-bold">
     <i class="fas fa-sync-alt ml-2"></i> تحديث من الرابط
 </button>
-<div class="file-input-wrapper bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg transition-colors font-bold cursor-pointer">
+<div id="btnUpload" class="file-input-wrapper bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg transition-colors font-bold cursor-pointer">
     <i class="fas fa-upload ml-2"></i> رفع ملف CSV
     <input type="file" id="csvFileInput" accept=".csv" onchange="handleFileUpload(event)">
 </div>
-<button onclick="loadDemoData()" class="bg-violet-500 hover:bg-violet-600 px-4 py-2 rounded-lg transition-colors font-bold">
+<button id="btnDemo" onclick="loadDemoData()" class="bg-violet-500 hover:bg-violet-600 px-4 py-2 rounded-lg transition-colors font-bold">
     <i class="fas fa-vial ml-2"></i> بيانات تجريبية
+</button>
+<button onclick="doLogout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors font-bold text-sm">
+    <i class="fas fa-right-from-bracket ml-2"></i> خروج
 </button>
 </div>
 </div>
@@ -829,8 +1077,8 @@ function mapColumns(row, fields) {
         suggestions: ['المقترحات', 'مقترحات', 'suggestions', 'الاقتراحات', 'اقتراحات'],
         funding: ['مصادر التمويل/الدعم2', 'مصادر التمويل', 'مصادر_التمويل', 'funding', 'تمويل', 'التمويل', 'الدعم', 'مصادر التمويل والدعم'],
         reason_inactive: ['سبب عدم التفعيل', 'سبب_عدم_التفعيل', 'reason_inactive', 'السبب', 'سبب', 'اسباب عدم التفعيل', 'سبب عدم التشغيل'],
-        lat: ['Latitude (Y)', 'خط العرض', 'خط_العرض', 'lat', 'latitude', 'y', 'latitude_y'],
-        lng: ['Longitude (x)', 'خط الطول', 'خط_الطول', 'lng', 'lon', 'long', 'longitude', 'x', 'longitude_x']
+        lat: ['Latitude (Y)', 'خط العرض', 'خط_العرض', 'lat', 'latitude', 'y', 'latitude_y', 'Lat', 'LAT', 'Y', 'العرض', 'Latitude'],
+        lng: ['Longitude (x)', 'خط الطول', 'خط_الطول', 'lng', 'lon', 'long', 'longitude', 'x', 'longitude_x', 'Lng', 'LNG', 'X', 'الطول', 'Longitude']
     };
 
     const mapped = {};
@@ -866,10 +1114,24 @@ function normalizeType(str) {
 }
 
 function parseCoordinate(val) {
-    if (val === '' || val === null || val === undefined) return 0;
-    const str = String(val).trim().replace(',', '.');
+    if (val === '' || val === null || val === undefined || val === 'nan' || val === 'NaN') return NaN;
+    let str = String(val).trim();
+    // Handle cases like "33.51, 36.27" in one cell - take first number
+    if (str.includes(',') && str.indexOf(',') !== str.lastIndexOf(',')) {
+        // Multiple commas - might be coordinate pair, take first
+        str = str.split(',')[0].trim();
+    }
+    str = str.replace(/,/g, '.');
+    str = str.replace(/\s/g, '');
+    // Remove any non-numeric chars except . and -
+    str = str.replace(/[^0-9.\-]/g, '');
+    // Handle multiple dots (e.g. "33..51")
+    const parts = str.split('.');
+    if (parts.length > 2) {
+        str = parts[0] + '.' + parts.slice(1).join('');
+    }
     const num = parseFloat(str);
-    return isNaN(num) ? 0 : num;
+    return isNaN(num) ? NaN : num;
 }
 
 function cleanAndParse(rawData) {
@@ -877,8 +1139,10 @@ function cleanAndParse(rawData) {
         const cleanRow = {};
         for (const key in row) {
             if (row[key] === '' || row[key] === null || row[key] === undefined) {
-                if (['id','lat','lng','total_area','building_area','floors','male_staff','female_staff','disabled_staff','benef_families','benef_female','benef_male','benef_children'].includes(key)) {
+                if (['id','total_area','building_area','floors','male_staff','female_staff','disabled_staff','benef_families','benef_female','benef_male','benef_children'].includes(key)) {
                     cleanRow[key] = 0;
+                } else if (key === 'lat' || key === 'lng') {
+                    cleanRow[key] = NaN;
                 } else {
                     cleanRow[key] = '';
                 }
@@ -892,6 +1156,8 @@ function cleanAndParse(rawData) {
         if (cleanRow.type !== undefined) cleanRow.type = normalizeType(cleanRow.type);
         cleanRow.lat = parseCoordinate(cleanRow.lat);
         cleanRow.lng = parseCoordinate(cleanRow.lng);
+        if (!isFinite(cleanRow.lat)) cleanRow.lat = NaN;
+        if (!isFinite(cleanRow.lng)) cleanRow.lng = NaN;
         if (!cleanRow.id && cleanRow.id !== 0) cleanRow.id = index + 1;
         return cleanRow;
     }).filter(row => row.name && String(row.name).trim() !== '');
@@ -902,49 +1168,103 @@ async function processRawData(data) {
     allData = data;
     showLoading('جاري معالجة البيانات...', 'تحليل ' + data.length + ' سجل');
 
-    // المرحلة 1: استخدام إحداثيات الشيت كأولوية قصوى
     let missingCoordsCount = 0;
-    allData.forEach(row => {
-        const sheetLat = parseCoordinate(row.lat);
-        const sheetLng = parseCoordinate(row.lng);
-        if (sheetLat && sheetLng && Math.abs(sheetLat) <= 90 && Math.abs(sheetLng) <= 180) {
+    let swappedCount = 0;
+
+    allData.forEach((row, idx) => {
+        let rawLat = parseCoordinate(row.lat);
+        let rawLng = parseCoordinate(row.lng);
+        let wasSwapped = false;
+
+        // === التحقق من عكس الإحداثيات (الإصلاح التلقائي) ===
+        let sheetLat = rawLat;
+        let sheetLng = rawLng;
+
+        // الحالة 1: lat > 90 يعني أنه على الأرجح lng
+        if (Math.abs(sheetLat) > 90 && Math.abs(sheetLng) <= 90) {
+            const temp = sheetLat; sheetLat = sheetLng; sheetLng = temp;
+            wasSwapped = true; swappedCount++;
+        }
+        // الحالة 2: lng > 180 يعني أنه على الأرجح lat
+        else if (Math.abs(sheetLng) > 180 && Math.abs(sheetLat) <= 180) {
+            const temp = sheetLat; sheetLat = sheetLng; sheetLng = temp;
+            wasSwapped = true; swappedCount++;
+        }
+        // الحالة 3: إذا كانت القيم تبدو معكوسة لسوريا (lat ~32-37, lng ~36-42)
+        else if (sheetLat > sheetLng && sheetLat >= 32 && sheetLat <= 42 && sheetLng >= 32 && sheetLng <= 42) {
+            const temp = sheetLat; sheetLat = sheetLng; sheetLng = temp;
+            wasSwapped = true; swappedCount++;
+        }
+
+        if (isFinite(sheetLat) && isFinite(sheetLng) && Math.abs(sheetLat) <= 90 && Math.abs(sheetLng) <= 180 && (sheetLat !== 0 || sheetLng !== 0)) {
             row._lat = sheetLat;
             row._lng = sheetLng;
-            row._coordSource = 'شيت';
+            row._coordSource = wasSwapped ? 'شيت (مصحح)' : 'شيت';
         } else {
-            row._lat = 0;
-            row._lng = 0;
+            row._lat = null;
+            row._lng = null;
             row._coordSource = 'غير متوفر';
             missingCoordsCount++;
         }
     });
 
-    // المرحلة 2: فقط للسجلات التي ليس لها إحداثيات في الشيت، نحاول القاموس ثم الترميز
+    // المرحلة 2: محاولة القاموس المحلي للمدينة (لا تعتمد على API فقط)
     if (missingCoordsCount > 0) {
-        const rowsMissing = allData.filter(r => !r._lat && !r._lng);
-        const uniqueMissingCities = [...new Set(rowsMissing.map(r => r.city).filter(c => c && c !== 'nan' && c !== ''))];
+        const rowsMissing = allData.filter(r => r._lat == null && r._lng == null);
+
+        // أولاً: القاموس المحلي للمدينة
+        rowsMissing.forEach(row => {
+            if (row.city && row.city !== 'nan') {
+                const coords = getCityCoordsFromLookup(row.city);
+                if (coords) {
+                    row._lat = coords[0];
+                    row._lng = coords[1];
+                    row._coordSource = 'مدينة (قاموس)';
+                }
+            }
+        });
+
+        // ثانياً: API للمدن المتبقية
+        const stillMissingAfterDict = allData.filter(r => r._lat == null && r._lng == null);
+        const uniqueMissingCities = [...new Set(stillMissingAfterDict.map(r => r.city).filter(c => c && c !== 'nan' && c !== ''))];
 
         if (uniqueMissingCities.length > 0) {
-            setLoadingSub('جاري تحديد إحداثيات ' + uniqueMissingCities.length + ' مدينة من ' + missingCoordsCount + ' سجل...');
-            await resolveMissingCities(uniqueMissingCities, currentAbortController ? currentAbortController.signal : null);
+            setLoadingSub('جاري تحديد إحداثيات ' + uniqueMissingCities.length + ' مدينة...');
+            try {
+                await resolveMissingCities(uniqueMissingCities, currentAbortController ? currentAbortController.signal : null);
+                stillMissingAfterDict.forEach(row => {
+                    if (cityCoordCache[row.city]) {
+                        row._lat = cityCoordCache[row.city][0];
+                        row._lng = cityCoordCache[row.city][1];
+                        row._coordSource = 'مدينة (API)';
+                    }
+                });
+            } catch(e) {
+                console.log('Geocoding API failed, using fallback');
+            }
+        }
 
-            // ربط الإحداثيات المحلولة بالسجلات
-            rowsMissing.forEach(row => {
-                if (cityCoordCache[row.city]) {
-                    row._lat = cityCoordCache[row.city][0];
-                    row._lng = cityCoordCache[row.city][1];
-                    row._coordSource = 'مدينة (تقديرية)';
-                }
-            });
+        // ثالثاً: fallback للمحافظة
+        const stillMissing = allData.filter(r => r._lat == null && r._lng == null);
+        const uniqueMissingProvinces = [...new Set(stillMissing.map(r => r.province).filter(p => p && p !== 'nan' && p !== ''))];
+        for (const province of uniqueMissingProvinces) {
+            const coords = getCityCoordsFromLookup(province);
+            if (coords) {
+                stillMissing.filter(r => r.province === province).forEach(row => {
+                    row._lat = coords[0];
+                    row._lng = coords[1];
+                    row._coordSource = 'محافظة (تقديرية)';
+                });
+            }
         }
     }
 
+    // تأكد من أن filteredData تحتوي على جميع السجلات
     filteredData = [...allData];
     updateKPIs();
     populateFilters();
     renderAdminHierarchy();
     filterData();
-    setTimeout(() => updateMap(), 50);
     hideLoading();
 }
 
@@ -1092,14 +1412,33 @@ function updateMap() {
     if (!map) return;
     markersLayer.clearLayers();
 
+    let validMarkers = 0;
+    let rejectedZero = 0;
+    let rejectedNull = 0;
+    let rejectedBounds = 0;
+
     filteredData.forEach(item => {
-        let lat = item._lat || 0;
-        let lng = item._lng || 0;
-        let source = item._coordSource || (item._lat ? 'شيت' : 'غير معروف');
+        let lat = item._lat;
+        let lng = item._lng;
+        let source = item._coordSource || 'غير معروف';
 
-        if (!lat || !lng || isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
-        if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
+        // رفض null/undefined/NaN
+        if (lat == null || lng == null || !isFinite(lat) || !isFinite(lng)) {
+            rejectedNull++;
+            return;
+        }
+        // رفض 0,0 (قيمة افتراضية غير صالحة)
+        if (lat === 0 && lng === 0) {
+            rejectedZero++;
+            return;
+        }
+        // رفض القيم خارج الحدود الجغرافية
+        if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+            rejectedBounds++;
+            return;
+        }
 
+        validMarkers++;
         const color = getStatusColor(item.status);
         const statusText = getStatusText(item.status);
         const totalStaff = (parseInt(item.male_staff) || 0) + (parseInt(item.female_staff) || 0) + (parseInt(item.disabled_staff) || 0);
@@ -1218,11 +1557,16 @@ function filterData() {
     const status = normalizeText(statusChip ? statusChip.dataset.value : '');
 
     filteredData = allData.filter(item => {
-        const matchProvince = !province || item.province === province;
-        const matchType = !type || item.type === type;
-        const matchStatus = !status || (item.status && item.status.includes(status));
+        const itemProvince = normalizeText(item.province || '');
+        const itemType = normalizeType(item.type || '');
+        const itemStatus = normalizeText(item.status || '');
+
+        const matchProvince = !province || itemProvince === province;
+        const matchType = !type || itemType === type;
+        const matchStatus = !status || itemStatus.includes(status);
         return matchProvince && matchType && matchStatus;
     });
+
     updateMap();
 }
 
@@ -1357,6 +1701,12 @@ function init() {
     loadData();
 }
 
+
+function doLogout() {
+    try { sessionStorage.removeItem(LOGIN_SESSION_KEY); } catch(e) {}
+    currentUser = null;
+    location.reload();
+}
 init();
 </script>
 </body>
