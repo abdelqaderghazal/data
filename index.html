@@ -196,7 +196,7 @@ body { background: #f0f4f8; }
 <div class="kpi-card card-glass rounded-xl p-5 shadow-lg text-center">
 <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-users text-teal-600 text-xl"></i></div>
 <div class="text-3xl font-bold text-teal-600" id="kpiTotalBeneficiaries">0</div>
-<div class="text-sm text-gray-500">إجمالي المستفيدين</div>
+<div class="text-sm text-gray-500">إجمالي الأسر المستفيدة</div>
 </div>
 <div class="kpi-card card-glass rounded-xl p-5 shadow-lg text-center">
 <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-user-tie text-cyan-600 text-xl"></i></div>
@@ -366,7 +366,8 @@ let sortAsc = true;
 let map;
 let markersLayer;
 
-const DEMO_DATA = [
+const DEMO_DATA = []; /* تم إلغاء البيانات التجريبية */
+/* const OLD_DEMO_DATA = [
     { id: 1, name: "وحدة التنمية الريفية - دمشق", province: "دمشق", city: "المزة", location_name: "شارع الثورة - بناء رقم 12", type: "وحدة", status: "مفعل", lat: 33.5138, lng: 36.2765, building_status: "جيد", total_area: 450, building_area: 320, floors: 2, male_staff: 5, female_staff: 8, disabled_staff: 1, benef_families: 120, benef_female: 180, benef_male: 150, benef_children: 220, occupant: "وزارة الشؤون الاجتماعية", ownership: "حكومي", equipment_status: "مجهز بالكامل", services: "تقديم المساعدات الغذائية والطبية، برامج التأهيل المهني", project: "توسيع الوحدة لاستيعاب 50 أسرة إضافية", difficulties: "نقص في الكوادر الطبية المتخصصة", suggestions: "توفير طبيب متطوع أسبوعياً", funding: "وزارة الشؤون الاجتماعية + منظمات محلية" },
     { id: 2, name: "مركز التنمية - حلب", province: "حلب", city: "الأعظمية", location_name: "ساحة سعد الله الجابري", type: "مركز", status: "غير مفعل", lat: 36.2021, lng: 37.1343, building_status: "بحاجة صيانة", total_area: 600, building_area: 500, floors: 1, male_staff: 0, female_staff: 0, disabled_staff: 0, benef_families: 0, benef_female: 0, benef_male: 0, benef_children: 0, occupant: "", ownership: "إيجار", equipment_status: "غير مجهز", reason_inactive: "تضرر البناء جراء الحرب وبحاجة لإعادة تأهيل", building_needs: "إصلاح الجدران والسقف، تركيب نوافذ جديدة", services: "", project: "إعادة تأهيل المركز بالتعاون مع منظمات دولية" },
     { id: 3, name: "وحدة ريفية - حمص", province: "حمص", city: "الوعر", location_name: "حي الوعر القديم - مقابل الجامع الكبير", type: "وحدة", status: "مفعل", lat: 34.7308, lng: 36.7094, building_status: "جيد", total_area: 300, building_area: 250, floors: 1, male_staff: 3, female_staff: 4, disabled_staff: 0, benef_families: 85, benef_female: 95, benef_male: 80, benef_children: 140, occupant: "جمعية خيرية", ownership: "تبرع", equipment_status: "مجهز جزئياً", services: "دعم نفسي اجتماعي، برامج تعليمية للأطفال", difficulties: "ضعف التمويل المستدام", suggestions: "إنشاء مشروع إنتاجي صغير لتمويل الوحدة" },
@@ -397,14 +398,9 @@ function showSuccess(msg) {
 
 
 function init() {
-    try {
-        initMap();
-        setupEventListeners();
-        setTimeout(() => loadData(), 500);
-    } catch(e) {
-        console.error('Init error:', e);
-        showError('خطأ في تهيئة التطبيق: ' + e.message);
-    }
+    initMap();
+    setupEventListeners();
+    setTimeout(() => loadData(), 500);
 }
 
 const CITY_COORDS = {
@@ -675,11 +671,9 @@ const CITY_COORDS = {
 // ذاكرة تخزين مؤقت للإحداثيات (بين الجلسات)
 let cityCoordCache = {};
 try {
-    if (typeof Storage !== 'undefined' && window.localStorage) {
-        const stored = localStorage.getItem('syria_city_coords_cache_v2');
-        if (stored) cityCoordCache = JSON.parse(stored);
-    }
-} catch(e) { cityCoordCache = {}; }
+    const stored = localStorage.getItem('syria_city_coords_cache_v2');
+    if (stored) cityCoordCache = JSON.parse(stored);
+} catch(e) {}
 
 function normalizeCityName(name) {
     if (!name) return '';
@@ -728,14 +722,14 @@ async function resolveCityCoords(city) {
     const lookup = getCityCoordsFromLookup(city);
     if (lookup) {
         cityCoordCache[city] = lookup;
-        try { if (typeof Storage !== 'undefined' && window.localStorage) { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } } catch(e) {}
+        try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
         return lookup;
     }
     // 2. جرب الترميز الجغرافي
     const geocoded = await geocodeCityNominatim(city);
     if (geocoded) {
         cityCoordCache[city] = geocoded;
-        try { if (typeof Storage !== 'undefined' && window.localStorage) { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } } catch(e) {}
+        try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
         return geocoded;
     }
     return null;
@@ -764,7 +758,7 @@ async function resolveAllCityCoords(data) {
             results.failed.push(city);
         }
     }
-    try { if (typeof Storage !== 'undefined' && window.localStorage) { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } } catch(e) {}
+    try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
     return results;
 }
 
@@ -818,6 +812,22 @@ function handleFileUpload(event) {
         error: function(err) { showError('خطأ في قراءة الملف: ' + err.message); }
     });
     event.target.value = '';
+}
+
+function findColumn(fields, keywords) {
+    if (!fields || !Array.isArray(fields)) return null;
+    for (const kw of keywords) {
+        const kwNorm = kw.toLowerCase().trim().replace(/[\s_]+/g, '');
+        for (const f of fields) {
+            const fNorm = f.toLowerCase().trim().replace(/[\s_]+/g, '');
+            if (fNorm === kwNorm) return f;
+        }
+        for (const f of fields) {
+            const fNorm = f.toLowerCase().trim().replace(/[\s_]+/g, '');
+            if (fNorm.includes(kwNorm) || kwNorm.includes(fNorm)) return f;
+        }
+    }
+    return null;
 }
 
 function normalizeColumnName(str) {
@@ -987,6 +997,32 @@ function loadFromGoogleSheetsAPI() {
         });
 }
 
+function loadFromJSONFeed() {
+    const url = 'https://spreadsheets.google.com/feeds/list/' + GOOGLE_SPREADSHEET_ID + '/od6/public/values?alt=json';
+    return fetch(url, { cache: 'no-store' })
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(json => {
+            if (!json.feed || !json.feed.entry) throw new Error('بيانات فارغة');
+            const entries = json.feed.entry;
+            const rows = entries.map(entry => {
+                const obj = {};
+                for (const key in entry) {
+                    if (key.startsWith('gsx$')) {
+                        const colName = key.replace('gsx$', '');
+                        obj[colName] = entry[key].$t || '';
+                    }
+                }
+                return obj;
+            });
+            const fields = rows.length > 0 ? Object.keys(rows[0]) : [];
+            const mapped = rows.map(row => mapColumns(row, fields));
+            return cleanAndParse(mapped);
+        });
+}
+
 function loadFromCSV() {
     return new Promise((resolve, reject) => {
         Papa.parse(API_URL, {
@@ -1107,13 +1143,15 @@ function renderAdminHierarchy() {
 
         const header = document.createElement('div');
         header.className = 'admin-province-header';
+        header.style.cursor = 'default';
         header.innerHTML = '<span class="admin-province-name"><i class="fas fa-map-marker-alt ml-2 text-blue-500"></i> ' + prov + '</span>' +
             '<div class="flex items-center gap-2">' +
-            '<span class="admin-province-count">' + totalItems + '</span>' +
-            '<i class="fas fa-chevron-down text-gray-400"></i></div>';
+            '<span class="admin-province-count">' + totalItems + '</span></div>';
 
         const citiesDiv = document.createElement('div');
-        citiesDiv.className = 'admin-cities';
+        citiesDiv.className = 'admin-cities show';
+        citiesDiv.style.display = 'block';
+        citiesDiv.style.padding = '10px 14px';
 
         cities.forEach(city => {
             const count = hierarchy[prov][city].length;
@@ -1123,17 +1161,6 @@ function renderAdminHierarchy() {
             cityBtn.onclick = () => zoomToCity(city, prov);
             citiesDiv.appendChild(cityBtn);
         });
-
-        header.onclick = () => {
-            const isExpanded = citiesDiv.classList.contains('show');
-            // إغلاق جميع المحافظات
-            document.querySelectorAll('.admin-cities').forEach(el => el.classList.remove('show'));
-            document.querySelectorAll('.admin-province-header').forEach(el => el.classList.remove('expanded'));
-            if (!isExpanded) {
-                citiesDiv.classList.add('show');
-                header.classList.add('expanded');
-            }
-        };
 
         provinceDiv.appendChild(header);
         provinceDiv.appendChild(citiesDiv);
@@ -1205,30 +1232,18 @@ function updateKPIs() {
     const centers = allData.filter(d => d.type === 'مركز');
     const totalCenters = centers.length;
     const activeCenters = centers.filter(d => d.status === 'مفعل').length;
-
+    
     // الوحدات الكلية والمفعلة
     const units = allData.filter(d => d.type === 'وحدة');
     const totalUnits = units.length;
     const activeUnits = units.filter(d => d.status === 'مفعل').length;
-
-    // المشاغل والروضات
-    const workshops = allData.filter(d => d.type === 'مشغل');
-    const kindergartens = allData.filter(d => d.type === 'روضة');
-
-    // المستفيدين والموظفين
-    const totalBeneficiaries = allData.reduce((sum, d) => sum + (parseInt(d.benef_families) || 0), 0);
-    const totalStaff = allData.reduce((sum, d) => sum + (parseInt(d.male_staff) || 0) + (parseInt(d.female_staff) || 0) + (parseInt(d.disabled_staff) || 0), 0);
-
+    
     const provinces = new Set(allData.map(d => d.province).filter(p => p && p !== 'nan')).size;
 
     document.getElementById('kpiTotalCenters').textContent = totalCenters;
     document.getElementById('kpiActiveCenters').textContent = activeCenters;
     document.getElementById('kpiTotalUnits').textContent = totalUnits;
     document.getElementById('kpiActiveUnits').textContent = activeUnits;
-    document.getElementById('kpiTotalWorkshops').textContent = workshops.length;
-    document.getElementById('kpiTotalKindergartens').textContent = kindergartens.length;
-    document.getElementById('kpiTotalBeneficiaries').textContent = totalBeneficiaries.toLocaleString('ar-SY');
-    document.getElementById('kpiTotalStaff').textContent = totalStaff.toLocaleString('ar-SY');
     document.getElementById('provinceCountBadge').textContent = provinces;
 }
 
@@ -1452,22 +1467,6 @@ function renderTable() {
     document.getElementById('nextBtn').disabled = end >= filteredData.length;
 }
 
-function syncChipsWithSelects() {
-    const province = document.getElementById('provinceFilter').value;
-    const type = document.getElementById('typeFilter').value;
-    const status = document.getElementById('statusFilter').value;
-
-    document.querySelectorAll('.filter-chip[data-filter="province"]').forEach(c => {
-        c.classList.toggle('active', c.dataset.value === province);
-    });
-    document.querySelectorAll('.filter-chip[data-filter="type"]').forEach(c => {
-        c.classList.toggle('active', c.dataset.value === type);
-    });
-    document.querySelectorAll('.filter-chip[data-filter="status"]').forEach(c => {
-        c.classList.toggle('active', c.dataset.value === status);
-    });
-}
-
 function filterData() {
     const search = normalizeText(document.getElementById('searchInput').value).toLowerCase();
     const province = normalizeText(document.getElementById('provinceFilter').value);
@@ -1481,9 +1480,6 @@ function filterData() {
         const matchStatus = !status || (item.status && item.status.includes(status));
         return matchSearch && matchProvince && matchType && matchStatus;
     });
-
-    // Also update chip active states to match select boxes
-    syncChipsWithSelects();
 
     filteredData.sort((a, b) => {
         let va = a[sortCol] || ''; let vb = b[sortCol] || '';
