@@ -551,44 +551,33 @@ async function geocodeCityNominatim(city, signal) {
     return null;
 }
 
-async function resolveAllCityCoords(data, signal) {
-    const uniqueCities = [...new Set(data.map(d => d.city).filter(c => c && c !== 'nan' && c !== ''))];
+async function resolveMissingCities(cities, signal) {
     const toGeocode = [];
-    const results = { resolved: [], failed: [], geocoded: [] };
 
-    // المرحلة 1: مطابقة سريعة من القاموس
-    for (const city of uniqueCities) {
-        if (cityCoordCache[city]) {
-            results.resolved.push(city);
-            continue;
-        }
+    // المرحلة 1: مطابقة من القاموس
+    for (const city of cities) {
+        if (cityCoordCache[city]) continue;
         const lookup = getCityCoordsFromLookup(city);
         if (lookup) {
             cityCoordCache[city] = lookup;
-            results.resolved.push(city);
             continue;
         }
         toGeocode.push(city);
     }
 
-    // المرحلة 2: ترميز جغرافي متوازي على دفعات
-    const BATCH_SIZE = 3; // Nominatim: ~1 req/sec, 3 parallel مع 400ms delay آمن
+    // المرحلة 2: ترميز جغرافي متوازي على دفعات (فقط للمدن غير الموجودة في القاموس)
+    const BATCH_SIZE = 3;
     for (let i = 0; i < toGeocode.length; i += BATCH_SIZE) {
         if (signal && signal.aborted) break;
         const batch = toGeocode.slice(i, i + BATCH_SIZE);
-        setLoadingSub('جاري تحديد الإحداثيات... (' + (i + 1) + ' / ' + toGeocode.length + ' مدينة)');
+        setLoadingSub('جاري تحديد الإحداثيات... (' + (i + batch.length) + ' / ' + toGeocode.length + ' مدينة)');
 
         const batchPromises = batch.map(city => geocodeCityNominatim(city, signal));
         const batchResults = await Promise.all(batchPromises);
 
         batch.forEach((city, idx) => {
             const coords = batchResults[idx];
-            if (coords) {
-                cityCoordCache[city] = coords;
-                results.geocoded.push(city);
-            } else {
-                results.failed.push(city);
-            }
+            if (coords) cityCoordCache[city] = coords;
         });
 
         if (i + BATCH_SIZE < toGeocode.length) {
@@ -597,7 +586,6 @@ async function resolveAllCityCoords(data, signal) {
     }
 
     safeStorage.set('syria_city_coords_cache_v2', cityCoordCache);
-    return results;
 }
 
 function initMap() {
@@ -914,31 +902,42 @@ async function processRawData(data) {
     allData = data;
     showLoading('جاري معالجة البيانات...', 'تحليل ' + data.length + ' سجل');
 
-    // حل الإحداثيات فقط للمدن التي ليس لها إحداثيات في البيانات
-    const needsGeocoding = allData.some(d => {
-        const lat = parseCoordinate(d.lat);
-        const lng = parseCoordinate(d.lng);
-        return !lat || !lng;
-    });
-
-    if (needsGeocoding) {
-        await resolveAllCityCoords(allData, currentAbortController ? currentAbortController.signal : null);
-    }
-
+    // المرحلة 1: استخدام إحداثيات الشيت كأولوية قصوى
+    let missingCoordsCount = 0;
     allData.forEach(row => {
         const sheetLat = parseCoordinate(row.lat);
         const sheetLng = parseCoordinate(row.lng);
-        if (sheetLat && sheetLng) {
+        if (sheetLat && sheetLng && Math.abs(sheetLat) <= 90 && Math.abs(sheetLng) <= 180) {
             row._lat = sheetLat;
             row._lng = sheetLng;
-        } else if (cityCoordCache[row.city]) {
-            row._lat = cityCoordCache[row.city][0];
-            row._lng = cityCoordCache[row.city][1];
+            row._coordSource = 'شيت';
         } else {
             row._lat = 0;
             row._lng = 0;
+            row._coordSource = 'غير متوفر';
+            missingCoordsCount++;
         }
     });
+
+    // المرحلة 2: فقط للسجلات التي ليس لها إحداثيات في الشيت، نحاول القاموس ثم الترميز
+    if (missingCoordsCount > 0) {
+        const rowsMissing = allData.filter(r => !r._lat && !r._lng);
+        const uniqueMissingCities = [...new Set(rowsMissing.map(r => r.city).filter(c => c && c !== 'nan' && c !== ''))];
+
+        if (uniqueMissingCities.length > 0) {
+            setLoadingSub('جاري تحديد إحداثيات ' + uniqueMissingCities.length + ' مدينة من ' + missingCoordsCount + ' سجل...');
+            await resolveMissingCities(uniqueMissingCities, currentAbortController ? currentAbortController.signal : null);
+
+            // ربط الإحداثيات المحلولة بالسجلات
+            rowsMissing.forEach(row => {
+                if (cityCoordCache[row.city]) {
+                    row._lat = cityCoordCache[row.city][0];
+                    row._lng = cityCoordCache[row.city][1];
+                    row._coordSource = 'مدينة (تقديرية)';
+                }
+            });
+        }
+    }
 
     filteredData = [...allData];
     updateKPIs();
@@ -1096,7 +1095,7 @@ function updateMap() {
     filteredData.forEach(item => {
         let lat = item._lat || 0;
         let lng = item._lng || 0;
-        let source = item._lat ? (item.lat ? 'شيت' : 'مدينة') : 'غير معروف';
+        let source = item._coordSource || (item._lat ? 'شيت' : 'غير معروف');
 
         if (!lat || !lng || isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
         if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
