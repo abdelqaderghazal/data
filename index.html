@@ -13,6 +13,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
 * { font-family: 'Tajawal', sans-serif; }
 body { background: #f0f4f8; }
+.loading-overlay {
+    position: fixed; inset: 0; background: rgba(255,255,255,0.92); z-index: 9999;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.loading-overlay.show { display: flex; }
+.loading-spinner {
+    width: 56px; height: 56px; border: 4px solid #e2e8f0;
+    border-top-color: #3b82f6; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { margin-top: 16px; color: #475569; font-weight: 600; font-size: 1rem; }
+.loading-sub { margin-top: 6px; color: #94a3b8; font-size: 0.8rem; }
+.retry-btn {
+    background: #3b82f6; color: white; padding: 8px 20px; border-radius: 8px;
+    border: none; font-weight: 700; cursor: pointer; margin-top: 10px; font-family: 'Tajawal', sans-serif;
+    transition: background 0.2s;
+}
+.retry-btn:hover { background: #2563eb; }
 .card-glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
 .kpi-card { transition: all 0.3s ease; }
 .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
@@ -114,6 +134,12 @@ body { background: #f0f4f8; }
 <base target="_blank">
 </head>
 <body class="min-h-screen">
+<div id="loadingOverlay" class="loading-overlay show">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">جاري تحميل البيانات...</div>
+    <div class="loading-sub" id="loadingSub">الرجاء الانتظار</div>
+    <button id="cancelLoadBtn" class="retry-btn" style="display:none;margin-top:20px;background:#ef4444;" onclick="cancelLoading()">إلغاء</button>
+</div>
 
 <header class="bg-gradient-to-l from-blue-900 via-blue-800 to-indigo-900 text-white shadow-2xl">
 <div class="container mx-auto px-4 py-6">
@@ -147,6 +173,7 @@ body { background: #f0f4f8; }
     <div id="errorBanner" class="error-banner">
         <i class="fas fa-exclamation-circle ml-2"></i>
         <span id="errorText"></span>
+        <button onclick="retryLastLoad()" class="retry-btn" style="margin-right:10px;">إعادة المحاولة</button>
     </div>
     <div id="successBanner" class="success-banner">
         <i class="fas fa-check-circle ml-2"></i>
@@ -276,30 +303,107 @@ body { background: #f0f4f8; }
 </footer>
 
 <script>
+// ============================================
+// إعدادات Google Sheets
+// ============================================
 const API_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRperfukTwM-J8BGLRNTGASUGO5xI_hJoR6iErlNKIjiu_9f_H097CSjt-sphLe77t0DOmlOgusXPDw/pub?output=csv';
-
-// ============================================
-// إعدادات Google Sheets API (للتخلص من مشاكل CORS نهائياً)
-// ============================================
-// 1. افتح الشيت في المتصفح وانسخ الـ ID من رابط التحرير:
-//    https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit
-// 2. احصل على API Key مجاني من:
-//    https://console.cloud.google.com/apis/credentials
-// 3. فعّل "Google Sheets API" في المشروع
-// 4. اجعل الشيت عاماً (Public) عبر: Share → Anyone with the link → Viewer
-const GOOGLE_API_KEY = '';          // <-- ضع مفتاح API هنا
-const GOOGLE_SPREADSHEET_ID = '';   // <-- ضع ID الشيت الحقيقي هنا (من رابط /edit)
-const GOOGLE_SHEET_NAME = 'Sheet1'; // <-- اسم الورقة (تبويب الشيت)
+const GOOGLE_API_KEY = '';
+const GOOGLE_SPREADSHEET_ID = '';
+const GOOGLE_SHEET_NAME = 'Sheet1';
 
 let allData = [];
 let filteredData = [];
-let currentPage = 1;
-const pageSize = 15;
-let sortCol = 'id';
-let sortAsc = true;
 let map;
 let markersLayer;
+let currentAbortController = null;
+let lastLoadAttempt = null;
 
+// ============================================
+// تخزين مؤقت آمن (يدعم private mode)
+// ============================================
+const safeStorage = {
+    _mem: {},
+    _hasLocal: false,
+    _hasSession: false,
+    init() {
+        try {
+            localStorage.setItem('__test__', '1');
+            localStorage.removeItem('__test__');
+            this._hasLocal = true;
+        } catch(e) {}
+        try {
+            sessionStorage.setItem('__test__', '1');
+            sessionStorage.removeItem('__test__');
+            this._hasSession = true;
+        } catch(e) {}
+    },
+    get(key) {
+        if (this._hasSession) { try { const v = sessionStorage.getItem(key); if (v) return JSON.parse(v); } catch(e) {} }
+        if (this._hasLocal) { try { const v = localStorage.getItem(key); if (v) return JSON.parse(v); } catch(e) {} }
+        return this._mem[key] || null;
+    },
+    set(key, value) {
+        const str = JSON.stringify(value);
+        if (this._hasSession) { try { sessionStorage.setItem(key, str); } catch(e) {} }
+        if (this._hasLocal) { try { localStorage.setItem(key, str); } catch(e) {} }
+        this._mem[key] = value;
+    },
+    remove(key) {
+        if (this._hasSession) { try { sessionStorage.removeItem(key); } catch(e) {} }
+        if (this._hasLocal) { try { localStorage.removeItem(key); } catch(e) {} }
+        delete this._mem[key];
+    }
+};
+safeStorage.init();
+
+let cityCoordCache = safeStorage.get('syria_city_coords_cache_v2') || {};
+
+// ============================================
+// Loading Overlay
+// ============================================
+function showLoading(text, sub) {
+    const el = document.getElementById('loadingOverlay');
+    document.querySelector('.loading-text').textContent = text || 'جاري التحميل...';
+    document.getElementById('loadingSub').textContent = sub || '';
+    document.getElementById('cancelLoadBtn').style.display = 'inline-block';
+    el.classList.add('show');
+}
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+}
+function setLoadingSub(text) {
+    document.getElementById('loadingSub').textContent = text || '';
+}
+function cancelLoading() {
+    if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+    }
+    hideLoading();
+    showError('تم إلغاء التحميل');
+}
+
+function showError(msg) {
+    const el = document.getElementById('errorBanner');
+    document.getElementById('errorText').innerHTML = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 20000);
+}
+function showSuccess(msg) {
+    const el = document.getElementById('successBanner');
+    document.getElementById('successText').textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 6000);
+}
+
+function retryLastLoad() {
+    if (lastLoadAttempt) lastLoadAttempt();
+    else loadData();
+}
+
+// ============================================
+// بيانات تجريبية
+// ============================================
 const DEMO_DATA = [
     { id: 1, name: "وحدة التنمية الريفية - دمشق", province: "دمشق", city: "المزة", location_name: "شارع الثورة - بناء رقم 12", type: "وحدة", status: "مفعل", lat: 33.5138, lng: 36.2765, building_status: "جيد", total_area: 450, building_area: 320, floors: 2, male_staff: 5, female_staff: 8, disabled_staff: 1, benef_families: 120, benef_female: 180, benef_male: 150, benef_children: 220, occupant: "وزارة الشؤون الاجتماعية", ownership: "حكومي", equipment_status: "مجهز بالكامل", services: "تقديم المساعدات الغذائية والطبية، برامج التأهيل المهني", project: "توسيع الوحدة لاستيعاب 50 أسرة إضافية", difficulties: "نقص في الكوادر الطبية المتخصصة", suggestions: "توفير طبيب متطوع أسبوعياً", funding: "وزارة الشؤون الاجتماعية + منظمات محلية" },
     { id: 2, name: "مركز التنمية - حلب", province: "حلب", city: "الأعظمية", location_name: "ساحة سعد الله الجابري", type: "مركز", status: "غير مفعل", lat: 36.2021, lng: 37.1343, building_status: "بحاجة صيانة", total_area: 600, building_area: 500, floors: 1, male_staff: 0, female_staff: 0, disabled_staff: 0, benef_families: 0, benef_female: 0, benef_male: 0, benef_children: 0, occupant: "", ownership: "إيجار", equipment_status: "غير مجهز", reason_inactive: "تضرر البناء جراء الحرب وبحاجة لإعادة تأهيل", building_needs: "إصلاح الجدران والسقف، تركيب نوافذ جديدة", services: "", project: "إعادة تأهيل المركز بالتعاون مع منظمات دولية" },
@@ -315,298 +419,96 @@ const DEMO_DATA = [
     { id: 12, name: "مركز تنمية - القنيطرة", province: "القنيطرة", city: "القنيطرة", location_name: "شارع دمشق - مقابل السوق المركزي", type: "مركز", status: "غير مفعل", lat: 33.1258, lng: 35.8245, building_status: "متوسط", total_area: 450, building_area: 400, floors: 1, male_staff: 0, female_staff: 0, disabled_staff: 0, benef_families: 0, benef_female: 0, benef_male: 0, benef_children: 0, occupant: "", ownership: "حكومي", equipment_status: "غير مجهز", reason_inactive: "عدم توفر ميزانية تشغيلية" }
 ];
 
-function showError(msg) {
-    const el = document.getElementById('errorBanner');
-    document.getElementById('errorText').textContent = msg;
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 15000);
-}
-
-function showSuccess(msg) {
-    const el = document.getElementById('successBanner');
-    document.getElementById('successText').textContent = msg;
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 5000);
-}
-
-
-function init() {
-    initMap();
-    setupEventListeners();
-    setTimeout(() => loadData(), 500);
-}
 
 const CITY_COORDS = {
-    'دمشق': [33.5138, 36.2765],
-    'المزة': [33.5056, 36.2714],
-    'برزة': [33.5403, 36.3406],
-    'جرمانا': [33.4858, 36.3489],
-    'داريا': [33.4583, 36.25],
-    'الزبداني': [33.7242, 36.1003],
-    'دوما': [33.5717, 36.4025],
-    'حرستا': [33.5586, 36.3708],
-    'عربين': [33.5408, 36.3383],
-    'سقبا': [33.5367, 36.3389],
-    'كفر بطنا': [33.5367, 36.375],
-    'حمورية': [33.4361, 36.3167],
-    'جديدة عرطوز': [33.4333, 36.1167],
-    'معضمية': [33.4333, 36.1],
-    'قدسيا': [33.45, 36.1],
-    'يبرود': [33.9675, 36.6575],
-    'الرحيبة': [33.75, 36.7167],
-    'دير عطية': [34.1, 36.7667],
-    'النبك': [34.0167, 36.7167],
-    'قارة': [33.8333, 36.5833],
-    'التل': [33.6, 36.3167],
-    'القطيفة': [33.7333, 36.5833],
-    'الضمير': [33.6167, 36.4167],
-    'مسرابا': [33.5333, 36.35],
-    'سعدنايا': [33.6833, 36.5333],
-    'الرغيبة': [33.75, 36.6167],
-    'النشابية': [33.55, 36.3667],
-    'حران العواميد': [33.5167, 36.4833],
-    'العشارية': [33.5667, 36.3833],
-    'ببيلا': [33.4833, 36.3333],
-    'المليحة': [33.45, 36.3167],
-    'الحسينية': [35.0167, 40.4333],
-    'عين ترما': [33.5, 36.3167],
-    'جيرود': [33.8, 36.7333],
-    'الفيجة': [33.7167, 36.5667],
-    'المنطقة الصناعية': [33.5, 36.2833],
-    'الكسوة': [33.35, 36.1],
-    'الحجر الأسود': [33.4667, 36.3],
-    'السبينة': [33.4333, 36.3333],
-    'السيدة زينب': [33.45, 36.3333],
-    'بيت سحم': [33.4833, 36.35],
-    'الطيبة': [33.4833, 36.3167],
-    'المعضمية': [33.4333, 36.1],
-    'الزabadani': [33.7242, 36.1003],
-    'حلب': [36.2021, 37.1343],
-    'الأعظمية': [36.2167, 37.15],
-    'الشهباء': [36.2167, 37.15],
-    'سيف الدولة': [36.1833, 37.1333],
-    'صلاح الدين': [36.2, 37.1333],
-    'باب الفرج': [36.2, 37.15],
-    'العزيزية': [36.1833, 37.1667],
-    'المشارقة': [36.2167, 37.1667],
-    'حلب الجديدة': [36.2, 37.1167],
-    'الشيخ مقصود': [36.2333, 37.1667],
-    'الشعار': [36.2167, 37.1333],
-    'حنانو': [36.2333, 37.1833],
-    'الميسر': [36.1833, 37.1333],
-    'مارع': [36.4833, 37.5],
-    'الباب': [36.3667, 37.5167],
-    'منبج': [36.5333, 37.95],
-    'عين العرب': [36.89, 38.35],
-    'كوباني': [36.89, 38.35],
-    'جرابلس': [36.8167, 38.0167],
-    'اعزاز': [36.5833, 37.05],
-    'الدانا': [36.2167, 36.7667],
-    'تل رفعت': [36.4667, 37.0833],
-    'عفرين': [36.5167, 36.8667],
-    'أتارب': [36.1333, 36.8167],
-    'كفر نايا': [36.1667, 36.85],
-    'كفر حمرة': [36.2333, 37.0833],
-    'حريتان': [36.2833, 37.0833],
-    'حيان': [36.2333, 37.05],
-    'السفيرة': [36.0667, 37.3667],
-    'أبين': [35.9333, 36.7833],
-    'تادف': [36.35, 37.5333],
-    'الراعي': [36.7667, 38.0333],
-    'الراشدين': [36.2333, 37.1167],
-    'الحمدانية': [36.2167, 37.1],
-    'الفرقان': [36.1833, 37.1167],
-    'الجميلية': [36.2167, 37.15],
-    'الكلاسة': [36.2, 37.15],
-    'القاطرجي': [36.1833, 37.15],
-    'السكري': [36.1833, 37.1333],
-    'الأنصاري': [36.1833, 37.1167],
-    'الزهراء': [36.2167, 37.1333],
-    'الراموسة': [36.1667, 37.1],
-    'الحاضر': [36.1, 37.0],
-    'الأتارب': [36.1333, 36.8167],
-    'حمص': [34.7308, 36.7094],
-    'الوعر': [34.7333, 36.7],
-    'البياضة': [34.5667, 36.5833],
-    'تلبيسة': [34.8333, 36.7333],
-    'الرستن': [34.9167, 36.7333],
-    'تدمر': [34.55, 38.2833],
-    'القصير': [34.5167, 36.5833],
-    'تلكلخ': [34.6667, 36.3167],
-    'المخرم': [34.6167, 36.6667],
-    'الفرقلس': [34.5667, 36.7167],
-    'دير بعلبة': [34.6, 36.1333],
-    'المشرفة': [34.5833, 36.75],
-    'الحولة': [34.8833, 36.5333],
-    'تير معلة': [34.85, 36.2167],
-    'القريتين': [34.2333, 37.2333],
-    'المخضر': [34.5833, 36.5],
-    'السنمين': [33.0833, 36.1833],
-    'الغنطو': [34.7833, 36.7],
-    'الحصن': [34.7833, 36.55],
-    'الدار الكبيرة': [34.4333, 36.75],
-    'القريا': [32.8667, 36.6167],
-    'الناصرة': [34.9167, 36.9167],
-    'الحواش': [35.5333, 35.8333],
-    'القاعة': [34.65, 36.55],
-    'الرقامة': [34.5667, 36.7167],
-    'عقرب': [34.7833, 36.3333],
-    'البويضة': [34.6167, 36.8333],
-    'الغازية': [34.8333, 36.5],
-    'اللاذقية': [35.5196, 35.7915],
-    'الرمل الجنوبي': [35.5167, 35.7833],
-    'جبلة': [35.35, 35.9167],
-    'بانياس': [35.1833, 35.95],
-    'القرداحة': [35.45, 36.05],
-    'الحفة': [35.6, 36.0333],
-    'سلمية': [35.0167, 37.05],
-    'كسب': [35.9167, 35.9833],
-    'الضنية': [35.9167, 36.0167],
-    'مشتى الحلو': [35.35, 36.1667],
-    'الدالية': [35.6833, 36.0167],
-    'الشيخ ضاهر': [35.75, 35.9167],
-    'تلمخرم': [35.5833, 35.8333],
-    'الفاخورة': [35.6167, 35.8333],
-    'الرمل الشمالي': [35.5333, 35.8],
-    'الصالحية': [35.3, 40.1833],
-    'العمارة': [35.4833, 35.7833],
-    'الشبطة': [35.4667, 35.7667],
-    'الشاطئ الأزرق': [35.5833, 35.7667],
-    'القناصات': [35.65, 35.9167],
-    'بسنادا': [35.4833, 36.0333],
-    'الشماس': [35.4167, 36.0],
-    'عين الشرقية': [35.3833, 36.0333],
-    'طرطوس': [34.8953, 35.8866],
-    'الكورنيش': [34.8833, 35.8833],
-    'صافيتا': [34.8167, 36.1167],
-    'دريكيش': [34.8833, 36.1333],
-    'الشيخ بدر': [34.8333, 36.1],
-    'القدموس': [34.9833, 36.1667],
-    'مسيافة': [34.8667, 36.0333],
-    'حمام واصل': [34.75, 36.1167],
-    'بيت الشيخ يونس': [34.9167, 36.0833],
-    'الدريكيش': [34.8833, 36.1333],
-    'دير الزور': [35.3354, 40.1406],
-    'الجبيلة': [35.3167, 40.1333],
-    'الميادين': [35.0167, 40.45],
-    'البوكمال': [34.45, 40.9333],
-    'العشارة': [35.0167, 40.4167],
-    'موحسن': [35.0667, 40.4167],
-    'الطبني': [35.1167, 40.3333],
-    'القورية': [35.15, 40.3],
-    'الكسرة': [35.2167, 40.3167],
-    'الشحيل': [35.2833, 40.2833],
-    'هجين': [34.9833, 40.2833],
-    'العزبة': [35.3333, 40.15],
-    'حطلة': [34.95, 40.4333],
-    'السوسة': [34.5167, 40.7333],
-    'الشعيطات': [35.0667, 40.3167],
-    'السويداء': [32.8557, 36.63],
-    'شهبا': [32.8557, 36.63],
-    'صلخد': [32.4833, 36.7],
-    'المزرعة': [32.7833, 36.6833],
-    'شقا': [32.6833, 36.8333],
-    'عتيل': [32.7833, 36.5167],
-    'المشنف': [32.6, 36.7833],
-    'الحقف': [32.7333, 36.7],
-    'رضم': [32.65, 36.75],
-    'المجيدل': [32.9167, 36.55],
-    'دير الدبوس': [32.8333, 36.6167],
-    'درعا': [32.9756, 36.1861],
-    'الصنمين': [33.0667, 36.1833],
-    'نوى': [32.8833, 36.05],
-    'إزرع': [32.8667, 36.2333],
-    'الشيخ مسكين': [32.7833, 36.1],
-    'طفس': [32.7333, 36.0667],
-    'بصرى الشام': [32.5167, 36.4833],
-    'جاسم': [32.9833, 36.0667],
-    'الحراك': [32.8833, 36.3],
-    'المسيفرة': [32.7333, 36.35],
-    'تل شهاب': [32.6833, 36.1],
-    'صيدا': [32.9167, 36.1667],
-    'الكرك': [32.6833, 36.0667],
-    'المزيريب': [32.7333, 36.0167],
-    'الغارية الشرقية': [32.7333, 36.2],
-    'الغارية الغربية': [32.7167, 36.1833],
-    'خربة غزالة': [32.7333, 36.2],
-    'سحم الجولان': [32.8167, 35.9833],
-    'إدلب': [35.9306, 36.6339],
-    'معرة النعمان': [35.6482, 36.6754],
-    'أريحا': [35.8167, 36.6],
-    'جسر الشغور': [35.8167, 36.3167],
-    'سراقب': [35.8667, 36.8],
-    'بنش': [36.1167, 36.7167],
-    'تفتناز': [36.0167, 36.7833],
-    'كفرنبل': [35.6167, 36.5667],
-    'حارم': [36.2167, 36.5167],
-    'سلقين': [36.1333, 36.45],
-    'أطمة': [36.1333, 36.5167],
-    'قلع المضيق': [35.7833, 36.4167],
-    'أبو الظهور': [35.7333, 37.05],
-    'خان شيخون': [35.4333, 36.65],
-    'اللطامنة': [35.3167, 36.6167],
-    'كفرزيتا': [35.3667, 36.6],
-    'مورك': [35.3667, 36.6833],
-    'كفر نبل': [35.5833, 36.5667],
-    'الهبيط': [35.4333, 36.5667],
-    'تمنعة': [35.45, 36.7333],
-    'التح': [35.4833, 36.7833],
-    'الرامي': [35.7833, 36.5333],
-    'بداما': [35.8333, 36.3333],
-    'الدركوش': [35.9167, 36.1667],
-    'الرقة': [35.9594, 39.0078],
-    'الطبقة': [35.8333, 38.55],
-    'تل أبيض': [36.7, 38.95],
-    'عين عيسى': [36.3833, 38.9167],
-    'سلوق': [36.1333, 39.1333],
-    'الجرنية': [36.0333, 39.0333],
-    'الهجنة': [35.8833, 39.0167],
-    'الكرامة': [35.8667, 39.1667],
-    'مدينة الرقة': [35.9594, 39.0078],
-    'الثورة': [35.95, 39.0],
-    'الريف الشمالي': [36.0, 39.0],
-    'الرشيد': [35.9167, 39.0],
-    'العطالله': [35.9833, 39.0333],
-    'المشلب': [35.95, 39.05],
-    'الصناعة': [35.9333, 39.0667],
-    'الرميلة': [35.9667, 39.0333],
-    'الحزيمية': [35.9, 39.0],
-    'السبخة': [35.85, 39.1],
-    'الخالدية': [35.8833, 39.1333],
-    'المعتمدية': [35.9167, 39.15],
-    'المنصورة': [35.8667, 39.1833],
-    'الحسكة': [36.5024, 40.7477],
-    'القامشلي': [37.056, 41.2174],
-    'المالكية': [37.1667, 42.1333],
-    'رأس العين': [36.85, 40.0667],
-    'الشدادي': [35.6167, 40.7333],
-    'تل تمر': [36.3167, 40.7333],
-    'اليعربية': [37.0333, 42.2],
-    'الوديعة': [37.0333, 42.1833],
-    'تل حميس': [36.3167, 41.1833],
-    'تل براك': [36.65, 41.0333],
-    'المركدة': [36.8333, 40.3833],
-    'هول': [36.5667, 40.8833],
-    'القنيطرة': [33.1258, 35.8245],
-    'خان أرنبة': [33.1833, 35.9833],
-    'جبا': [33.1167, 35.8833],
-    'بريقة': [33.1167, 35.9167],
-    'حضر': [33.1167, 35.8667],
-    'رفيد': [33.1833, 35.8333],
-    'القحطانية': [33.2333, 35.9167],
-    'المعلقة': [33.1333, 35.9167],
-    'ترنعة': [33.0833, 35.9167],
-    'حرش': [33.0667, 35.9167],
-    'الفوقاني': [33.1167, 35.9167],
-    'التحتاني': [33.1, 35.9167]
+    'دمشق': [33.5138, 36.2765], 'المزة': [33.5056, 36.2714], 'برزة': [33.5403, 36.3406],
+    'جرمانا': [33.4858, 36.3489], 'داريا': [33.4583, 36.25], 'الزبداني': [33.7242, 36.1003],
+    'دوما': [33.5717, 36.4025], 'حرستا': [33.5586, 36.3708], 'عربين': [33.5408, 36.3383],
+    'سقبا': [33.5367, 36.3389], 'كفر بطنا': [33.5367, 36.375], 'حمورية': [33.4361, 36.3167],
+    'جديدة عرطوز': [33.4333, 36.1167], 'معضمية': [33.4333, 36.1], 'قدسيا': [33.45, 36.1],
+    'يبرود': [33.9675, 36.6575], 'الرحيبة': [33.75, 36.7167], 'دير عطية': [34.1, 36.7667],
+    'النبك': [34.0167, 36.7167], 'قارة': [33.8333, 36.5833], 'التل': [33.6, 36.3167],
+    'القطيفة': [33.7333, 36.5833], 'الضمير': [33.6167, 36.4167], 'مسرابا': [33.5333, 36.35],
+    'سعدنايا': [33.6833, 36.5333], 'الرغيبة': [33.75, 36.6167], 'النشابية': [33.55, 36.3667],
+    'حران العواميد': [33.5167, 36.4833], 'العشارية': [33.5667, 36.3833], 'ببيلا': [33.4833, 36.3333],
+    'المليحة': [33.45, 36.3167], 'الحسينية': [35.0167, 40.4333], 'عين ترما': [33.5, 36.3167],
+    'جيرود': [33.8, 36.7333], 'الفيجة': [33.7167, 36.5667], 'المنطقة الصناعية': [33.5, 36.2833],
+    'الكسوة': [33.35, 36.1], 'الحجر الأسود': [33.4667, 36.3], 'السبينة': [33.4333, 36.3333],
+    'السيدة زينب': [33.45, 36.3333], 'بيت سحم': [33.4833, 36.35], 'الطيبة': [33.4833, 36.3167],
+    'المعضمية': [33.4333, 36.1], 'حلب': [36.2021, 37.1343], 'الأعظمية': [36.2167, 37.15],
+    'الشهباء': [36.2167, 37.15], 'سيف الدولة': [36.1833, 37.1333], 'صلاح الدين': [36.2, 37.1333],
+    'باب الفرج': [36.2, 37.15], 'العزيزية': [36.1833, 37.1667], 'المشارقة': [36.2167, 37.1667],
+    'حلب الجديدة': [36.2, 37.1167], 'الشيخ مقصود': [36.2333, 37.1667], 'الشعار': [36.2167, 37.1333],
+    'حنانو': [36.2333, 37.1833], 'الميسر': [36.1833, 37.1333], 'مارع': [36.4833, 37.5],
+    'الباب': [36.3667, 37.5167], 'منبج': [36.5333, 37.95], 'عين العرب': [36.89, 38.35],
+    'كوباني': [36.89, 38.35], 'جرابلس': [36.8167, 38.0167], 'اعزاز': [36.5833, 37.05],
+    'الدانا': [36.2167, 36.7667], 'تل رفعت': [36.4667, 37.0833], 'عفرين': [36.5167, 36.8667],
+    'أتارب': [36.1333, 36.8167], 'كفر نايا': [36.1667, 36.85], 'كفر حمرة': [36.2333, 37.0833],
+    'حريتان': [36.2833, 37.0833], 'حيان': [36.2333, 37.05], 'السفيرة': [36.0667, 37.3667],
+    'أبين': [35.9333, 36.7833], 'تادف': [36.35, 37.5333], 'الراعي': [36.7667, 38.0333],
+    'الراشدين': [36.2333, 37.1167], 'الحمدانية': [36.2167, 37.1], 'الفرقان': [36.1833, 37.1167],
+    'الجميلية': [36.2167, 37.15], 'الكلاسة': [36.2, 37.15], 'القاطرجي': [36.1833, 37.15],
+    'السكري': [36.1833, 37.1333], 'الأنصاري': [36.1833, 37.1167], 'الزهراء': [36.2167, 37.1333],
+    'الراموسة': [36.1667, 37.1], 'الحاضر': [36.1, 37.0], 'الأتارب': [36.1333, 36.8167],
+    'حمص': [34.7308, 36.7094], 'الوعر': [34.7333, 36.7], 'البياضة': [34.5667, 36.5833],
+    'تلبيسة': [34.8333, 36.7333], 'الرستن': [34.9167, 36.7333], 'تدمر': [34.55, 38.2833],
+    'القصير': [34.5167, 36.5833], 'تلكلخ': [34.6667, 36.3167], 'المخرم': [34.6167, 36.6667],
+    'الفرقلس': [34.5667, 36.7167], 'دير بعلبة': [34.6, 36.1333], 'المشرفة': [34.5833, 36.75],
+    'الحولة': [34.8833, 36.5333], 'تير معلة': [34.85, 36.2167], 'القريتين': [34.2333, 37.2333],
+    'المخضر': [34.5833, 36.5], 'السنمين': [33.0833, 36.1833], 'الغنطو': [34.7833, 36.7],
+    'الحصن': [34.7833, 36.55], 'الدار الكبيرة': [34.4333, 36.75], 'القريا': [32.8667, 36.6167],
+    'الناصرة': [34.9167, 36.9167], 'الحواش': [35.5333, 35.8333], 'القاعة': [34.65, 36.55],
+    'الرقامة': [34.5667, 36.7167], 'عقرب': [34.7833, 36.3333], 'البويضة': [34.6167, 36.8333],
+    'الغازية': [34.8333, 36.5], 'اللاذقية': [35.5196, 35.7915], 'الرمل الجنوبي': [35.5167, 35.7833],
+    'جبلة': [35.35, 35.9167], 'بانياس': [35.1833, 35.95], 'القرداحة': [35.45, 36.05],
+    'الحفة': [35.6, 36.0333], 'سلمية': [35.0167, 37.05], 'كسب': [35.9167, 35.9833],
+    'الضنية': [35.9167, 36.0167], 'مشتى الحلو': [35.35, 36.1667], 'الدالية': [35.6833, 36.0167],
+    'الشيخ ضاهر': [35.75, 35.9167], 'تلمخرم': [35.5833, 35.8333], 'الفاخورة': [35.6167, 35.8333],
+    'الرمل الشمالي': [35.5333, 35.8], 'الصالحية': [35.3, 40.1833], 'العمارة': [35.4833, 35.7833],
+    'الشبطة': [35.4667, 35.7667], 'الشاطئ الأزرق': [35.5833, 35.7667], 'القناصات': [35.65, 35.9167],
+    'بسنادا': [35.4833, 36.0333], 'الشماس': [35.4167, 36.0], 'عين الشرقية': [35.3833, 36.0333],
+    'طرطوس': [34.8953, 35.8866], 'الكورنيش': [34.8833, 35.8833], 'صافيتا': [34.8167, 36.1167],
+    'دريكيش': [34.8833, 36.1333], 'الشيخ بدر': [34.8333, 36.1], 'القدموس': [34.9833, 36.1667],
+    'مسيافة': [34.8667, 36.0333], 'حمام واصل': [34.75, 36.1167], 'بيت الشيخ يونس': [34.9167, 36.0833],
+    'الدريكيش': [34.8833, 36.1333], 'دير الزور': [35.3354, 40.1406], 'الجبيلة': [35.3167, 40.1333],
+    'الميادين': [35.0167, 40.45], 'البوكمال': [34.45, 40.9333], 'العشارة': [35.0167, 40.4167],
+    'موحسن': [35.0667, 40.4167], 'الطبني': [35.1167, 40.3333], 'القورية': [35.15, 40.3],
+    'الكسرة': [35.2167, 40.3167], 'الشحيل': [35.2833, 40.2833], 'هجين': [34.9833, 40.2833],
+    'العزبة': [35.3333, 40.15], 'حطلة': [34.95, 40.4333], 'السوسة': [34.5167, 40.7333],
+    'الشعيطات': [35.0667, 40.3167], 'السويداء': [32.8557, 36.63], 'شهبا': [32.8557, 36.63],
+    'صلخد': [32.4833, 36.7], 'المزرعة': [32.7833, 36.6833], 'شقا': [32.6833, 36.8333],
+    'عتيل': [32.7833, 36.5167], 'المشنف': [32.6, 36.7833], 'الحقف': [32.7333, 36.7],
+    'رضم': [32.65, 36.75], 'المجيدل': [32.9167, 36.55], 'دير الدبوس': [32.8333, 36.6167],
+    'درعا': [32.9756, 36.1861], 'الصنمين': [33.0667, 36.1833], 'نوى': [32.8833, 36.05],
+    'إزرع': [32.8667, 36.2333], 'الشيخ مسكين': [32.7833, 36.1], 'طفس': [32.7333, 36.0667],
+    'بصرى الشام': [32.5167, 36.4833], 'جاسم': [32.9833, 36.0667], 'الحراك': [32.8833, 36.3],
+    'المسيفرة': [32.7333, 36.35], 'تل شهاب': [32.6833, 36.1], 'صيدا': [32.9167, 36.1667],
+    'الكرك': [32.6833, 36.0667], 'المزيريب': [32.7333, 36.0167], 'الغارية الشرقية': [32.7333, 36.2],
+    'الغارية الغربية': [32.7167, 36.1833], 'خربة غزالة': [32.7333, 36.2], 'سحم الجولان': [32.8167, 35.9833],
+    'إدلب': [35.9306, 36.6339], 'معرة النعمان': [35.6482, 36.6754], 'أريحا': [35.8167, 36.6],
+    'جسر الشغور': [35.8167, 36.3167], 'سراقب': [35.8667, 36.8], 'بنش': [36.1167, 36.7167],
+    'تفتناز': [36.0167, 36.7833], 'كفرنبل': [35.6167, 36.5667], 'حارم': [36.2167, 36.5167],
+    'سلقين': [36.1333, 36.45], 'أطمة': [36.1333, 36.5167], 'قلع المضيق': [35.7833, 36.4167],
+    'أبو الظهور': [35.7333, 37.05], 'خان شيخون': [35.4333, 36.65], 'اللطامنة': [35.3167, 36.6167],
+    'كفرزيتا': [35.3667, 36.6], 'مورك': [35.3667, 36.6833], 'كفر نبل': [35.5833, 36.5667],
+    'الهبيط': [35.4333, 36.5667], 'تمنعة': [35.45, 36.7333], 'التح': [35.4833, 36.7833],
+    'الرامي': [35.7833, 36.5333], 'بداما': [35.8333, 36.3333], 'الدركوش': [35.9167, 36.1667],
+    'الرقة': [35.9594, 39.0078], 'الطبقة': [35.8333, 38.55], 'تل أبيض': [36.7, 38.95],
+    'عين عيسى': [36.3833, 38.9167], 'سلوق': [36.1333, 39.1333], 'الجرنية': [36.0333, 39.0333],
+    'الهجنة': [35.8833, 39.0167], 'الكرامة': [35.8667, 39.1667], 'مدينة الرقة': [35.9594, 39.0078],
+    'الثورة': [35.95, 39.0], 'الريف الشمالي': [36.0, 39.0], 'الرشيد': [35.9167, 39.0],
+    'العطالله': [35.9833, 39.0333], 'المشلب': [35.95, 39.05], 'الصناعة': [35.9333, 39.0667],
+    'الرميلة': [35.9667, 39.0333], 'الحزيمية': [35.9, 39.0], 'السبخة': [35.85, 39.1],
+    'الخالدية': [35.8833, 39.1333], 'المعتمدية': [35.9167, 39.15], 'المنصورة': [35.8667, 39.1833],
+    'الحسكة': [36.5024, 40.7477], 'القامشلي': [37.056, 41.2174], 'المالكية': [37.1667, 42.1333],
+    'رأس العين': [36.85, 40.0667], 'الشدادي': [35.6167, 40.7333], 'تل تمر': [36.3167, 40.7333],
+    'اليعربية': [37.0333, 42.2], 'الوديعة': [37.0333, 42.1833], 'تل حميس': [36.3167, 41.1833],
+    'تل براك': [36.65, 41.0333], 'المركدة': [36.8333, 40.3833], 'هول': [36.5667, 40.8833],
+    'القنيطرة': [33.1258, 35.8245], 'خان أرنبة': [33.1833, 35.9833], 'جبا': [33.1167, 35.8833],
+    'بريقة': [33.1167, 35.9167], 'حضر': [33.1167, 35.8667], 'رفيد': [33.1833, 35.8333],
+    'القحطانية': [33.2333, 35.9167], 'المعلقة': [33.1333, 35.9167], 'ترنعة': [33.0833, 35.9167],
+    'حرش': [33.0667, 35.9167], 'الفوقاني': [33.1167, 35.9167], 'التحتاني': [33.1, 35.9167]
 };
-
-// ذاكرة تخزين مؤقت للإحداثيات (بين الجلسات)
-let cityCoordCache = {};
-try {
-    const stored = localStorage.getItem('syria_city_coords_cache_v2');
-    if (stored) cityCoordCache = JSON.parse(stored);
-} catch(e) {}
 
 function normalizeCityName(name) {
     if (!name) return '';
@@ -619,14 +521,11 @@ function normalizeCityName(name) {
 
 function getCityCoordsFromLookup(city) {
     if (!city) return null;
-    // مطابقة مباشرة
     if (CITY_COORDS[city]) return CITY_COORDS[city];
-    // مطابقة بعد التطبيع
     const norm = normalizeCityName(city);
     for (const [key, coords] of Object.entries(CITY_COORDS)) {
         if (normalizeCityName(key) === norm) return coords;
     }
-    // مطابقة جزئية
     for (const [key, coords] of Object.entries(CITY_COORDS)) {
         const keyNorm = normalizeCityName(key);
         if (keyNorm.includes(norm) || norm.includes(keyNorm)) return coords;
@@ -634,43 +533,30 @@ function getCityCoordsFromLookup(city) {
     return null;
 }
 
-async function geocodeCityNominatim(city) {
+// ============================================
+// Geocoding محسّن - Parallel batching
+// ============================================
+async function geocodeCityNominatim(city, signal) {
     try {
         const url = 'https://nominatim.openstreetmap.org/search?format=json&q=' +
             encodeURIComponent(city + ', Syria') + '&limit=1';
-        const response = await fetch(url);
+        const response = await fetch(url, { signal, headers: { 'Accept-Language': 'ar' } });
         const data = await response.json();
         if (data && data.length > 0) {
             return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
         }
     } catch(e) {
-        console.error('Geocoding error for', city, e);
+        if (e.name !== 'AbortError') console.error('Geocoding error for', city, e);
     }
     return null;
 }
 
-async function resolveCityCoords(city) {
-    if (!city || cityCoordCache[city]) return cityCoordCache[city];
-    // 1. جرب البحث المباشر
-    const lookup = getCityCoordsFromLookup(city);
-    if (lookup) {
-        cityCoordCache[city] = lookup;
-        try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
-        return lookup;
-    }
-    // 2. جرب الترميز الجغرافي
-    const geocoded = await geocodeCityNominatim(city);
-    if (geocoded) {
-        cityCoordCache[city] = geocoded;
-        try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
-        return geocoded;
-    }
-    return null;
-}
-
-async function resolveAllCityCoords(data) {
+async function resolveAllCityCoords(data, signal) {
     const uniqueCities = [...new Set(data.map(d => d.city).filter(c => c && c !== 'nan' && c !== ''))];
+    const toGeocode = [];
     const results = { resolved: [], failed: [], geocoded: [] };
+
+    // المرحلة 1: مطابقة سريعة من القاموس
     for (const city of uniqueCities) {
         if (cityCoordCache[city]) {
             results.resolved.push(city);
@@ -682,106 +568,239 @@ async function resolveAllCityCoords(data) {
             results.resolved.push(city);
             continue;
         }
-        const coords = await geocodeCityNominatim(city);
-        if (coords) {
-            cityCoordCache[city] = coords;
-            results.geocoded.push(city);
-            await new Promise(r => setTimeout(r, 1100)); // احترام حد Nominatim
-        } else {
-            results.failed.push(city);
+        toGeocode.push(city);
+    }
+
+    // المرحلة 2: ترميز جغرافي متوازي على دفعات
+    const BATCH_SIZE = 3; // Nominatim: ~1 req/sec, 3 parallel مع 400ms delay آمن
+    for (let i = 0; i < toGeocode.length; i += BATCH_SIZE) {
+        if (signal && signal.aborted) break;
+        const batch = toGeocode.slice(i, i + BATCH_SIZE);
+        setLoadingSub('جاري تحديد الإحداثيات... (' + (i + 1) + ' / ' + toGeocode.length + ' مدينة)');
+
+        const batchPromises = batch.map(city => geocodeCityNominatim(city, signal));
+        const batchResults = await Promise.all(batchPromises);
+
+        batch.forEach((city, idx) => {
+            const coords = batchResults[idx];
+            if (coords) {
+                cityCoordCache[city] = coords;
+                results.geocoded.push(city);
+            } else {
+                results.failed.push(city);
+            }
+        });
+
+        if (i + BATCH_SIZE < toGeocode.length) {
+            await new Promise(r => setTimeout(r, 400));
         }
     }
-    try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
+
+    safeStorage.set('syria_city_coords_cache_v2', cityCoordCache);
     return results;
 }
 
 function initMap() {
     map = L.map('map').setView([35.2, 38.5], 6);
-
-    // طبقة الخريطة الأساسية (OpenStreetMap)
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 19
+        attribution: '&copy; OpenStreetMap', maxZoom: 19
     });
-
-    // طبقة القمر الصناعي (Esri)
     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '&copy; Esri',
-        maxZoom: 19
+        attribution: '&copy; Esri', maxZoom: 19
     });
-
-    // إضافة الطبقة الأساسية افتراضياً
     osmLayer.addTo(map);
-
-    // زر تبديل الطبقات
-    const baseMaps = {
-        '🗺️ أساسية': osmLayer,
-        '🛰️ قمر صناعي': satelliteLayer
-    };
-    L.control.layers(baseMaps, null, {
-        position: 'topright',
-        collapsed: true
+    L.control.layers({ 'أساسية': osmLayer, 'قمر صناعي': satelliteLayer }, null, {
+        position: 'topright', collapsed: true
     }).addTo(map);
-
     markersLayer = L.featureGroup().addTo(map);
 }
 
-async function loadDemoData() {
-    await processRawData(DEMO_DATA);
-    showSuccess('تم تحميل البيانات التجريبية بنجاح - ' + DEMO_DATA.length + ' سجل');
-}
 
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    Papa.parse(file, {
-        header: true, dynamicTyping: true, skipEmptyLines: true,
-        complete: async function(results) {
-            const mapped = results.data.map(row => mapColumns(row, results.meta.fields));
-            const parsed = cleanAndParse(mapped);
-            await processRawData(parsed);
-            showSuccess('تم استيراد ملف CSV بنجاح - ' + parsed.length + ' سجل');
-        },
-        error: function(err) { showError('خطأ في قراءة الملف: ' + err.message); }
+// ============================================
+// جلب البيانات مع timeout وتحكم في الإلغاء
+// ============================================
+function fetchWithTimeout(url, options, timeoutMs) {
+    return new Promise((resolve, reject) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+            controller.abort();
+            reject(new Error('Timeout after ' + timeoutMs + 'ms'));
+        }, timeoutMs);
+
+        fetch(url, { ...options, signal: controller.signal })
+            .then(response => {
+                clearTimeout(timeoutId);
+                resolve(response);
+            })
+            .catch(err => {
+                clearTimeout(timeoutId);
+                reject(err);
+            });
     });
-    event.target.value = '';
 }
 
-function findColumn(fields, keywords) {
-    if (!fields || !Array.isArray(fields)) return null;
-    for (const kw of keywords) {
-        const kwNorm = kw.toLowerCase().trim().replace(/[\s_]+/g, '');
-        for (const f of fields) {
-            const fNorm = f.toLowerCase().trim().replace(/[\s_]+/g, '');
-            if (fNorm === kwNorm) return f;
-        }
-        for (const f of fields) {
-            const fNorm = f.toLowerCase().trim().replace(/[\s_]+/g, '');
-            if (fNorm.includes(kwNorm) || kwNorm.includes(fNorm)) return f;
+async function loadData() {
+    lastLoadAttempt = loadData;
+    const btn = document.getElementById('syncIcon');
+    if (btn) btn.classList.add('fa-spin');
+    showLoading('جاري جلب البيانات...', 'جاري الاتصال بالخادم');
+
+    currentAbortController = new AbortController();
+    const signal = currentAbortController.signal;
+
+    // محاولة استخدام البيانات المخزنة مؤقتاً أولاً
+    const cached = safeStorage.get('dashboard_data_cache');
+    const cacheAge = safeStorage.get('dashboard_data_cache_time');
+    const now = Date.now();
+    const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 دقائق
+
+    if (cached && cacheAge && (now - cacheAge) < CACHE_MAX_AGE) {
+        try {
+            setLoadingSub('استخدام البيانات المخزنة مؤقتاً...');
+            await processRawData(cached);
+            hideLoading();
+            showSuccess('تم تحميل البيانات من الذاكرة المؤقتة - ' + cached.length + ' سجل');
+            if (btn) btn.classList.remove('fa-spin');
+            return;
+        } catch(e) {
+            console.log('Cache invalid, fetching fresh data');
+            safeStorage.remove('dashboard_data_cache');
         }
     }
-    return null;
+
+    const attempts = [];
+    if (GOOGLE_API_KEY && GOOGLE_SPREADSHEET_ID) {
+        attempts.push({ name: 'Google Sheets API', fn: () => loadFromGoogleSheetsAPI(signal) });
+    }
+    if (GOOGLE_SPREADSHEET_ID) {
+        attempts.push({ name: 'JSON Feed', fn: () => loadFromJSONFeed(signal) });
+    }
+    attempts.push({ name: 'CSV مباشر', fn: () => loadFromCSV(signal) });
+    attempts.push({ name: 'بروكسي 1', fn: () => loadFromCSVProxy('https://corsproxy.io/?', signal) });
+    attempts.push({ name: 'بروكسي 2', fn: () => loadFromCSVProxy('https://api.allorigins.win/raw?url=', signal) });
+
+    for (const attempt of attempts) {
+        if (signal.aborted) break;
+        try {
+            setLoadingSub('محاولة عبر ' + attempt.name + '...');
+            const data = await attempt.fn();
+            if (!data || data.length === 0) throw new Error('بيانات فارغة');
+
+            // تخزين في الذاكرة المؤقتة
+            safeStorage.set('dashboard_data_cache', data);
+            safeStorage.set('dashboard_data_cache_time', Date.now());
+
+            await processRawData(data);
+            hideLoading();
+            showSuccess('تم جلب البيانات بنجاح عبر ' + attempt.name + ' - ' + data.length + ' سجل');
+            if (btn) btn.classList.remove('fa-spin');
+            return;
+        } catch (err) {
+            console.log('فشل ' + attempt.name + ':', err.message || err);
+            if (signal.aborted) break;
+        }
+    }
+
+    if (btn) btn.classList.remove('fa-spin');
+    hideLoading();
+    showError('تعذر الاتصال بجميع المصادر.<br>جرب: <b>بيانات تجريبية</b> أو <b>رفع ملف CSV</b> يدوياً');
 }
 
+function loadFromGoogleSheetsAPI(signal) {
+    const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + GOOGLE_SPREADSHEET_ID + 
+        '/values/' + encodeURIComponent(GOOGLE_SHEET_NAME) + '?key=' + GOOGLE_API_KEY;
+    return fetchWithTimeout(url, { cache: 'no-store' }, 8000)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(json => {
+            if (!json.values || json.values.length < 2) throw new Error('بيانات فارغة');
+            const headers = json.values[0];
+            const rows = json.values.slice(1).map(row => {
+                const obj = {};
+                headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? row[i] : ''; });
+                return obj;
+            });
+            return cleanAndParse(rows.map(row => mapColumns(row, headers)));
+        });
+}
+
+function loadFromJSONFeed(signal) {
+    const url = 'https://spreadsheets.google.com/feeds/list/' + GOOGLE_SPREADSHEET_ID + '/od6/public/values?alt=json';
+    return fetchWithTimeout(url, { cache: 'no-store' }, 8000)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(json => {
+            if (!json.feed || !json.feed.entry) throw new Error('بيانات فارغة');
+            const rows = json.feed.entry.map(entry => {
+                const obj = {};
+                for (const key in entry) {
+                    if (key.startsWith('gsx$')) {
+                        obj[key.replace('gsx$', '')] = entry[key].$t || '';
+                    }
+                }
+                return obj;
+            });
+            const fields = rows.length > 0 ? Object.keys(rows[0]) : [];
+            return cleanAndParse(rows.map(row => mapColumns(row, fields)));
+        });
+}
+
+function loadFromCSV(signal) {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => reject(new Error('CSV timeout')), 10000);
+        Papa.parse(API_URL, {
+            download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
+            complete: function(results) {
+                clearTimeout(timeoutId);
+                if (!results.data || results.data.length === 0) return reject(new Error('بيانات فارغة'));
+                const fields = results.meta.fields || [];
+                resolve(cleanAndParse(results.data.map(row => mapColumns(row, fields))));
+            },
+            error: function(err) {
+                clearTimeout(timeoutId);
+                reject(err);
+            }
+        });
+    });
+}
+
+function loadFromCSVProxy(proxyPrefix, signal) {
+    const url = proxyPrefix + encodeURIComponent(API_URL);
+    return fetchWithTimeout(url, { cache: 'no-store' }, 10000)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(csvText => {
+            return new Promise((resolve, reject) => {
+                Papa.parse(csvText, {
+                    header: true, dynamicTyping: true, skipEmptyLines: true,
+                    complete: function(results) {
+                        if (!results.data || results.data.length === 0) return reject(new Error('بيانات فارغة'));
+                        const fields = results.meta.fields || [];
+                        resolve(cleanAndParse(results.data.map(row => mapColumns(row, fields))));
+                    },
+                    error: function(err) { reject(err); }
+                });
+            });
+        });
+}
+
+// ============================================
+// معالجة الأعمدة والتنظيف
+// ============================================
 function normalizeColumnName(str) {
     return String(str).toLowerCase().trim()
         .replace(/[\s_\-]+/g, '')
         .replace(/[أإآا]/g, 'ا')
         .replace(/ى/g, 'ي')
         .replace(/ة/g, 'ه')
-        .replace(/[ً-ٰٟ]/g, ''); // إزالة التشكيل
+        .replace(/[ً-ٰٟ]/g, '');
 }
 
 function findColumn(fields, keywords) {
     if (!fields || !Array.isArray(fields)) return null;
-    // محاولة 1: مطابقة تامة بعد التطبيع
     for (const kw of keywords) {
         const kwNorm = normalizeColumnName(kw);
         for (const f of fields) {
             if (normalizeColumnName(f) === kwNorm) return f;
         }
     }
-    // محاولة 2: تضمين جزئي بعد التطبيع
     for (const kw of keywords) {
         const kwNorm = normalizeColumnName(kw);
         for (const f of fields) {
@@ -794,204 +813,49 @@ function findColumn(fields, keywords) {
 
 function mapColumns(row, fields) {
     const mapping = {
-        name: ['الاسم', 'اسم', 'name', 'الاسم_الكامل', 'الاسم الكامل', 'اسم الوحدة', 'اسم المركز', 'اسم المنشأة', 'الاسم الكامل للوحدة', 'الاسم الكامل للمركز'],
+        name: ['الاسم', 'اسم', 'name', 'الاسم_الكامل', 'الاسم الكامل', 'اسم الوحدة', 'اسم المركز', 'اسم المنشأة'],
         province: ['المحافظة', 'محافظة', 'province', 'المحافظات', 'المحافظه'],
         city: ['البلدة', 'بلدة', 'city', 'المدينة', 'مدينة', 'المنطقة', 'منطقة', 'البلده', 'المنطقه'],
-        location_name: ['الموقع', 'موقع', 'location', 'الموقع_الجغرافي', 'الموقع الجغرافي', 'العنوان', 'عنوان', 'address', 'الموقع الجغرافي للوحدة', 'الموقع الجغرافي للمركز'],
-        type: ['النوع', 'نوع', 'type', 'نوع المنشأة', 'نوع الوحدة', 'نوع المركز', 'النوع'],
+        location_name: ['الموقع', 'موقع', 'location', 'العنوان', 'عنوان', 'address'],
+        type: ['النوع', 'نوع', 'type', 'نوع المنشأة', 'نوع الوحدة', 'نوع المركز'],
         status: ['الحالة', 'حالة', 'status', 'حالة التفعيل', 'حالة الوحدة', 'حالة المركز', 'الحاله'],
-        building_status: ['حالة البناء', 'حالة_البناء', 'building_status', 'بناء', 'الحالة البنائية', 'الحاله البنائيه', 'حاله البناء'],
+        building_status: ['حالة البناء', 'حالة_البناء', 'building_status', 'بناء', 'الحالة البنائية', 'حاله البناء'],
         total_area: ['المساحة الكلية', 'المساحة_الكلية', 'total_area', 'المساحة', 'مساحة', 'area', 'المساحه الكليه', 'المساحه'],
         building_area: ['مساحة البناء', 'مساحة_البناء', 'building_area', 'مساحة المبنى', 'مساحه البناء'],
-        floors: ['الطوابق', 'طوابق', 'floors', 'عدد الطوابق', 'floor', 'عدد الطوابق', 'الطوابق'],
-        male_staff: ['موظفين ذكور', 'موظفين_ذكور', 'male_staff', 'ذكور', 'الذكور', 'عدد الذكور', 'الموظفين الذكور', 'عدد الموظفين الذكور'],
-        female_staff: ['موظفات إناث', 'موظفات_إناث', 'female_staff', 'إناث', 'الإناث', 'عدد الإناث', 'موظفات', 'موظفات اناث', 'الاناث', 'الموظفات الإناث', 'عدد الموظفات الإناث'],
-        disabled_staff: ['موظفون ذوو إعاقة', 'موظفون_ذوو_إعاقة', 'disabled_staff', 'ذوو إعاقة', 'ذوي إعاقة', 'اعاقة', 'ذوي اعاقة', 'الموظفون ذوو الإعاقة', 'ذوو الاعاقه'],
-        benef_families: ['أسر مستفيدة', 'أسر_مستفيدة', 'benef_families', 'أسر', 'عدد الأسر', 'المستفيدين', 'الاسر المستفيدة', 'عدد الاسر المستفيده', 'الاسر'],
-        benef_female: ['مستفيدات إناث', 'مستفيدات_إناث', 'benef_female', 'مستفيدات', 'اناث مستفيدين', 'المستفيدات', 'عدد المستفيدات', 'المستفيدات الإناث'],
-        benef_male: ['مستفيدون ذكور', 'مستفيدون_ذكور', 'benef_male', 'مستفيدون', 'ذكور مستفيدين', 'المستفدين', 'عدد المستفيدين', 'المستفيدون الذكور'],
-        benef_children: ['أطفال مستفيدون', 'أطفال_مستفيدون', 'benef_children', 'أطفال', 'عدد الأطفال', 'اطفال مستفيدين', 'عدد الاطفال المستفيدين', 'الاطفال'],
-        occupant: ['الجهة الشاغرة', 'الجهة_الشاغرة', 'occupant', 'الجهة', 'الشاغر', 'الجهه الشاغره', 'الجهة الشاغرة للوحدة'],
+        floors: ['الطوابق', 'طوابق', 'floors', 'عدد الطوابق', 'floor'],
+        male_staff: ['موظفين ذكور', 'موظفين_ذكور', 'male_staff', 'ذكور', 'الذكور', 'عدد الذكور', 'الموظفين الذكور'],
+        female_staff: ['موظفات إناث', 'موظفات_إناث', 'female_staff', 'إناث', 'الإناث', 'عدد الإناث', 'موظفات', 'الموظفات الإناث'],
+        disabled_staff: ['موظفون ذوو إعاقة', 'موظفون_ذوو_إعاقة', 'disabled_staff', 'ذوو إعاقة', 'ذوي إعاقة', 'اعاقة', 'ذوي اعاقة'],
+        benef_families: ['أسر مستفيدة', 'أسر_مستفيدة', 'benef_families', 'أسر', 'عدد الأسر', 'المستفيدين', 'الاسر المستفيدة', 'الاسر'],
+        benef_female: ['مستفيدات إناث', 'مستفيدات_إناث', 'benef_female', 'مستفيدات', 'اناث مستفيدين', 'المستفيدات', 'عدد المستفيدات'],
+        benef_male: ['مستفيدون ذكور', 'مستفيدون_ذكور', 'benef_male', 'مستفيدون', 'ذكور مستفيدين', 'المستفدين', 'عدد المستفيدين'],
+        benef_children: ['أطفال مستفيدون', 'أطفال_مستفيدون', 'benef_children', 'أطفال', 'عدد الأطفال', 'اطفال مستفيدين', 'الاطفال'],
+        occupant: ['الجهة الشاغرة', 'الجهة_الشاغرة', 'occupant', 'الجهة', 'الشاغر', 'الجهه الشاغره'],
         ownership: ['ملكية البناء', 'ملكية_البناء', 'ownership', 'ملكية', 'الملكية', 'ملكيه البناء', 'الملكيه'],
-        equipment_status: ['حالة التجهيزات', 'حالة_التجهيزات', 'equipment_status', 'تجهيزات', 'التجهيزات', 'حاله التجهيزات', 'التجهيز'],
-        building_needs: ['احتياج البناء', 'احتياجات البناء', 'احتياجات_البناء', 'building_needs', 'احتياجات', 'احتياجات البناء والتجهيز', 'احتياج البناء'],
+        equipment_status: ['حالة التجهيزات', 'حالة_التجهيزات', 'equipment_status', 'تجهيزات', 'التجهيزات', 'حاله التجهيزات'],
+        building_needs: ['احتياج البناء', 'احتياجات البناء', 'احتياجات_البناء', 'building_needs', 'احتياجات', 'احتياج البناء'],
         equipment_needs: ['احتياج التجهيزات', 'احتياجات التجهيزات', 'احتياجات_التجهيزات', 'equipment_needs', 'احتياجات التجهيز'],
-        services: ['الخدمات المقدمة', 'الخدمات', 'خدمات', 'services', 'الخدمات المقدمة في مركز او الوحدة', 'الخدمات المقدمه', 'الخدمات المقدمة في الوحدة'],
+        services: ['الخدمات المقدمة', 'الخدمات', 'خدمات', 'services', 'الخدمات المقدمه', 'الخدمات المقدمة في الوحدة'],
         project: ['المشروع المقترح للتفعيل', 'المشروع المقترح', 'المشروع_المقترح', 'project', 'المشروع', 'المشاريع المقترحه', 'مشروع مقترح'],
         difficulties: ['ملاحظات (صعوبات العمل)', 'الصعوبات', 'صعوبات', 'difficulties', 'صعوبات العمل', 'الصعوبات والمعوقات', 'ملاحظات'],
         suggestions: ['المقترحات', 'مقترحات', 'suggestions', 'الاقتراحات', 'اقتراحات'],
-        funding: ['مصادر التمويل/الدعم2', 'مصادر التمويل', 'مصادر_التمويل', 'funding', 'تمويل', 'التمويل', 'الدعم', 'مصادر التمويل والدعم', 'التمويل والدعم'],
+        funding: ['مصادر التمويل/الدعم2', 'مصادر التمويل', 'مصادر_التمويل', 'funding', 'تمويل', 'التمويل', 'الدعم', 'مصادر التمويل والدعم'],
         reason_inactive: ['سبب عدم التفعيل', 'سبب_عدم_التفعيل', 'reason_inactive', 'السبب', 'سبب', 'اسباب عدم التفعيل', 'سبب عدم التشغيل'],
         lat: ['Latitude (Y)', 'خط العرض', 'خط_العرض', 'lat', 'latitude', 'y', 'latitude_y'],
         lng: ['Longitude (x)', 'خط الطول', 'خط_الطول', 'lng', 'lon', 'long', 'longitude', 'x', 'longitude_x']
     };
 
     const mapped = {};
-    const matchedFields = [];
-    const unmatchedFields = [];
-
     for (const targetKey in mapping) {
         const sourceKey = findColumn(fields, mapping[targetKey]);
         if (sourceKey && row[sourceKey] !== undefined) {
             mapped[targetKey] = row[sourceKey];
-            matchedFields.push(targetKey + ' ← ' + sourceKey);
         }
     }
-
-    // تسجيل الأعمدة التي لم يتم التعرف عليها
-    for (const f of fields) {
-        const fNorm = normalizeColumnName(f);
-        let found = false;
-        for (const targetKey in mapping) {
-            const sourceKey = findColumn([f], mapping[targetKey]);
-            if (sourceKey) { found = true; break; }
-        }
-        if (!found && fNorm.length > 0) {
-            unmatchedFields.push(f);
-        }
-    }
-
-    // إذا لم يتم التعرف على شيء، استخدم الأسماء كما هي
     if (Object.keys(mapped).length === 0 && fields) {
         for (const f of fields) mapped[f] = row[f];
     }
-
-    // تخزين التشخيص في متغير عام لاستخدامه لاحقاً
-    window._lastMappingDebug = {
-        matched: matchedFields,
-        unmatched: unmatchedFields,
-        totalFields: fields.length,
-        mappedCount: Object.keys(mapped).length
-    };
-
     return mapped;
-}
-
-async function loadData() {
-    const btn = document.querySelector('button[onclick="loadData()"] i');
-    if (btn) btn.classList.add('fa-spin');
-
-    // سلسلة المحاولات حسب الأولوية
-    const attempts = [];
-
-    // 1. Google Sheets API v4 (الأفضل - يتجاوز CORS)
-    if (GOOGLE_API_KEY && GOOGLE_SPREADSHEET_ID) {
-        attempts.push({ name: 'Google Sheets API', fn: loadFromGoogleSheetsAPI });
-    }
-
-    // 2. JSON Feed (بدون API Key - يتجاوز CORS أيضاً)
-    if (GOOGLE_SPREADSHEET_ID) {
-        attempts.push({ name: 'JSON Feed', fn: loadFromJSONFeed });
-    }
-
-    // 3. CSV مباشر (قد يفشل بسبب CORS إذا فُتح الملف محلياً)
-    attempts.push({ name: 'CSV مباشر', fn: loadFromCSV });
-
-    // 4. بروكسيات CORS (احتياطي)
-    attempts.push({ name: 'بروكسي 1', fn: () => loadFromCSVProxy('https://corsproxy.io/?') });
-    attempts.push({ name: 'بروكسي 2', fn: () => loadFromCSVProxy('https://api.allorigins.win/raw?url=') });
-
-    for (const attempt of attempts) {
-        try {
-            const data = await attempt.fn();
-            if (!data || data.length === 0) throw new Error('بيانات فارغة');
-            await processRawData(data);
-            showSuccess('تم جلب البيانات بنجاح عبر ' + attempt.name + ' - ' + data.length + ' سجل');
-            if (btn) btn.classList.remove('fa-spin');
-            return;
-        } catch (err) {
-            console.log('فشل ' + attempt.name + ':', err);
-        }
-    }
-
-    if (btn) btn.classList.remove('fa-spin');
-    showError('تعذر الاتصال بجميع المصادر. جرب:\n1. إضافة Google API Key + Spreadsheet ID\n2. فتح الملف عبر خادم محلي\n3. استخدام زر "بيانات تجريبية"\n4. رفع ملف CSV يدوياً');
-}
-
-
-function loadFromGoogleSheetsAPI() {
-    const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + GOOGLE_SPREADSHEET_ID + '/values/' + encodeURIComponent(GOOGLE_SHEET_NAME) + '?key=' + GOOGLE_API_KEY;
-    return fetch(url, { cache: 'no-store' })
-        .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.json();
-        })
-        .then(json => {
-            if (!json.values || json.values.length < 2) throw new Error('بيانات فارغة');
-            const headers = json.values[0];
-            const rows = json.values.slice(1).map(row => {
-                const obj = {};
-                headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? row[i] : ''; });
-                return obj;
-            });
-            const fields = headers;
-            const mapped = rows.map(row => mapColumns(row, fields));
-            return cleanAndParse(mapped);
-        });
-}
-
-function loadFromJSONFeed() {
-    const url = 'https://spreadsheets.google.com/feeds/list/' + GOOGLE_SPREADSHEET_ID + '/od6/public/values?alt=json';
-    return fetch(url, { cache: 'no-store' })
-        .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.json();
-        })
-        .then(json => {
-            if (!json.feed || !json.feed.entry) throw new Error('بيانات فارغة');
-            const entries = json.feed.entry;
-            const rows = entries.map(entry => {
-                const obj = {};
-                for (const key in entry) {
-                    if (key.startsWith('gsx$')) {
-                        const colName = key.replace('gsx$', '');
-                        obj[colName] = entry[key].$t || '';
-                    }
-                }
-                return obj;
-            });
-            const fields = rows.length > 0 ? Object.keys(rows[0]) : [];
-            const mapped = rows.map(row => mapColumns(row, fields));
-            return cleanAndParse(mapped);
-        });
-}
-
-function loadFromCSV() {
-    return new Promise((resolve, reject) => {
-        Papa.parse(API_URL, {
-            download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
-            complete: function(results) {
-                if (!results.data || results.data.length === 0) return reject(new Error('بيانات فارغة'));
-                const fields = results.meta.fields || [];
-                const mapped = results.data.map(row => mapColumns(row, fields));
-                resolve(cleanAndParse(mapped));
-            },
-            error: function(err) { reject(err); }
-        });
-    });
-}
-
-function loadFromCSVProxy(proxyPrefix) {
-    const url = proxyPrefix + encodeURIComponent(API_URL);
-    return fetch(url, { cache: 'no-store' })
-        .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.text();
-        })
-        .then(csvText => {
-            return new Promise((resolve, reject) => {
-                Papa.parse(csvText, {
-                    header: true, dynamicTyping: true, skipEmptyLines: true,
-                    complete: function(results) {
-                        if (!results.data || results.data.length === 0) return reject(new Error('بيانات فارغة'));
-                        const fields = results.meta.fields || [];
-                        const mapped = results.data.map(row => mapColumns(row, fields));
-                        resolve(cleanAndParse(mapped));
-                    },
-                    error: function(err) { reject(err); }
-                });
-            });
-        });
 }
 
 function normalizeText(str) {
@@ -1006,7 +870,6 @@ function normalizeType(str) {
         .replace(/ة/g, 'ه')
         .replace(/ى/g, 'ي')
         .toLowerCase();
-    // تعيين القيم المعيارية
     if (s.includes('مركز')) return 'مركز';
     if (s.includes('وحدة')) return 'وحدة';
     if (s.includes('مشغل')) return 'مشغل';
@@ -1016,7 +879,6 @@ function normalizeType(str) {
 
 function parseCoordinate(val) {
     if (val === '' || val === null || val === undefined) return 0;
-    // التعامل مع الفاصلة العشرية العربية (35,5 → 35.5)
     const str = String(val).trim().replace(',', '.');
     const num = parseFloat(str);
     return isNaN(num) ? 0 : num;
@@ -1036,13 +898,10 @@ function cleanAndParse(rawData) {
                 cleanRow[key] = row[key];
             }
         }
-        // تنظيف النصوص لمنع التكرار بسبب المسافات
         ['name','province','city','status','building_status','equipment_status','ownership','occupant','location_name'].forEach(k => {
             if (cleanRow[k] !== undefined) cleanRow[k] = normalizeText(cleanRow[k]);
         });
-        // تطبيع نوع المنشأة
         if (cleanRow.type !== undefined) cleanRow.type = normalizeType(cleanRow.type);
-        // تنظيف الإحداثيات: تحويل الفاصلة إلى نقطة
         cleanRow.lat = parseCoordinate(cleanRow.lat);
         cleanRow.lng = parseCoordinate(cleanRow.lng);
         if (!cleanRow.id && cleanRow.id !== 0) cleanRow.id = index + 1;
@@ -1050,174 +909,61 @@ function cleanAndParse(rawData) {
     }).filter(row => row.name && String(row.name).trim() !== '');
 }
 
-function renderAdminHierarchy() {
-    const container = document.getElementById('adminHierarchy');
-    if (!container) return;
-    container.innerHTML = '';
-
-    // تجميع البيانات حسب المحافظة ثم البلدة
-    const hierarchy = {};
-    allData.forEach(d => {
-        const prov = d.province || 'غير محدد';
-        const city = d.city || 'غير محددة';
-        if (!hierarchy[prov]) hierarchy[prov] = {};
-        if (!hierarchy[prov][city]) hierarchy[prov][city] = [];
-        hierarchy[prov][city].push(d);
-    });
-
-    const provinces = Object.keys(hierarchy).sort();
-
-    provinces.forEach((prov, idx) => {
-        const cities = Object.keys(hierarchy[prov]).sort();
-        const totalItems = cities.reduce((sum, c) => sum + hierarchy[prov][c].length, 0);
-
-        const provinceDiv = document.createElement('div');
-        provinceDiv.className = 'admin-province';
-
-        const header = document.createElement('div');
-        header.className = 'admin-province-header';
-        header.innerHTML = '<span class="admin-province-name"><i class="fas fa-map-marker-alt ml-2 text-blue-500"></i> ' + prov + '</span>' +
-            '<div class="flex items-center gap-2">' +
-            '<span class="admin-province-count">' + totalItems + '</span>' +
-            '<i class="fas fa-chevron-down text-gray-400"></i></div>';
-
-        const citiesDiv = document.createElement('div');
-        citiesDiv.className = 'admin-cities';
-
-        cities.forEach(city => {
-            const count = hierarchy[prov][city].length;
-            const cityBtn = document.createElement('span');
-            cityBtn.className = 'admin-city';
-            cityBtn.innerHTML = '<i class="fas fa-crosshairs"></i> ' + city + ' <span style="opacity:0.6;font-size:0.7rem;">(' + count + ')</span>';
-            cityBtn.onclick = () => zoomToCity(city, prov);
-            citiesDiv.appendChild(cityBtn);
-        });
-
-        header.onclick = () => {
-            const isExpanded = citiesDiv.classList.contains('show');
-            // إغلاق جميع المحافظات
-            document.querySelectorAll('.admin-cities').forEach(el => el.classList.remove('show'));
-            document.querySelectorAll('.admin-province-header').forEach(el => el.classList.remove('expanded'));
-            if (!isExpanded) {
-                citiesDiv.classList.add('show');
-                header.classList.add('expanded');
-            }
-        };
-
-        provinceDiv.appendChild(header);
-        provinceDiv.appendChild(citiesDiv);
-        container.appendChild(provinceDiv);
-    });
-}
-
-function zoomToCity(city, province) {
-    // البحث عن إحداثيات البلدة
-    let coords = getCityCoordsFromLookup(city);
-    // إذا لم تُوجد، ابحث في البيانات المُحلّة
-    if (!coords) {
-        const match = allData.find(d => d.city === city && d._lat && d._lng);
-        if (match) coords = [match._lat, match._lng];
-    }
-    // إذا لم تُوجد، ابحث في إحداثيات المحافظة
-    if (!coords) {
-        coords = getCityCoordsFromLookup(province);
-    }
-
-    if (coords && map) {
-        map.flyTo(coords, 13, { duration: 1.5 });
-        // فتح أقرب popup بعد التحريك
-        setTimeout(() => {
-            const nearest = allData.find(d => d.city === city && d._lat && d._lng);
-            if (nearest) {
-                markersLayer.eachLayer(layer => {
-                    const ll = layer.getLatLng();
-                    if (Math.abs(ll.lat - coords[0]) < 0.01 && Math.abs(ll.lng - coords[1]) < 0.01) {
-                        layer.openPopup();
-                    }
-                });
-            }
-        }, 1600);
-    } else {
-        showError('لم يتم العثور على إحداثيات لـ: ' + city);
-    }
-}
 
 async function processRawData(data) {
     allData = data;
+    showLoading('جاري معالجة البيانات...', 'تحليل ' + data.length + ' سجل');
 
-    // حل إحداثيات المدن من أسماء البلدات
-    const geoResults = await resolveAllCityCoords(allData);
+    // حل الإحداثيات فقط للمدن التي ليس لها إحداثيات في البيانات
+    const needsGeocoding = allData.some(d => {
+        const lat = parseCoordinate(d.lat);
+        const lng = parseCoordinate(d.lng);
+        return !lat || !lng;
+    });
 
-    // ربط الإحداثيات بكل صف
+    if (needsGeocoding) {
+        await resolveAllCityCoords(allData, currentAbortController ? currentAbortController.signal : null);
+    }
+
     allData.forEach(row => {
-        if (cityCoordCache[row.city]) {
+        const sheetLat = parseCoordinate(row.lat);
+        const sheetLng = parseCoordinate(row.lng);
+        if (sheetLat && sheetLng) {
+            row._lat = sheetLat;
+            row._lng = sheetLng;
+        } else if (cityCoordCache[row.city]) {
             row._lat = cityCoordCache[row.city][0];
             row._lng = cityCoordCache[row.city][1];
         } else {
-            // احتياطي: أعمدة الإحداثيات من الشيت
-            row._lat = parseCoordinate(row.lat);
-            row._lng = parseCoordinate(row.lng);
+            row._lat = 0;
+            row._lng = 0;
         }
     });
 
     filteredData = [...allData];
-
-updateKPIs();
+    updateKPIs();
     populateFilters();
     renderAdminHierarchy();
     filterData();
-    setTimeout(() => updateMap(), 100);
+    setTimeout(() => updateMap(), 50);
+    hideLoading();
 }
 
 function updateKPIs() {
-    // المراكز الكلية والمفعلة
     const centers = allData.filter(d => d.type === 'مركز');
-    const totalCenters = centers.length;
-    const activeCenters = centers.filter(d => d.status === 'مفعل').length;
-
-    // الوحدات الكلية والمفعلة
     const units = allData.filter(d => d.type === 'وحدة');
-    const totalUnits = units.length;
-    const activeUnits = units.filter(d => d.status === 'مفعل').length;
-
-    // المشاغل
-    const totalWorkshops = allData.filter(d => d.type === 'مشغل').length;
-
-    // الروضات
-    const totalKindergartens = allData.filter(d => d.type === 'روضة').length;
-
-    // إجمالي الأسر المستفيدة = عدد الأسر المستفيدة فقط
-    // (يمكن تعديله ليشمل الأفراد: benef_female + benef_male + benef_children)
-    const totalBeneficiaries = allData.reduce((sum, d) => {
-        return sum + (parseInt(d.benef_families) || 0);
-    }, 0);
-
-    // إجمالي الموظفين (ذكور + إناث + ذوو إعاقة)
-    const totalStaff = allData.reduce((sum, d) => {
-        return sum + 
-            (parseInt(d.male_staff) || 0) + 
-            (parseInt(d.female_staff) || 0) + 
-            (parseInt(d.disabled_staff) || 0);
-    }, 0);
-
-    const provinces = new Set(allData.map(d => d.province).filter(p => p && p !== 'nan')).size;
-
-    document.getElementById('kpiTotalCenters').textContent = totalCenters;
-    document.getElementById('kpiActiveCenters').textContent = activeCenters;
-    document.getElementById('kpiTotalUnits').textContent = totalUnits;
-    document.getElementById('kpiActiveUnits').textContent = activeUnits;
-
-    // تحديث المؤشرات الأربعة المفقودة
-    document.getElementById('kpiTotalWorkshops').textContent = totalWorkshops;
-    document.getElementById('kpiTotalKindergartens').textContent = totalKindergartens;
-    document.getElementById('kpiTotalBeneficiaries').textContent = totalBeneficiaries.toLocaleString('ar-SY');
-    document.getElementById('kpiTotalStaff').textContent = totalStaff.toLocaleString('ar-SY');
-
-    document.getElementById('provinceCountBadge').textContent = provinces;
+    document.getElementById('kpiTotalCenters').textContent = centers.length;
+    document.getElementById('kpiActiveCenters').textContent = centers.filter(d => d.status === 'مفعل').length;
+    document.getElementById('kpiTotalUnits').textContent = units.length;
+    document.getElementById('kpiActiveUnits').textContent = units.filter(d => d.status === 'مفعل').length;
+    document.getElementById('kpiTotalWorkshops').textContent = allData.filter(d => d.type === 'مشغل').length;
+    document.getElementById('kpiTotalKindergartens').textContent = allData.filter(d => d.type === 'روضة').length;
+    document.getElementById('kpiTotalBeneficiaries').textContent = allData.reduce((sum, d) => sum + (parseInt(d.benef_families) || 0), 0).toLocaleString('ar-SY');
+    document.getElementById('kpiTotalStaff').textContent = allData.reduce((sum, d) => sum + (parseInt(d.male_staff) || 0) + (parseInt(d.female_staff) || 0) + (parseInt(d.disabled_staff) || 0), 0).toLocaleString('ar-SY');
+    document.getElementById('provinceCountBadge').textContent = new Set(allData.map(d => d.province).filter(p => p && p !== 'nan')).size;
 }
 
 function populateFilters() {
-    // توليد شرائح المحافظات
     const provinces = [...new Set(allData.map(d => d.province).filter(p => p && p !== 'nan'))].sort();
     const chipsContainer = document.getElementById('provinceChips');
     chipsContainer.innerHTML = '';
@@ -1239,7 +985,6 @@ function populateFilters() {
         chipsContainer.appendChild(chip);
     });
 
-    // تعبئة الأنواع والحالات بناءً على كل البيانات (افتراضياً)
     updateTypeChips(allData);
     updateStatusChips(allData);
     attachChipListeners();
@@ -1248,10 +993,8 @@ function populateFilters() {
 function updateTypeChips(data) {
     const container = document.getElementById('typeChips');
     if (!container) return;
-
     const activeType = document.querySelector('.filter-chip[data-filter="type"].active');
     const currentType = activeType ? activeType.dataset.value : '';
-
     const types = [...new Set(data.map(d => d.type).filter(t => t))].sort();
     container.innerHTML = '';
 
@@ -1276,10 +1019,8 @@ function updateTypeChips(data) {
 function updateStatusChips(data) {
     const container = document.getElementById('statusChips');
     if (!container) return;
-
     const activeStatus = document.querySelector('.filter-chip[data-filter="status"].active');
     const currentStatus = activeStatus ? activeStatus.dataset.value : '';
-
     const statuses = [...new Set(data.map(d => getStatusText(d.status)).filter(s => s && s !== 'أخرى'))].sort();
     container.innerHTML = '';
 
@@ -1301,29 +1042,20 @@ function updateStatusChips(data) {
     });
 }
 
-function updateChipCounts() {
-    // الأعداد تُحدّث ضمن updateTypeChips و updateStatusChips
-}
-
 function attachChipListeners() {
     document.querySelectorAll('.filter-chip').forEach(chip => {
         chip.addEventListener('click', function() {
             const filterType = this.dataset.filter;
             document.querySelectorAll('.filter-chip[data-filter="' + filterType + '"]').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
-
-            // إذا تغيرت المحافظة، حدّث الأنواع والحالات
             if (filterType === 'province') {
                 const province = this.dataset.value;
                 let baseData = allData;
-                if (province) {
-                    baseData = allData.filter(d => d.province === province);
-                }
+                if (province) baseData = allData.filter(d => d.province === province);
                 updateTypeChips(baseData);
                 updateStatusChips(baseData);
-                attachChipListeners(); // إعادة ربط المستمعين للعناصر الجديدة
+                attachChipListeners();
             }
-
             applyTopFilters();
         });
     });
@@ -1351,16 +1083,10 @@ function createCustomMarker(lat, lng, color, type, name) {
         '<div style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:11px solid ' + color + ';"></div>' +
         '<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:26px;background:' + color + ';border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:bold;font-family:Tajawal,sans-serif;">' + label + '</div>' +
         '</div>';
-
-    const icon = L.divIcon({
-        html: iconHtml,
-        className: 'custom-marker',
-        iconSize: [36, 36],
-        iconAnchor: [18, 36],
-        popupAnchor: [0, -36]
+    return L.divIcon({
+        html: iconHtml, className: 'custom-marker',
+        iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -36]
     });
-
-    return L.marker([lat, lng], { icon: icon });
 }
 
 function updateMap() {
@@ -1368,75 +1094,49 @@ function updateMap() {
     markersLayer.clearLayers();
 
     filteredData.forEach(item => {
-        // استخدام الإحداثيات المُحلّة من اسم البلدة أولاً
         let lat = item._lat || 0;
         let lng = item._lng || 0;
-        let source = item._lat ? 'مدينة' : 'شيت';
+        let source = item._lat ? (item.lat ? 'شيت' : 'مدينة') : 'غير معروف';
 
-        // التحقق من صحة الإحداثيات
-        if (!lat || !lng || isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
-            return;
-        }
-
-        // التحقق النهائي من النطاقات
-        if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
-            return;
-        }
+        if (!lat || !lng || isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
+        if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
 
         const color = getStatusColor(item.status);
         const statusText = getStatusText(item.status);
-
-        const marker = createCustomMarker(lat, lng, color, item.type, item.name);
-
         const totalStaff = (parseInt(item.male_staff) || 0) + (parseInt(item.female_staff) || 0) + (parseInt(item.disabled_staff) || 0);
 
         const popupContent = '<div style="min-width:260px;direction:rtl;text-align:right;font-family:Tajawal,sans-serif;">' +
             '<h3 style="font-weight:bold;margin-bottom:8px;color:#1e40af;font-size:15px;border-bottom:2px solid #e0e7ff;padding-bottom:6px;">' + item.name + '</h3>' +
-
             '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;">' +
             '<p style="font-size:12px;color:#666;margin:2px 0"><b>المحافظة:</b> ' + (item.province || '-') + '</p>' +
-            '<p style="font-size:12px;color:#666;margin:2px 0"><b>البلدة:</b> ' + (item.city || '-') + '</p>' +
-            '</div>' +
-
+            '<p style="font-size:12px;color:#666;margin:2px 0"><b>البلدة:</b> ' + (item.city || '-') + '</p></div>' +
             '<div style="background:#f8fafc;border-radius:8px;padding:8px;margin-bottom:8px;">' +
             '<p style="font-size:12px;color:#666;margin:3px 0"><b>النوع:</b> <span style="background:#e0e7ff;padding:2px 8px;border-radius:4px;font-size:11px;">' + (item.type || '-') + '</span></p>' +
             '<p style="font-size:12px;color:#666;margin:3px 0"><b>الحالة:</b> <span style="color:' + color + ';font-weight:bold">' + statusText + '</span></p>' +
             '<p style="font-size:12px;color:#666;margin:3px 0"><b>حالة البناء:</b> ' + (item.building_status || '-') + '</p>' +
-            '<p style="font-size:12px;color:#666;margin:3px 0"><b>ملكية البناء:</b> ' + (item.ownership || '-') + '</p>' +
-            '</div>' +
-
+            '<p style="font-size:12px;color:#666;margin:3px 0"><b>ملكية البناء:</b> ' + (item.ownership || '-') + '</p></div>' +
             '<div style="background:#f0fdf4;border-radius:8px;padding:8px;margin-bottom:8px;">' +
             '<p style="font-size:11px;color:#166534;font-weight:bold;margin-bottom:4px;"><i class="fas fa-ruler-combined ml-1"></i> المساحات</p>' +
             '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;">' +
             '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#15803d;">' + (item.total_area || '-') + '</div><div style="font-size:10px;color:#666;">المساحة الكلية</div></div>' +
             '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#15803d;">' + (item.building_area || '-') + '</div><div style="font-size:10px;color:#666;">مساحة البناء</div></div>' +
-            '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#15803d;">' + (item.floors || '-') + '</div><div style="font-size:10px;color:#666;">الطوابق</div></div>' +
-            '</div>' +
-            '</div>' +
-
+            '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#15803d;">' + (item.floors || '-') + '</div><div style="font-size:10px;color:#666;">الطوابق</div></div></div></div>' +
             '<div style="background:#eff6ff;border-radius:8px;padding:8px;margin-bottom:8px;">' +
             '<p style="font-size:11px;color:#1e40af;font-weight:bold;margin-bottom:4px;"><i class="fas fa-users ml-1"></i> الكوادر البشرية (' + totalStaff + ')</p>' +
             '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;">' +
             '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#2563eb;">' + (item.male_staff || 0) + '</div><div style="font-size:10px;color:#666;">ذكور</div></div>' +
             '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#db2777;">' + (item.female_staff || 0) + '</div><div style="font-size:10px;color:#666;">إناث</div></div>' +
-            '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#7c3aed;">' + (item.disabled_staff || 0) + '</div><div style="font-size:10px;color:#666;">ذوي إعاقة</div></div>' +
-            '</div>' +
-            '</div>' +
-
-            (item.building_needs ? '<div style="background:#fffbeb;border-radius:8px;padding:8px;margin-bottom:8px;">' +
-            '<p style="font-size:11px;color:#92400e;font-weight:bold;margin-bottom:2px;"><i class="fas fa-tools ml-1"></i> احتياج البناء</p>' +
-            '<p style="font-size:11px;color:#78350f;margin:0;">' + item.building_needs + '</p></div>' : '') +
-
+            '<div style="background:white;border-radius:6px;padding:4px;"><div style="font-size:13px;font-weight:bold;color:#7c3aed;">' + (item.disabled_staff || 0) + '</div><div style="font-size:10px;color:#666;">ذوي إعاقة</div></div></div></div>' +
+            (item.building_needs ? '<div style="background:#fffbeb;border-radius:8px;padding:8px;margin-bottom:8px;"><p style="font-size:11px;color:#92400e;font-weight:bold;margin-bottom:2px;"><i class="fas fa-tools ml-1"></i> احتياج البناء</p><p style="font-size:11px;color:#78350f;margin:0;">' + item.building_needs + '</p></div>' : '') +
             '<p style="font-size:10px;color:#888;margin-top:4px;font-family:monospace;direction:ltr;text-align:left;">📍 ' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ' (' + source + ')</p>' +
-
             (item.reason_inactive ? '<p style="font-size:11px;color:#991b1b;margin-top:6px;background:#fef2f2;padding:4px 8px;border-radius:4px;"><b>السبب:</b> ' + item.reason_inactive + '</p>' : '') +
             '</div>';
 
+        const marker = L.marker([lat, lng], { icon: createCustomMarker(lat, lng, color, item.type, item.name) });
         marker.bindPopup(popupContent);
         markersLayer.addLayer(marker);
     });
 
-// تكبير الخريطة لتشمل جميع العلامات
     if (markersLayer.getLayers().length > 0) {
         map.fitBounds(markersLayer.getBounds().pad(0.1));
     } else {
@@ -1444,18 +1144,76 @@ function updateMap() {
     }
 }
 
+function renderAdminHierarchy() {
+    const container = document.getElementById('adminHierarchy');
+    if (!container) return;
+    container.innerHTML = '';
+    const hierarchy = {};
+    allData.forEach(d => {
+        const prov = d.province || 'غير محدد';
+        const city = d.city || 'غير محددة';
+        if (!hierarchy[prov]) hierarchy[prov] = {};
+        if (!hierarchy[prov][city]) hierarchy[prov][city] = [];
+        hierarchy[prov][city].push(d);
+    });
 
+    Object.keys(hierarchy).sort().forEach(prov => {
+        const cities = Object.keys(hierarchy[prov]).sort();
+        const totalItems = cities.reduce((sum, c) => sum + hierarchy[prov][c].length, 0);
+        const provinceDiv = document.createElement('div');
+        provinceDiv.className = 'admin-province';
+        const header = document.createElement('div');
+        header.className = 'admin-province-header';
+        header.innerHTML = '<span class="admin-province-name"><i class="fas fa-map-marker-alt ml-2 text-blue-500"></i> ' + prov + '</span>' +
+            '<div class="flex items-center gap-2"><span class="admin-province-count">' + totalItems + '</span><i class="fas fa-chevron-down text-gray-400"></i></div>';
+        const citiesDiv = document.createElement('div');
+        citiesDiv.className = 'admin-cities';
+        cities.forEach(city => {
+            const count = hierarchy[prov][city].length;
+            const cityBtn = document.createElement('span');
+            cityBtn.className = 'admin-city';
+            cityBtn.innerHTML = '<i class="fas fa-crosshairs"></i> ' + city + ' <span style="opacity:0.6;font-size:0.7rem;">(' + count + ')</span>';
+            cityBtn.onclick = () => zoomToCity(city, prov);
+            citiesDiv.appendChild(cityBtn);
+        });
+        header.onclick = () => {
+            const isExpanded = citiesDiv.classList.contains('show');
+            document.querySelectorAll('.admin-cities').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.admin-province-header').forEach(el => el.classList.remove('expanded'));
+            if (!isExpanded) { citiesDiv.classList.add('show'); header.classList.add('expanded'); }
+        };
+        provinceDiv.appendChild(header);
+        provinceDiv.appendChild(citiesDiv);
+        container.appendChild(provinceDiv);
+    });
+}
 
-
-
-
-
+function zoomToCity(city, province) {
+    let coords = getCityCoordsFromLookup(city);
+    if (!coords) {
+        const match = allData.find(d => d.city === city && d._lat && d._lng);
+        if (match) coords = [match._lat, match._lng];
+    }
+    if (!coords) coords = getCityCoordsFromLookup(province);
+    if (coords && map) {
+        map.flyTo(coords, 13, { duration: 1.5 });
+        setTimeout(() => {
+            markersLayer.eachLayer(layer => {
+                const ll = layer.getLatLng();
+                if (Math.abs(ll.lat - coords[0]) < 0.01 && Math.abs(ll.lng - coords[1]) < 0.01) {
+                    layer.openPopup();
+                }
+            });
+        }, 1600);
+    } else {
+        showError('لم يتم العثور على إحداثيات لـ: ' + city);
+    }
+}
 
 function filterData() {
     const provinceChip = document.querySelector('.filter-chip[data-filter="province"].active');
     const typeChip = document.querySelector('.filter-chip[data-filter="type"].active');
     const statusChip = document.querySelector('.filter-chip[data-filter="status"].active');
-
     const province = normalizeText(provinceChip ? provinceChip.dataset.value : '');
     const type = normalizeType(typeChip ? typeChip.dataset.value : '');
     const status = normalizeText(statusChip ? statusChip.dataset.value : '');
@@ -1466,13 +1224,6 @@ function filterData() {
         const matchStatus = !status || (item.status && item.status.includes(status));
         return matchProvince && matchType && matchStatus;
     });
-
-    filteredData.sort((a, b) => {
-        let va = a[sortCol] || ''; let vb = b[sortCol] || '';
-        if (typeof va === 'string') va = va.toLowerCase(); if (typeof vb === 'string') vb = vb.toLowerCase();
-        if (va < vb) return sortAsc ? -1 : 1; if (va > vb) return sortAsc ? 1 : -1; return 0;
-    });
-
     updateMap();
 }
 
@@ -1480,42 +1231,25 @@ function applyTopFilters() {
     const provinceChip = document.querySelector('.filter-chip[data-filter="province"].active');
     const typeChip = document.querySelector('.filter-chip[data-filter="type"].active');
     const statusChip = document.querySelector('.filter-chip[data-filter="status"].active');
-
     const province = normalizeText(provinceChip ? provinceChip.dataset.value : '');
     const type = normalizeType(typeChip ? typeChip.dataset.value : '');
     const status = normalizeText(statusChip ? statusChip.dataset.value : '');
-
     const activeFilters = [];
     if (province) activeFilters.push('المحافظة: ' + province);
     if (type) activeFilters.push('النوع: ' + type);
     if (status) activeFilters.push('الحالة: ' + status);
     document.getElementById('activeFiltersText').textContent = activeFilters.length > 0 ? 'الفلاتر النشطة: ' + activeFilters.join(' | ') : 'لا توجد فلاتر نشطة';
-
     filterData();
 }
 
 function resetFilters() {
-    // إعادة ضبط جميع الشرائح
     document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
     document.querySelectorAll('.filter-chip[data-value=""]').forEach(chip => chip.classList.add('active'));
-
-    // إعادة تعبئة الأنواع والحالات بناءً على كل البيانات
     updateTypeChips(allData);
     updateStatusChips(allData);
     attachChipListeners();
-
     document.getElementById('activeFiltersText').textContent = 'لا توجد فلاتر نشطة';
     filterData();
-}
-
-function sortTable(col) {
-    if (sortCol === col) sortAsc = !sortAsc;
-    else { sortCol = col; sortAsc = true; }
-    filterData();
-}
-
-function setupEventListeners() {
-    // الفلاتر تُدار عبر الشرائح فقط
 }
 
 function showDetail(id) {
@@ -1579,6 +1313,49 @@ function closeModal(e) {
     if (e && e.target !== e.currentTarget) return;
     document.getElementById('detailModal').classList.remove('show');
     document.body.style.overflow = '';
+}
+
+async function loadDemoData() {
+    showLoading('جاري تحميل البيانات التجريبية...');
+    await processRawData(DEMO_DATA);
+    hideLoading();
+    showSuccess('تم تحميل البيانات التجريبية بنجاح - ' + DEMO_DATA.length + ' سجل');
+}
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    showLoading('جاري قراءة الملف...');
+    Papa.parse(file, {
+        header: true, dynamicTyping: true, skipEmptyLines: true,
+        complete: async function(results) {
+            const mapped = results.data.map(row => mapColumns(row, results.meta.fields));
+            const parsed = cleanAndParse(mapped);
+            await processRawData(parsed);
+            hideLoading();
+            showSuccess('تم استيراد ملف CSV بنجاح - ' + parsed.length + ' سجل');
+        },
+        error: function(err) {
+            hideLoading();
+            showError('خطأ في قراءة الملف: ' + err.message);
+        }
+    });
+    event.target.value = '';
+}
+
+function init() {
+    // التحقق من تحميل المكتبات الأساسية
+    if (typeof L === 'undefined') {
+        showError('فشل تحميل خريطة Leaflet. تأكد من الاتصال بالإنترنت.');
+        return;
+    }
+    if (typeof Papa === 'undefined') {
+        showError('فشل تحميل مكتبة CSV. تأكد من الاتصال بالإنترنت.');
+        return;
+    }
+    initMap();
+    // تحميل البيانات فوراً بدون delay
+    loadData();
 }
 
 init();
