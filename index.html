@@ -397,9 +397,14 @@ function showSuccess(msg) {
 
 
 function init() {
-    initMap();
-    setupEventListeners();
-    setTimeout(() => loadData(), 500);
+    try {
+        initMap();
+        setupEventListeners();
+        setTimeout(() => loadData(), 500);
+    } catch(e) {
+        console.error('Init error:', e);
+        showError('خطأ في تهيئة التطبيق: ' + e.message);
+    }
 }
 
 const CITY_COORDS = {
@@ -670,9 +675,11 @@ const CITY_COORDS = {
 // ذاكرة تخزين مؤقت للإحداثيات (بين الجلسات)
 let cityCoordCache = {};
 try {
-    const stored = localStorage.getItem('syria_city_coords_cache_v2');
-    if (stored) cityCoordCache = JSON.parse(stored);
-} catch(e) {}
+    if (typeof Storage !== 'undefined' && window.localStorage) {
+        const stored = localStorage.getItem('syria_city_coords_cache_v2');
+        if (stored) cityCoordCache = JSON.parse(stored);
+    }
+} catch(e) { cityCoordCache = {}; }
 
 function normalizeCityName(name) {
     if (!name) return '';
@@ -721,14 +728,14 @@ async function resolveCityCoords(city) {
     const lookup = getCityCoordsFromLookup(city);
     if (lookup) {
         cityCoordCache[city] = lookup;
-        try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
+        try { if (typeof Storage !== 'undefined' && window.localStorage) { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } } catch(e) {}
         return lookup;
     }
     // 2. جرب الترميز الجغرافي
     const geocoded = await geocodeCityNominatim(city);
     if (geocoded) {
         cityCoordCache[city] = geocoded;
-        try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
+        try { if (typeof Storage !== 'undefined' && window.localStorage) { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } } catch(e) {}
         return geocoded;
     }
     return null;
@@ -757,7 +764,7 @@ async function resolveAllCityCoords(data) {
             results.failed.push(city);
         }
     }
-    try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
+    try { if (typeof Storage !== 'undefined' && window.localStorage) { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } } catch(e) {}
     return results;
 }
 
@@ -811,22 +818,6 @@ function handleFileUpload(event) {
         error: function(err) { showError('خطأ في قراءة الملف: ' + err.message); }
     });
     event.target.value = '';
-}
-
-function findColumn(fields, keywords) {
-    if (!fields || !Array.isArray(fields)) return null;
-    for (const kw of keywords) {
-        const kwNorm = kw.toLowerCase().trim().replace(/[\s_]+/g, '');
-        for (const f of fields) {
-            const fNorm = f.toLowerCase().trim().replace(/[\s_]+/g, '');
-            if (fNorm === kwNorm) return f;
-        }
-        for (const f of fields) {
-            const fNorm = f.toLowerCase().trim().replace(/[\s_]+/g, '');
-            if (fNorm.includes(kwNorm) || kwNorm.includes(fNorm)) return f;
-        }
-    }
-    return null;
 }
 
 function normalizeColumnName(str) {
@@ -991,32 +982,6 @@ function loadFromGoogleSheetsAPI() {
                 return obj;
             });
             const fields = headers;
-            const mapped = rows.map(row => mapColumns(row, fields));
-            return cleanAndParse(mapped);
-        });
-}
-
-function loadFromJSONFeed() {
-    const url = 'https://spreadsheets.google.com/feeds/list/' + GOOGLE_SPREADSHEET_ID + '/od6/public/values?alt=json';
-    return fetch(url, { cache: 'no-store' })
-        .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.json();
-        })
-        .then(json => {
-            if (!json.feed || !json.feed.entry) throw new Error('بيانات فارغة');
-            const entries = json.feed.entry;
-            const rows = entries.map(entry => {
-                const obj = {};
-                for (const key in entry) {
-                    if (key.startsWith('gsx$')) {
-                        const colName = key.replace('gsx$', '');
-                        obj[colName] = entry[key].$t || '';
-                    }
-                }
-                return obj;
-            });
-            const fields = rows.length > 0 ? Object.keys(rows[0]) : [];
             const mapped = rows.map(row => mapColumns(row, fields));
             return cleanAndParse(mapped);
         });
@@ -1240,18 +1205,30 @@ function updateKPIs() {
     const centers = allData.filter(d => d.type === 'مركز');
     const totalCenters = centers.length;
     const activeCenters = centers.filter(d => d.status === 'مفعل').length;
-    
+
     // الوحدات الكلية والمفعلة
     const units = allData.filter(d => d.type === 'وحدة');
     const totalUnits = units.length;
     const activeUnits = units.filter(d => d.status === 'مفعل').length;
-    
+
+    // المشاغل والروضات
+    const workshops = allData.filter(d => d.type === 'مشغل');
+    const kindergartens = allData.filter(d => d.type === 'روضة');
+
+    // المستفيدين والموظفين
+    const totalBeneficiaries = allData.reduce((sum, d) => sum + (parseInt(d.benef_families) || 0), 0);
+    const totalStaff = allData.reduce((sum, d) => sum + (parseInt(d.male_staff) || 0) + (parseInt(d.female_staff) || 0) + (parseInt(d.disabled_staff) || 0), 0);
+
     const provinces = new Set(allData.map(d => d.province).filter(p => p && p !== 'nan')).size;
 
     document.getElementById('kpiTotalCenters').textContent = totalCenters;
     document.getElementById('kpiActiveCenters').textContent = activeCenters;
     document.getElementById('kpiTotalUnits').textContent = totalUnits;
     document.getElementById('kpiActiveUnits').textContent = activeUnits;
+    document.getElementById('kpiTotalWorkshops').textContent = workshops.length;
+    document.getElementById('kpiTotalKindergartens').textContent = kindergartens.length;
+    document.getElementById('kpiTotalBeneficiaries').textContent = totalBeneficiaries.toLocaleString('ar-SY');
+    document.getElementById('kpiTotalStaff').textContent = totalStaff.toLocaleString('ar-SY');
     document.getElementById('provinceCountBadge').textContent = provinces;
 }
 
@@ -1475,6 +1452,22 @@ function renderTable() {
     document.getElementById('nextBtn').disabled = end >= filteredData.length;
 }
 
+function syncChipsWithSelects() {
+    const province = document.getElementById('provinceFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+
+    document.querySelectorAll('.filter-chip[data-filter="province"]').forEach(c => {
+        c.classList.toggle('active', c.dataset.value === province);
+    });
+    document.querySelectorAll('.filter-chip[data-filter="type"]').forEach(c => {
+        c.classList.toggle('active', c.dataset.value === type);
+    });
+    document.querySelectorAll('.filter-chip[data-filter="status"]').forEach(c => {
+        c.classList.toggle('active', c.dataset.value === status);
+    });
+}
+
 function filterData() {
     const search = normalizeText(document.getElementById('searchInput').value).toLowerCase();
     const province = normalizeText(document.getElementById('provinceFilter').value);
@@ -1488,6 +1481,9 @@ function filterData() {
         const matchStatus = !status || (item.status && item.status.includes(status));
         return matchSearch && matchProvince && matchType && matchStatus;
     });
+
+    // Also update chip active states to match select boxes
+    syncChipsWithSelects();
 
     filteredData.sort((a, b) => {
         let va = a[sortCol] || ''; let vb = b[sortCol] || '';
