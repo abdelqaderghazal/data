@@ -400,7 +400,12 @@ function showSuccess(msg) {
 function init() {
     initMap();
     setupEventListeners();
-    setTimeout(() => loadData(), 500);
+    // محاولة جلب البيانات تلقائياً بعد 500ms
+    setTimeout(() => {
+        loadData().catch(err => {
+            console.log('لم يتم جلب البيانات تلقائياً:', err);
+        });
+    }, 500);
 }
 
 const CITY_COORDS = {
@@ -1202,28 +1207,59 @@ function zoomToCity(city, province) {
 async function processRawData(data) {
     allData = data;
 
-    // حل إحداثيات المدن من أسماء البلدات
-    const geoResults = await resolveAllCityCoords(allData);
-
-    // ربط الإحداثيات بكل صف
+    // ربط الإحداثيات فوراً من 3 مصادر: الشيت → القاموس → الذاكرة المؤقتة
     allData.forEach(row => {
-        if (cityCoordCache[row.city]) {
-            row._lat = cityCoordCache[row.city][0];
-            row._lng = cityCoordCache[row.city][1];
-        } else {
-            // احتياطي: أعمدة الإحداثيات من الشيت
-            row._lat = parseCoordinate(row.lat);
-            row._lng = parseCoordinate(row.lng);
+        let lat = parseCoordinate(row.lat);
+        let lng = parseCoordinate(row.lng);
+        let source = 'شيت';
+
+        // أولوية 2: قاموس المدن المدمج
+        if ((!lat || !lng) && row.city) {
+            const lookup = getCityCoordsFromLookup(row.city);
+            if (lookup) { lat = lookup[0]; lng = lookup[1]; source = 'قاموس'; }
         }
+
+        // أولوية 3: الذاكرة المؤقتة
+        if ((!lat || !lng) && row.city && cityCoordCache[row.city]) {
+            lat = cityCoordCache[row.city][0]; lng = cityCoordCache[row.city][1]; source = 'ذاكرة';
+        }
+
+        row._lat = lat; row._lng = lng; row._coordSource = source;
     });
 
     filteredData = [...allData];
-
-updateKPIs();
+    updateKPIs();
     populateFilters();
     renderAdminHierarchy();
     filterData();
-    setTimeout(() => updateMap(), 100);
+    renderTable();
+    updateMap();
+
+    // جلب الإحداثيات المفقودة في الخلفية (بدون حظر الواجهة)
+    const missingCities = [...new Set(allData.filter(d => !d._lat || !d._lng).map(d => d.city).filter(c => c))];
+    if (missingCities.length > 0) {
+        resolveMissingCitiesInBackground(missingCities);
+    }
+}
+
+async function resolveMissingCitiesInBackground(cities) {
+    let updated = false;
+    for (const city of cities) {
+        if (cityCoordCache[city]) continue;
+        const coords = await geocodeCityNominatim(city);
+        if (coords) {
+            cityCoordCache[city] = coords;
+            // تحديث الصفوف المطابقة
+            allData.forEach(row => {
+                if (row.city === city && !row._lat) { row._lat = coords[0]; row._lng = coords[1]; row._coordSource = 'geocode'; updated = true; }
+            });
+            await new Promise(r => setTimeout(r, 1100));
+        }
+    }
+    if (updated) {
+        try { localStorage.setItem('syria_city_coords_cache_v2', JSON.stringify(cityCoordCache)); } catch(e) {}
+        updateMap();
+    }
 }
 
 function updateKPIs() {
