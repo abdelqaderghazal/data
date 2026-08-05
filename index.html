@@ -196,7 +196,7 @@ body { background: #f0f4f8; }
 <div class="kpi-card card-glass rounded-xl p-5 shadow-lg text-center">
 <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-users text-teal-600 text-xl"></i></div>
 <div class="text-3xl font-bold text-teal-600" id="kpiTotalBeneficiaries">0</div>
-<div class="text-sm text-gray-500">إجمالي المستفيدين</div>
+<div class="text-sm text-gray-500">إجمالي الأسر المستفيدة</div>
 </div>
 <div class="kpi-card card-glass rounded-xl p-5 shadow-lg text-center">
 <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-user-tie text-cyan-600 text-xl"></i></div>
@@ -366,7 +366,8 @@ let sortAsc = true;
 let map;
 let markersLayer;
 
-const DEMO_DATA = [
+const DEMO_DATA = []; /* تم إلغاء البيانات التجريبية */
+/* const OLD_DEMO_DATA = [
     { id: 1, name: "وحدة التنمية الريفية - دمشق", province: "دمشق", city: "المزة", location_name: "شارع الثورة - بناء رقم 12", type: "وحدة", status: "مفعل", lat: 33.5138, lng: 36.2765, building_status: "جيد", total_area: 450, building_area: 320, floors: 2, male_staff: 5, female_staff: 8, disabled_staff: 1, benef_families: 120, benef_female: 180, benef_male: 150, benef_children: 220, occupant: "وزارة الشؤون الاجتماعية", ownership: "حكومي", equipment_status: "مجهز بالكامل", services: "تقديم المساعدات الغذائية والطبية، برامج التأهيل المهني", project: "توسيع الوحدة لاستيعاب 50 أسرة إضافية", difficulties: "نقص في الكوادر الطبية المتخصصة", suggestions: "توفير طبيب متطوع أسبوعياً", funding: "وزارة الشؤون الاجتماعية + منظمات محلية" },
     { id: 2, name: "مركز التنمية - حلب", province: "حلب", city: "الأعظمية", location_name: "ساحة سعد الله الجابري", type: "مركز", status: "غير مفعل", lat: 36.2021, lng: 37.1343, building_status: "بحاجة صيانة", total_area: 600, building_area: 500, floors: 1, male_staff: 0, female_staff: 0, disabled_staff: 0, benef_families: 0, benef_female: 0, benef_male: 0, benef_children: 0, occupant: "", ownership: "إيجار", equipment_status: "غير مجهز", reason_inactive: "تضرر البناء جراء الحرب وبحاجة لإعادة تأهيل", building_needs: "إصلاح الجدران والسقف، تركيب نوافذ جديدة", services: "", project: "إعادة تأهيل المركز بالتعاون مع منظمات دولية" },
     { id: 3, name: "وحدة ريفية - حمص", province: "حمص", city: "الوعر", location_name: "حي الوعر القديم - مقابل الجامع الكبير", type: "وحدة", status: "مفعل", lat: 34.7308, lng: 36.7094, building_status: "جيد", total_area: 300, building_area: 250, floors: 1, male_staff: 3, female_staff: 4, disabled_staff: 0, benef_families: 85, benef_female: 95, benef_male: 80, benef_children: 140, occupant: "جمعية خيرية", ownership: "تبرع", equipment_status: "مجهز جزئياً", services: "دعم نفسي اجتماعي، برامج تعليمية للأطفال", difficulties: "ضعف التمويل المستدام", suggestions: "إنشاء مشروع إنتاجي صغير لتمويل الوحدة" },
@@ -1072,12 +1073,11 @@ function normalizeType(str) {
         .replace(/ة/g, 'ه')
         .replace(/ى/g, 'ي')
         .toLowerCase();
-    // تعيين القيم المعيارية
     if (s.includes('مركز')) return 'مركز';
     if (s.includes('وحدة')) return 'وحدة';
     if (s.includes('مشغل')) return 'مشغل';
     if (s.includes('روضة')) return 'روضة';
-    return str;
+    return normalizeText(str);
 }
 
 function parseCoordinate(val) {
@@ -1142,13 +1142,15 @@ function renderAdminHierarchy() {
 
         const header = document.createElement('div');
         header.className = 'admin-province-header';
+        header.style.cursor = 'default';
         header.innerHTML = '<span class="admin-province-name"><i class="fas fa-map-marker-alt ml-2 text-blue-500"></i> ' + prov + '</span>' +
             '<div class="flex items-center gap-2">' +
-            '<span class="admin-province-count">' + totalItems + '</span>' +
-            '<i class="fas fa-chevron-down text-gray-400"></i></div>';
+            '<span class="admin-province-count">' + totalItems + '</span></div>';
 
         const citiesDiv = document.createElement('div');
-        citiesDiv.className = 'admin-cities';
+        citiesDiv.className = 'admin-cities show';
+        citiesDiv.style.display = 'block';
+        citiesDiv.style.padding = '10px 14px';
 
         cities.forEach(city => {
             const count = hierarchy[prov][city].length;
@@ -1158,17 +1160,6 @@ function renderAdminHierarchy() {
             cityBtn.onclick = () => zoomToCity(city, prov);
             citiesDiv.appendChild(cityBtn);
         });
-
-        header.onclick = () => {
-            const isExpanded = citiesDiv.classList.contains('show');
-            // إغلاق جميع المحافظات
-            document.querySelectorAll('.admin-cities').forEach(el => el.classList.remove('show'));
-            document.querySelectorAll('.admin-province-header').forEach(el => el.classList.remove('expanded'));
-            if (!isExpanded) {
-                citiesDiv.classList.add('show');
-                header.classList.add('expanded');
-            }
-        };
 
         provinceDiv.appendChild(header);
         provinceDiv.appendChild(citiesDiv);
@@ -1237,21 +1228,33 @@ updateKPIs();
 
 function updateKPIs() {
     // المراكز الكلية والمفعلة
-    const centers = allData.filter(d => d.type === 'مركز');
+    const centers = allData.filter(d => normalizeType(d.type) === 'مركز');
     const totalCenters = centers.length;
-    const activeCenters = centers.filter(d => d.status === 'مفعل').length;
-    
+    const activeCenters = centers.filter(d => normalizeText(d.status || '') === 'مفعل').length;
+
     // الوحدات الكلية والمفعلة
-    const units = allData.filter(d => d.type === 'وحدة');
+    const units = allData.filter(d => normalizeType(d.type) === 'وحدة');
     const totalUnits = units.length;
-    const activeUnits = units.filter(d => d.status === 'مفعل').length;
-    
+    const activeUnits = units.filter(d => normalizeText(d.status || '') === 'مفعل').length;
+
+    // المشاغل والروضات
+    const workshops = allData.filter(d => normalizeType(d.type) === 'مشغل');
+    const kindergartens = allData.filter(d => normalizeType(d.type) === 'روضة');
+
+    // المستفيدين والموظفين
+    const totalBeneficiaries = allData.reduce((sum, d) => sum + (parseInt(d.benef_families) || 0), 0);
+    const totalStaff = allData.reduce((sum, d) => sum + (parseInt(d.male_staff) || 0) + (parseInt(d.female_staff) || 0) + (parseInt(d.disabled_staff) || 0), 0);
+
     const provinces = new Set(allData.map(d => d.province).filter(p => p && p !== 'nan')).size;
 
     document.getElementById('kpiTotalCenters').textContent = totalCenters;
     document.getElementById('kpiActiveCenters').textContent = activeCenters;
     document.getElementById('kpiTotalUnits').textContent = totalUnits;
     document.getElementById('kpiActiveUnits').textContent = activeUnits;
+    document.getElementById('kpiTotalWorkshops').textContent = workshops.length;
+    document.getElementById('kpiTotalKindergartens').textContent = kindergartens.length;
+    document.getElementById('kpiTotalBeneficiaries').textContent = totalBeneficiaries.toLocaleString('ar-SY');
+    document.getElementById('kpiTotalStaff').textContent = totalStaff.toLocaleString('ar-SY');
     document.getElementById('provinceCountBadge').textContent = provinces;
 }
 
@@ -1295,19 +1298,17 @@ function updateChipCounts() {
     const types = ['وحدة', 'مركز', 'مشغل', 'روضة'];
     types.forEach(t => {
         const el = document.getElementById('count-' + t);
-        if (el) el.textContent = allData.filter(d => d.type === t).length;
+        if (el) el.textContent = allData.filter(d => normalizeType(d.type) === t).length;
     });
-    // تسجيل الأنواع الفريدة الموجودة في البيانات (للتشخيص)
-    const uniqueTypes = [...new Set(allData.map(d => d.type).filter(t => t))];
+    const uniqueTypes = [...new Set(allData.map(d => normalizeType(d.type)).filter(t => t))];
     console.log('الأنواع الفريدة في البيانات:', uniqueTypes);
     const statuses = ['مفعل', 'غير مفعل', 'جزء مفعل'];
     statuses.forEach(s => {
         const id = 'count-' + s.replace(/\s/g, '_');
         const el = document.getElementById(id);
         if (el) {
-            if (s === 'مفعل') el.textContent = allData.filter(d => d.status === 'مفعل').length;
-            else if (s === 'غير مفعل') el.textContent = allData.filter(d => String(d.status).includes('غير مفعل')).length;
-            else if (s === 'جزء مفعل') el.textContent = allData.filter(d => String(d.status).includes('جزء') || String(d.status).includes('جزئي')).length;
+            const normStatus = normalizeText(s);
+            el.textContent = allData.filter(d => normalizeText(d.status || '') === normStatus).length;
         }
     });
 }
@@ -1359,7 +1360,14 @@ function createCustomMarker(lat, lng, color, type, name) {
 
 function updateMap() {
     if (!map) return;
+    // إزالة جميع العلامات بشكل قاطع
     markersLayer.clearLayers();
+    // تأكيد إضافي: إزالة أي طبقات MarkerGroup أخرى
+    map.eachLayer(function(layer) {
+        if (layer instanceof L.Marker && layer !== markersLayer) {
+            map.removeLayer(layer);
+        }
+    });
 
     filteredData.forEach(item => {
         // استخدام الإحداثيات المُحلّة من اسم البلدة أولاً
@@ -1482,10 +1490,16 @@ function filterData() {
     const status = normalizeText(document.getElementById('statusFilter').value);
 
     filteredData = allData.filter(item => {
-        const matchSearch = !search || (item.name && item.name.toLowerCase().includes(search)) || (item.city && item.city.toLowerCase().includes(search));
-        const matchProvince = !province || item.province === province;
-        const matchType = !type || item.type === type;
-        const matchStatus = !status || (item.status && item.status.includes(status));
+        const itemProvince = normalizeText(item.province || '');
+        const itemType = normalizeType(item.type || '');
+        const itemStatus = normalizeText(item.status || '');
+        const itemName = normalizeText(item.name || '').toLowerCase();
+        const itemCity = normalizeText(item.city || '').toLowerCase();
+
+        const matchSearch = !search || itemName.includes(search) || itemCity.includes(search);
+        const matchProvince = !province || itemProvince === province;
+        const matchType = !type || itemType === type;
+        const matchStatus = !status || itemStatus === status;
         return matchSearch && matchProvince && matchType && matchStatus;
     });
 
