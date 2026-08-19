@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="application-version" content="Professional v3.2">
-<title>سِجل المؤشرات التشغيلية — المحافظات | Professional v3</title>
-<meta name="description" content="لوحة مؤشرات تشغيلية احترافية للمحافظات — تحليل، مقارنة، متابعة، وجودة بيانات">
-<meta name="theme-color" content="#0B5A7A">
+<title>سِجل المؤشرات التشغيلية — المحافظات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -545,25 +542,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-<style id="professional-v3-css">
-  /* Professional v3 — quality, accessibility and executive UX */
-  :root{--v3-shadow:0 10px 30px rgba(5,42,58,.08);--v3-radius:16px;}
-  .v3-status-strip{max-width:1180px;margin:14px auto 0;padding:0 28px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
-  .v3-status-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--v3-shadow);min-width:0;}
-  .v3-status-card .v3-label{font-size:10px;color:var(--ink-soft);display:block;margin-bottom:3px}
-  .v3-status-card .v3-value{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .v3-quality{display:flex;align-items:center;gap:7px}.v3-dot{width:8px;height:8px;border-radius:50%;background:#B08D57;flex:0 0 auto}.v3-dot.good{background:#4F7A63}.v3-dot.bad{background:#B5533C}
-  .v3-toolbar-actions{display:flex;gap:8px;align-items:center;margin-inline-start:auto;flex-wrap:wrap}
-  .v3-mini-btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:7px 10px;font-family:'Cairo';font-size:11px;font-weight:700;cursor:pointer}.v3-mini-btn:hover{border-color:#0D8BA8;background:var(--sand)}
-  .v3-disclaimer{max-width:1180px;margin:10px auto 0;padding:0 28px}.v3-disclaimer>div{background:#fff8e8;border:1px solid #ead8a8;color:#735c1d;border-radius:10px;padding:9px 12px;font-size:11.5px;line-height:1.7}
-  .v3-health{max-width:1180px;margin:0 auto;padding:0 28px}.v3-health-box{display:none;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;box-shadow:var(--v3-shadow)}
-  .v3-health-box.open{display:block}.v3-health-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.v3-health-item{background:var(--sand);border-radius:10px;padding:10px}.v3-health-item strong{display:block;font-family:'IBM Plex Mono';font-size:17px;color:var(--ink)}.v3-health-item span{font-size:10.5px;color:var(--ink-soft)}
-  button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(13,139,168,.28);outline-offset:2px}
-  [aria-busy="true"]{cursor:progress}
-  @media(max-width:800px){.v3-status-strip{grid-template-columns:repeat(2,minmax(0,1fr));}.v3-health-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:480px){.v3-status-strip{grid-template-columns:1fr;padding:0 16px}.v3-disclaimer{padding:0 16px}.v3-health{padding:0 16px}.v3-health-grid{grid-template-columns:1fr}}
-</style>
 </head>
 <body class="locked">
 
@@ -758,7 +736,7 @@
 <div class="data-panel">
   <div class="data-source-bar">
     <span class="label">📁 مصدر البيانات:</span>
-    <input type="text" class="gsheet-input" id="gsheetUrl" placeholder="ألصق رابط Google Sheets المنشور أو رابط CSV هنا" autocomplete="off">
+    <input type="text" class="gsheet-input" id="gsheetUrl" value="متصل بـ Google Sheets API" readonly style="background:#e8f5e9;color:#0B5A7A;font-weight:600;text-align:center;">
     <button class="btn btn-primary" onclick="loadFromSheet()" id="refreshBtn">🔄 تحديث من الرابط</button>
     <button class="btn btn-success" onclick="showUploadModal()">📁 رفع ملف CSV يدوياً</button>
     <span class="status-badge status-loading" id="dataStatus">جاري التحميل التلقائي...</span>
@@ -1127,7 +1105,7 @@
 <footer>
   <div class="line" id="footerNote">⚠️ ارفع ملف CSV لعرض البيانات</div>
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-    <div>هذه اللوحة تفاعلية بالكامل: استخدم فلاتر المحافظات والأشهر للتحليل، أو ارفع ملف CSV، أو حدّث البيانات من Google Sheets.</div>
+    <div>هذه اللوحة تفاعلية بالكامل: استخدم أزرار المحافظات والأشهر أعلاه للتصفية، أو ارفع ملف CSV مباشرة.</div>
     <button onclick="logout()" style="background:linear-gradient(135deg,#c62828,#e53935);color:white;border:none;border-radius:8px;padding:8px 18px;font-family:Cairo;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;box-shadow:0 2px 8px rgba(198,40,40,0.25);" onmouseover="this.style.background='linear-gradient(135deg,#b71c1c,#c62828)';" onmouseout="this.style.background='linear-gradient(135deg,#c62828,#e53935)';">🚪 تسجيل الخروج</button>
   </div>
 </footer>
@@ -1168,7 +1146,7 @@ const COLUMN_MAP_INV = {};
 // =====================
 // INLINE CSV DATA (works on file:// without internet)
 // =====================
-const INLINE_CSV_DATA = `المحافظة,الشهر,السنة,عدد السكان,ذكور,إناث,السكان دون 15 سنة,السكان 15-60 سنة,السكان 60+ سنة,حجم قوة العمل (مليون),المشتغلون,المتعطلون,معدل البطالة العام,معدل بطالة الذكور,معدل بطالة الاناث,معدل بطالة الشباب,معدل المشاركة في النشاط الاقتصادي / ذكور,معدل المشاركة في النشاط الاقتصادي / إناث,نسبة العمال في القطاع الخاص غير المنظم,معدل زواج القاصرات حسب المحافظات,%معدل عمل الأطفال,معدل اكمال الدراسة في مرحلة التعليم الأساسي,نسبة النساء المعيلات,%تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا ),%تقديرات الفقر وفق الأمن الغذائي (الاسر ذات الهشاشة),%تقديرات الفقر - الأمن الغذائي (الاسر المعدومة ),دور رعاية كبار السن,عدد المستفيدين من خدمات دور رعاية المسنين,عدد  معاهد رعاية وتأهيل الأشخاص ذوي الاعاقة,عدد الطلاب المسجلين في المعاهد الخاصة بذوي الاعاقة,عدد المستفيدين من توزيع المعينات الحركية,المستفيدين  من المعونة النقدية لأسر الأشخاص من ذوي  الإعاقة,عدد الحاصلين الجدد على بطاقة الاشخاص ذوي الاعاقة,عدد دور رعاية الايتام,المستفيدين من الخدمات (كفالة داخلية ),المستفيدين من الخدمات (كفالة خارجية),عدد مراكز رعاية المتسولين,دور رعاية المتسولين في الخدمة,عدد النزلاء في مراكز التسول,معاهد الاحداث/ مراكز الملاحظة,عدد معاهد الاحداث في الخدمة,عدد النزلاء من الاحداث,المستفيدين من دار لحن الحياة,عدد مراكز التأهيل المهني,عدد المراكز في الخدمة الفعلية,عدد المستفيدين من التأهيل,عدد المسجلين على منصة سوق العمل(2024- 2025),عدد المنشآت المسجلة في المنصة,عدد فرص العمل على المنصة,عدد فرص التدريب على المنصة,عدد مراكز التنمية الريفية خارج الخدمة,مراكز التنمية في الخدمة,عدد وحدات الصناعات الريفية خارج الخدمة,عدد وحدات الصناعة في الخدمة,مستفيدو مراكز التنمية الريفية,مستفيدو وحدات الصناعات الريفية,اجمالي عدد المنظمات غير الحكومية,عدد المنظمات غير الحكومية المسحوب ترخيصها,عدد المنظمات غير الحكومية المشهرة,عدد المساعدات  (سلة غذائية),عدد المساعدات عينية (ادوية - عمليات- منظفات),اعانات مالية,عدد المراكز المجتمعية,مساحات امنة للنساء,عدد المخيمات,عدد الاسر المقيمة في المخيمات,عدد المسجلين في التأمينات الاجتماعية/ قطاع عام,عدد المسجلين في التأمينات الاجتماعية / قطاع خاص,اجمالي عدد المسجلين القائمين على راس عملهم,عدد المسجلين  الجدد من خلال الزيارات التفتيشية,عدد المتقاعدين المستفيدين,عدد المستفيدين من تعويضات إصابات العمل,قرارات ضم الخدمة,عدد المنشآت التي تم اشراكها بالتامينات, منح تراخيص العمل  للعاملين غير السوريين,تجديد تراخيص العمل  للعاملين غير السوريين,عدد مكاتب التشغيل المرخصة  لمزاولة مهنة استقدام العاملات غير السوريات,العاملات المنزليات غير السوريات (نم منحهن ترخيص العمل ),عدد المكاتب المرخصة لتشغيل العمال المنزليين السوريين,مكاتب مرخصة لمزاولة مهنة تشغيل خاص للعمال السوريين,عدد الزيارات التفتيشية على المنشأت (صناعي – زراعي ),زيارات تفتيشية على المنشآت (صناعي),زيارات تفتيشية على المنشآت (زراعي),المخالفات الناتجة عن الزيارات,مشاريع الصكوك القانونية الجديدة,مشاريع الصكوك القانونية  قيد المراجعة والتحديث,أهم ثلاث إنجازات,أهم ثلاث توصيات,الاحتياجات الرئيسية,التقرير الشهري
+const INLINE_CSV_DATA = `المحافظة,الشهر,السنة,عدد السكان,ذكور,إناث,السكان دون 15 سنة,السكان 15-60 سنة,السكان 60+ سنة,حجم قوة العمل (مليون),المشتغلون,المتعطلون,معدل البطالة العام,معدل بطالة الذكور,معدل بطالة الاناث,معدل بطالة الشباب,معدل المشاركة في النشاط الاقتصادي / ذكور,معدل المشاركة في النشاط الاقتصادي / إناث,نسبة العمال في القطاع الخاص غير المنظم,معدل زواج القاصرات حسب المحافظات,%معدل عمل الأطفال,معدل اكمال الدراسة في مرحلة التعليم الأساسيي,نسبة النساء المعيلات,%تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا ),%تقديرات الفقر وفق الأمن الغذائي (الاسر ذات الهشاشة),%تقديرات الفقر - الأمن الغذائي (الاسر المعدومة ),دور رعاية كبار السن,عدد المستفيدين من خدمات دور رعاية المسنين,عدد  معاهد رعاية وتأهيل الأشخاص ذوي الاعاقة,عدد الطلاب المسجلين في المعاهد الخاصة بذوي الاعاقة,عدد المستفيدين من توزيع المعينات الحركية,المستفيدين  من المعونة النقدية لأسر الأشخاص من ذوي  الإعاقة,عدد الحاصلين الجدد على بطاقة الاشخاص ذوي الاعاقة,عدد دور رعاية الايتام,المستفيدين من الخدمات (كفالة داخلية ),المستفيدين من الخدمات (كفالة خارجية),عدد مراكز رعاية المتسولين,دور رعاية المتسولين في الخدمة,عدد النزلاء في مراكز التسول,معاهد الاحداث/ مراكز الملاحظة,عدد معاهد الاحداث في الخدمة,عدد النزلاء من الاحداث,المستفيدين من دار لحن الحياة,عدد مراكز التأهيل المهني,عدد المراكز في الخدمة الفعلية,عدد المستفيدين من التأهيل,عدد المسجلين على منصة سوق العمل(2024- 2025),عدد المنشآت المسجلة في المنصة,عدد فرص العمل على المنصة,عدد فرص التدريب على المنصة,عدد مراكز التنمية الريفية خارج الخدمة,مراكز التنمية في الخدمة,عدد وحدات الصناعات الريفية خارج الخدمة,عدد وحدات الصناعة في الخدمة,مستفيدو مراكز التنمية الريفية,مستفيدو وحدات الصناعات الريفية,اجمالي عدد المنظمات غير الحكومية,عدد المنظمات غير الحكومية المسحوب ترخيصها,عدد المنظمات غير الحكومية المشهرة,عدد المساعدات  (سلة غذائية),عدد المساعدات عينية (ادوية - عمليات- منظفات),اعانات مالية,عدد المراكز المجتمعية,مساحات امنة للنساء,عدد المخيمات,عدد الاسر المقيمة في المخيمات,عدد المسجلين في التأمينات الاجتماعية/ قطاع عام,عدد المسجلين في التأمينات الاجتماعية / قطاع خاص,اجمالي عدد المسجلين القائمين على راس عملهم,عدد المسجلين  الجدد من خلال الزيارات التفتيشية,عدد المتقاعدين المستفيدين,عدد المستفيدين من تعويضات إصابات العمل,قرارات ضم الخدمة,عدد المنشآت التي تم اشراكها بالتامينات, منح تراخيص العمل  للعاملين غير السوريين,تجديد تراخيص العمل  للعاملين غير السوريين,عدد مكاتب التشغيل المرخصة  لمزاولة مهنة استقدام العاملات غير السوريات,العاملات المنزليات غير السوريات (نم منحهن ترخيص العمل ),عدد المكاتب المرخصة لتشغيل العمال المنزليين السوريين,مكاتب مرخصة لمزاولة مهنة تشغيل خاص للعمال السوريين,عدد الزيارات التفتيشية على المنشأت (صناعي – زراعي ),زيارات تفتيشية على المنشآت (صناعي),زيارات تفتيشية على المنشآت (زراعي),المخالفات الناتجة عن الزيارات,مشاريع الصكوك القانونية الجديدة,مشاريع الصكوك القانونية  قيد المراجعة والتحديث,أهم ثلاث إنجازات,أهم ثلاث توصيات,الاحتياجات الرئيسية,التقرير الشهرية
 دمشق,كانون الثاني,2025,2500000,1280000,1220000,875000,1375000,250000,1.25,950000,300000,24.0,18.5,32.0,28.5,65.2,18.5,42.0,12.5,8.2,78.5,22.0,35.0,28.0,37.0,8,450,12,320,85,120,950,6,280,150,45,5,180,3,2,45,120,4,3,85,8500,120,350,280,2,2,3,2,450,280,85,15,25,3200,850,420,6,12,3,150,450000,280000,730000,12500,95000,4500,850,320,45,120,8,5,12,8,450,280,170,85,25,15,تطوير مركز التأهيل المهني وتوسيع قاعدة المستفيدين,تعزيز الشراكة مع المنظمات المحلية لخدمة الأيتام,زيادة عدد مراكز رعاية الأشخاص ذوي الإعاقة,https://docs.google.com/document/d/example1
 ريف دمشق,كانون الثاني,2025,2800000,1430000,1370000,980000,1540000,280000,1.4,1050000,350000,25.0,19.2,33.5,29.8,64.8,17.2,45.0,13.8,9.5,76.0,24.5,32.0,30.0,38.0,7,380,10,280,72,105,820,5,250,120,38,4,155,2,2,38,95,3,3,72,7200,95,280,220,3,2,4,3,380,220,72,12,22,2800,720,380,5,10,2,120,380000,250000,630000,11200,82000,3800,720,280,38,95,6,4,10,6,380,220,155,72,22,12,إنشاء مركز جديد للتنمية الريفية في منطقة الزبداني,توسيع برنامج الكفالة الخارجية للأيتام,دعم مشاريع التأهيل المهني للشباب,https://docs.google.com/document/d/example2
 حلب,كانون الثاني,2025,3200000,1640000,1560000,1120000,1760000,320000,1.6,1180000,420000,26.2,20.5,35.0,31.2,63.5,15.8,48.0,15.2,11.0,74.5,26.8,30.0,32.0,38.0,9,520,14,380,95,140,1100,7,320,180,52,6,210,4,3,52,145,5,4,110,9800,145,420,340,4,3,5,4,520,340,110,18,32,3800,980,520,7,14,3,180,420000,320000,740000,14500,98000,5200,980,420,52,145,10,7,15,10,520,340,210,110,32,18,إعادة تأهيل مركز رعاية الأحداث بعد الصيانة,توسيع برنامج المساعدات الغذائية للأسر المتضررة,تطوير البنية التحتية لمراكز التنمية الريفية,https://docs.google.com/document/d/example3
@@ -1188,19 +1166,10 @@ const INLINE_CSV_DATA = `المحافظة,الشهر,السنة,عدد السك�
 // GOOGLE SHEETS API CONFIG
 // =====================
 const SHEETS_CONFIG = {
-  url: localStorage.getItem('mosal_sheets_url') || '',
-  apiKey: localStorage.getItem('mosal_sheets_api_key') || '',
-  spreadsheetId: localStorage.getItem('mosal_sheets_spreadsheet_id') || '1gbP938zd_pO3qfYRG4Yd7LmH7MOSbeyvuwjq0Tnnnds',
-  range: localStorage.getItem('mosal_sheets_range') || 'سوريا!A1:ZZ5000'
+  apiKey: 'AIzaSyCJ1xkZxmF0UnWMdQYjLElklIPYgCkHM2A',
+  spreadsheetId: '1gbP938zd_pO3qfYRG4Yd7LmH7MOSbeyvuwjq0Tnnnds',
+  range: 'سوريا!A1:ZZ5000'
 };
-
-function configureSheets(key, spreadsheetId, range, url){
-  if(url !== undefined){ localStorage.setItem('mosal_sheets_url', String(url).trim()); SHEETS_CONFIG.url = String(url).trim(); }
-  if(key !== undefined){ localStorage.setItem('mosal_sheets_api_key', String(key).trim()); SHEETS_CONFIG.apiKey = String(key).trim(); }
-  if(spreadsheetId !== undefined){ localStorage.setItem('mosal_sheets_spreadsheet_id', String(spreadsheetId).trim()); SHEETS_CONFIG.spreadsheetId = String(spreadsheetId).trim(); }
-  if(range !== undefined){ localStorage.setItem('mosal_sheets_range', String(range).trim()); SHEETS_CONFIG.range = String(range).trim(); }
-  return {...SHEETS_CONFIG};
-}
 
 const COLUMN_MAP = {
   // === Core identifiers ===
@@ -1230,7 +1199,7 @@ const COLUMN_MAP = {
   // === NEW: Social Issues ===
   "معدل زواج القاصرات حسب المحافظات": "child_marriage_rate",
   "%معدل عمل الأطفال": "child_labor_rate",
-  "معدل اكمال الدراسة في مرحلة التعليم الأساسي": "basic_edu_completion",
+  "معدل اكمال الدراسة في مرحلة التعليم الأساسيي": "basic_edu_completion",
   "نسبة النساء المعيلات": "female_breadwinners",
 
   // === NEW: Poverty ===
@@ -1354,7 +1323,7 @@ const COLUMN_MAP = {
   "ذكور": "males",
   "إناث": "females",
 
-  "التقرير الشهري": "monthly_report",
+  "التقرير الشهرية": "monthly_report",
 
   // === ADDITIONAL MAPPINGS for user's Google Sheet columns ===
   "عدد الطلاب المسجلين في المعاهد  الخاصة بذوي الاعاقة": "disability_benef",
@@ -1757,12 +1726,24 @@ function kpiDefs(arr){
     {em:"📜",lbl:"تراخيص عمل جديدة",val:sum("work_permits_new",arr)}];
 }
 
+// Normalize percentage values coming from CSV/Google Sheets.
+// Some sheets export a cell formatted as a percentage after already
+// multiplying the underlying rate by 100 (e.g. 3319.6 instead of 33.196).
+function normalizePercentValue(value){
+  const n = parseFloat(value);
+  if(isNaN(n)) return null;
+  return (n > 100 && n <= 10000) ? n / 100 : n;
+}
+function fmtPct(value){
+  const n = normalizePercentValue(value);
+  return n === null ? '0.0' : n.toFixed(1);
+}
 function avg(field, arr){
   const vals = arr.map(d => {
     const v = d[field];
     if(v === null || v === undefined || v === '') return null;
-    const n = parseFloat(v);
-    return isNaN(n) ? null : n;
+    const n = normalizePercentValue(v);
+    return n === null ? null : n;
   }).filter(v => v !== null);
   if(vals.length === 0) return 0;
   return (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1);
@@ -2133,7 +2114,9 @@ function sumStatic(field){
 }
 
 function avgStatic(field){
-  const vals = getStaticValues(field);
+  const vals = getStaticValues(field)
+    .map(normalizePercentValue)
+    .filter(v => v !== null);
   if(vals.length === 0){
     console.warn('avgStatic: no values for field', field, 'gov:', activeGov);
     return 0;
@@ -3538,64 +3521,69 @@ function looksLikeCsv(text){
 async function loadFromSheet(){
   const statusEl = document.getElementById('dataStatus');
   const refreshBtn = document.getElementById('refreshBtn');
-  const urlInput = document.getElementById('gsheetUrl');
-  const enteredUrl = String(urlInput?.value || SHEETS_CONFIG.url || '').trim();
 
   statusEl.textContent = '⏳ جاري الاتصال بـ Google Sheets...';
   statusEl.className = 'status-badge status-loading';
   if(refreshBtn) refreshBtn.disabled = true;
 
   try {
-    let csvText = '';
-    let sourceLabel = '';
-    if(enteredUrl){
-      const csvUrl = normalizeGoogleSheetUrl(enteredUrl);
-      configureSheets(undefined, undefined, undefined, enteredUrl);
-      const response = await fetchWithTimeout(csvUrl, {}, 15000);
-      if(!response.ok) throw new Error(`خطأ HTTP: ${response.status}`);
-      csvText = await response.text();
-      if(!looksLikeCsv(csvText)) throw new Error('الرابط لم يُرجع ملف CSV. اجعل الورقة متاحة لأي شخص لديه الرابط أو استخدم رابط النشر بصيغة CSV.');
-      sourceLabel = 'الرابط المباشر';
-    } else if(SHEETS_CONFIG.apiKey && SHEETS_CONFIG.spreadsheetId){
-      const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.spreadsheetId}/values/${encodeURIComponent(SHEETS_CONFIG.range)}?key=${SHEETS_CONFIG.apiKey}&valueRenderOption=UNFORMATTED_VALUE`;
-      const response = await fetchWithTimeout(apiUrl, {}, 15000);
-      if(!response.ok){
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error?.message || `خطأ HTTP: ${response.status}`);
-      }
-      const json = await response.json();
-      if(!json.values || json.values.length < 2) throw new Error('الورقة فارغة أو لا تحتوي على بيانات كافية');
-      csvText = json.values.map(row => row.map(cell => {
-        if(cell === null || cell === undefined) return '';
-        const str = String(cell).replace(/\r?\n/g, ' ');
-        return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str;
-      }).join(',')).join('\n');
-      sourceLabel = 'Google Sheets API';
-    } else {
-      throw new Error('ألصق رابط Google Sheets في الحقل أولاً');
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.spreadsheetId}/values/${encodeURIComponent(SHEETS_CONFIG.range)}?key=${SHEETS_CONFIG.apiKey}&valueRenderOption=UNFORMATTED_VALUE`;
+
+    const response = await fetch(url, { cache: 'no-store' });
+
+    if(!response.ok){
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || `خطأ HTTP: ${response.status}`);
     }
 
+    const json = await response.json();
+
+    if(!json.values || json.values.length < 2){
+      throw new Error('الورقة فارغة أو لا تحتوي على بيانات كافية');
+    }
+
+    // Convert Google Sheets array to CSV text
+    const csvText = json.values.map(row => 
+      row.map(cell => {
+        if(cell === null || cell === undefined) return '';
+        const str = String(cell).replace(/\r?\n/g, ' ');
+        if(str.includes(',') || str.includes('"')){
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }).join(',')
+    ).join('\n');
+
     if(processCSVData(csvText)){
-      statusEl.textContent = `✅ تم التحديث من Google Sheets (${sourceLabel}) — ` + new Date().toLocaleTimeString('ar-SY');
+      statusEl.textContent = '✅ تم التحديث من Google Sheets — ' + new Date().toLocaleTimeString('ar-SY');
       statusEl.className = 'status-badge status-ok';
+
+      const urlInput = document.getElementById('gsheetUrl');
       if(urlInput){
-        urlInput.value = enteredUrl;
+        urlInput.value = `متصل بـ Google Sheets: ${SHEETS_CONFIG.spreadsheetId}`;
         urlInput.style.background = '#e8f5e9';
         urlInput.style.color = '#0B5A7A';
       }
     }
+
   } catch(err){
     console.error('Google Sheets Error:', err);
+
     let msg = '❌ فشل الاتصال: ';
     if(err.message.includes('API key not valid')) msg += 'مفتاح API غير صالح';
     else if(err.message.includes('not found')) msg += 'لم يتم العثور على الورقة';
-    else if(err.message.includes('Permission')) msg += 'الورقة غير عامة؛ استخدم رابط النشر أو غيّر صلاحيات المشاركة';
+    else if(err.message.includes('Permission')) msg += 'الورقة غير عامة (تحقق من إعدادات المشاركة)';
     else msg += err.message;
+
     statusEl.textContent = msg;
     statusEl.className = 'status-badge status-error';
+
+    // fallback to inline data immediately
     if(typeof INLINE_CSV_DATA !== 'undefined' && INLINE_CSV_DATA){
+      console.log('استخدام البيانات المحلية كاحتياط...');
       processCSVData(INLINE_CSV_DATA);
-      statusEl.textContent += ' — تم استخدام البيانات المحلية كاحتياط';
+      statusEl.textContent = '⚠️ تم التحميل من البيانات المحلية (لا يوجد إنترنت)';
+      statusEl.className = 'status-badge status-loading';
     }
   } finally {
     if(refreshBtn) refreshBtn.disabled = false;
@@ -3870,11 +3858,11 @@ function updateMapMarkers(){
         <div class="info-row"><span class="info-label">💪 قوة العمل</span><span class="info-val">${fmt(d.labor_force||0)}</span></div>
         <div class="info-row"><span class="info-label">💼 المشتغلون</span><span class="info-val">${fmt(d.employed||0)}</span></div>
         <div class="info-row"><span class="info-label">🚫 المتعطلون</span><span class="info-val">${fmt(d.unemployed||0)}</span></div>
-        <div class="info-row"><span class="info-label">📉 معدل البطالة</span><span class="info-val">${fmt(d.unemployment_rate||0)}%</span></div>
-        <div class="info-row"><span class="info-label">🧑‍🎓 بطالة الشباب</span><span class="info-val">${fmt(d.youth_unemployment||0)}%</span></div>
-        <div class="info-row"><span class="info-label">♂️ مشاركة الذكور</span><span class="info-val">${fmt(d.male_participation||0)}%</span></div>
-        <div class="info-row"><span class="info-label">♀️ مشاركة الإناث</span><span class="info-val">${fmt(d.female_participation||0)}%</span></div>
-        <div class="info-row"><span class="info-label">🏭 قطاع غير منظم</span><span class="info-val">${fmt(d.unorganized_workers||0)}%</span></div>
+        <div class="info-row"><span class="info-label">📉 معدل البطالة</span><span class="info-val">${fmtPct(d.unemployment_rate)}%</span></div>
+        <div class="info-row"><span class="info-label">🧑‍🎓 بطالة الشباب</span><span class="info-val">${fmtPct(d.youth_unemployment)}%</span></div>
+        <div class="info-row"><span class="info-label">♂️ مشاركة الذكور</span><span class="info-val">${fmtPct(d.male_participation)}%</span></div>
+        <div class="info-row"><span class="info-label">♀️ مشاركة الإناث</span><span class="info-val">${fmtPct(d.female_participation)}%</span></div>
+        <div class="info-row"><span class="info-label">🏭 قطاع غير منظم</span><span class="info-val">${fmtPct(d.unorganized_workers)}%</span></div>
         <div style="border-top:1px dashed #ccc;margin:8px 0;padding-top:6px;">
           <span style="font-weight:600;color:#0B5A7A;font-size:11px;">🎓 التأهيل والإرشاد (قدرات)</span>
         </div>
@@ -3915,16 +3903,16 @@ function updateMapMarkers(){
         <div style="border-top:2px solid #0B5A7A;margin:10px 0;padding-top:8px;">
           <span style="font-weight:700;color:var(--syria-green);font-size:12px;">📊 مؤشرات اجتماعية</span>
         </div>
-        <div class="info-row"><span class="info-label">💍 زواج القاصرات</span><span class="info-val">${fmt(d.child_marriage_rate||0)}%</span></div>
-        <div class="info-row"><span class="info-label">👷 عمل الأطفال</span><span class="info-val">${fmt(d.child_labor_rate||0)}%</span></div>
-        <div class="info-row"><span class="info-label">📚 إكمال التعليم الأساسي</span><span class="info-val">${fmt(d.basic_edu_completion||0)}%</span></div>
-        <div class="info-row"><span class="info-label">👩‍👧 نساء معيلات</span><span class="info-val">${fmt(d.female_breadwinners||0)}%</span></div>
+        <div class="info-row"><span class="info-label">💍 زواج القاصرات</span><span class="info-val">${fmtPct(d.child_marriage_rate)}%</span></div>
+        <div class="info-row"><span class="info-label">👷 عمل الأطفال</span><span class="info-val">${fmtPct(d.child_labor_rate)}%</span></div>
+        <div class="info-row"><span class="info-label">📚 إكمال التعليم الأساسي</span><span class="info-val">${fmtPct(d.basic_edu_completion)}%</span></div>
+        <div class="info-row"><span class="info-label">👩‍👧 نساء معيلات</span><span class="info-val">${fmtPct(d.female_breadwinners)}%</span></div>
         <div style="border-top:1px dashed #ccc;margin:8px 0;padding-top:6px;">
           <span style="font-weight:600;color:#0B5A7A;font-size:11px;">🍞 الأمن الغذائي (تقديرات الفقر)</span>
         </div>
-        <div class="info-row"><span class="info-label">✅ أسر آمنة غذائياً</span><span class="info-val" style="color:#4F7A63;font-weight:700;">${fmt(d.food_secure_pct||0)}%</span></div>
-        <div class="info-row"><span class="info-label">⚠️ أسر ذات هشاشة غذائية</span><span class="info-val" style="color:#B08D57;font-weight:700;">${fmt(d.food_vulnerable_pct||0)}%</span></div>
-        <div class="info-row"><span class="info-label">🔴 أسر معدومة غذائياً</span><span class="info-val" style="color:#B5533C;font-weight:700;">${fmt(d.food_insecure_pct||0)}%</span></div>
+        <div class="info-row"><span class="info-label">✅ أسر آمنة غذائياً</span><span class="info-val" style="color:#4F7A63;font-weight:700;">${fmtPct(d.food_secure_pct)}%</span></div>
+        <div class="info-row"><span class="info-label">⚠️ أسر ذات هشاشة غذائية</span><span class="info-val" style="color:#B08D57;font-weight:700;">${fmtPct(d.food_vulnerable_pct)}%</span></div>
+        <div class="info-row"><span class="info-label">🔴 أسر معدومة غذائياً</span><span class="info-val" style="color:#B5533C;font-weight:700;">${fmtPct(d.food_insecure_pct)}%</span></div>
 
         ${textFields.achievements && textFields.achievements.length ? `
         <div style="border-top:2px solid #0D8BA8;margin:10px 0;padding-top:8px;">
@@ -5552,9 +5540,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   initGoogleSignIn();
 
   setTimeout(() => {
-    if((SHEETS_CONFIG.url || (SHEETS_CONFIG.apiKey && !SHEETS_CONFIG.apiKey.includes('ضع_')))){
-      const savedUrlInput = document.getElementById('gsheetUrl');
-      if(savedUrlInput && SHEETS_CONFIG.url) savedUrlInput.value = SHEETS_CONFIG.url;
+    if(SHEETS_CONFIG.apiKey && !SHEETS_CONFIG.apiKey.includes('ضع_')){
       loadFromSheet();
     }
   }, 1200);
@@ -5640,7 +5626,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         <div class="gov-avatar" id="govProfileAvatar">🏛️</div>
         <div class="gov-profile-title">
           <h2 id="govProfileName">اسم المحافظة</h2>
-          <p id="govProfileSubtitle">الملف التنفيذي — تحليل استرشادي للمؤشرات التشغيلية</p>
+          <p id="govProfileSubtitle">الملف التنفيذي — تحليل المؤشرات التشغيلية</p>
         </div>
       </div>
     </div>
@@ -5655,12 +5641,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         </div>
         <!-- Gauge + Insights -->
         <div class="profile-card">
-          <h3>📊 المؤشر المركب الاسترشادي</h3>
+          <h3>📊 مؤشر الأداء العام</h3>
           <div class="gauge-wrap">
             <canvas id="gaugeChart" width="180" height="100"></canvas>
             <div class="gauge-value" id="gaugeValue">—</div>
           </div>
-          <div class="gauge-label">من 100 — مقياس استرشادي مبني على البيانات المتاحة</div>
+          <div class="gauge-label">من 100 — يجمع الأداء عبر المحاور الستة</div>
 
           <div style="margin-top:16px;">
             <h3 style="font-family:'Tajawal';font-weight:700;font-size:13px;color:#4F7A63;margin:0 0 8px;">💪 أبرز نقاط القوة</h3>
@@ -5748,11 +5734,7 @@ const RADAR_AXES = [
 ];
 
 function getGovData(gov){
-  let rows = ALL_DATA.filter(d => d.gov === gov);
-  if(selectedMonths && selectedMonths.size > 0){
-    rows = rows.filter(d => selectedMonths.has(normalizeMonth(d.month)));
-  }
-  return rows;
+  return ALL_DATA.filter(d => d.gov === gov);
 }
 
 function aggregateGov(gov){
@@ -5818,7 +5800,7 @@ function openGovProfile(gov){
 
   document.getElementById('govProfileName').textContent = gov;
   document.getElementById('govProfileAvatar').textContent = getGovAvatar(gov);
-  document.getElementById('govProfileSubtitle').textContent = 'الملف التنفيذي — تحليل استرشادي للمؤشرات التشغيلية';
+  document.getElementById('govProfileSubtitle').textContent = 'الملف التنفيذي — تحليل المؤشرات التشغيلية';
 
   const scores = getAllAxisScores(gov);
   if(!scores){
@@ -5981,8 +5963,8 @@ function renderMiniKpis(gov){
   const pop = rows.reduce((a,d) => a + (parseFloat(d.population) || 0), 0);
   const employed = rows.reduce((a,d) => a + (parseFloat(d.employed) || 0), 0);
   // Average percentage values (don't sum rates!)
-  const unempRates = rows.map(d => parseFloat(d.unemployment_rate)).filter(v => !isNaN(v));
-  const avgUnemp = unempRates.length ? (unempRates.reduce((a,b) => a+b, 0) / unempRates.length).toFixed(1) : 0;
+  const unempRates = rows.map(d => normalizePercentValue(d.unemployment_rate)).filter(v => v !== null);
+  const avgUnemp = unempRates.length ? (unempRates.reduce((a,b) => a+b, 0) / unempRates.length).toFixed(1) : '0.0';
   const insurance = rows.reduce((a,d) => a + (parseFloat(d.insurance_total) || 0), 0);
   const aid = rows.reduce((a,d) => a + (parseFloat(d.food_baskets) || 0) + (parseFloat(d.cash_assistance) || 0) + (parseFloat(d.in_kind_aid) || 0), 0);
   const digital = rows.reduce((a,d) => a + (parseFloat(d.platform_registered) || 0), 0);
@@ -6059,7 +6041,7 @@ function renderComparison(){
       <h4>${getGovAvatar(compareGovA)} ${compareGovA}</h4>
       <div style="text-align:center;margin-bottom:14px;">
         <div style="font-family:IBM Plex Mono;font-size:32px;font-weight:700;color:${getScoreColor(scoresA.overall)};">${scoresA.overall}</div>
-        <div style="font-size:11px;color:var(--ink-soft);">المؤشر المركب الاسترشادي</div>
+        <div style="font-size:11px;color:var(--ink-soft);">مؤشر الأداء العام</div>
       </div>
       ${axisRows.map(r => `
         <div class="compare-metric">
@@ -6073,7 +6055,7 @@ function renderComparison(){
       <h4>${getGovAvatar(compareGovB)} ${compareGovB}</h4>
       <div style="text-align:center;margin-bottom:14px;">
         <div style="font-family:IBM Plex Mono;font-size:32px;font-weight:700;color:${getScoreColor(scoresB.overall)};">${scoresB.overall}</div>
-        <div style="font-size:11px;color:var(--ink-soft);">المؤشر المركب الاسترشادي</div>
+        <div style="font-size:11px;color:var(--ink-soft);">مؤشر الأداء العام</div>
       </div>
       ${axisRows.map(r => `
         <div class="compare-metric">
@@ -6108,501 +6090,5 @@ document.addEventListener('keydown', function(e){
   }
 });
 </script>
-
-<script id="professional-v3-js">
-// =====================================================
-// PROFESSIONAL v3 — data quality, safe export, resilience
-// =====================================================
-(function(){
-  const originalError = window.onerror;
-  window.onerror = function(msg, src, line, col, err){
-    console.error('Professional v3 runtime error:', {msg,src,line,col,err});
-    const st=document.getElementById('dataStatus');
-    if(st){ st.textContent='⚠️ حدث خطأ في أحد مكونات اللوحة — راجع وحدة التحكم'; st.className='status-badge status-error'; }
-    if(typeof originalError==='function') return originalError.apply(this, arguments);
-    return false;
-  };
-})();
-
-function v3CountNumericIssues(rows){
-  let issues=0;
-  rows.forEach(r=>Object.keys(r).forEach(k=>{
-    if(['gov','month','year'].includes(k)) return;
-    const v=r[k];
-    if(v!=='' && v!==null && v!==undefined && typeof v!=='number' && /^-?\d+(\.\d+)?$/.test(String(v).trim())===false && /^(population|employed|unemployed|insurance|platform|rural|ngo|food|cash|aid|camps|disabled|elderly|pension|insp|work|training|benef)/i.test(k)) issues++;
-  }));
-  return issues;
-}
-
-function runV3DataHealth(){
-  const rows=Array.isArray(ALL_DATA)?ALL_DATA:[];
-  const box=document.getElementById('v3HealthBox');
-  if(box) box.classList.add('open');
-  const missingGov=rows.filter(r=>!String(r.gov??'').trim()).length;
-  const missingMonth=rows.filter(r=>!String(r.month??'').trim()).length;
-  const keys=new Map(); let dup=0;
-  rows.forEach(r=>{ const key=[r.gov,r.month,r.year].map(x=>String(x??'').trim()).join('|'); if(key==='||') return; const n=(keys.get(key)||0)+1; keys.set(key,n); if(n===2) dup++; });
-  const numeric=v3CountNumericIssues(rows);
-  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=fmt?fmt(val):String(val)};
-  set('v3MissingGov',missingGov); set('v3MissingMonth',missingMonth); set('v3DuplicateRows',dup); set('v3NumericIssues',numeric);
-  const score=rows.length?Math.max(0,100-Math.min(100,(missingGov+missingMonth+dup+numeric)/Math.max(rows.length,1)*100)):0;
-  const txt=document.getElementById('v3QualityText'), dot=document.getElementById('v3QualityDot');
-  if(txt) txt.textContent=rows.length?(score>=98?'ممتاز':score>=90?'جيد':'يحتاج مراجعة'):'لا توجد بيانات';
-  if(dot){dot.classList.remove('good','bad'); if(score>=98)dot.classList.add('good'); else if(score<90)dot.classList.add('bad');}
-  return {rows:rows.length,missingGov,missingMonth,duplicates:dup,numericIssues:numeric,quality:score};
-}
-function toggleV3Health(){const b=document.getElementById('v3HealthBox'); if(b)b.classList.toggle('open');}
-function updateV3Status(){
-  const rows=Array.isArray(ALL_DATA)?ALL_DATA:[];
-  const set=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
-  set('v3RowCount',fmt?fmt(rows.length):String(rows.length));
-  set('v3GovCount',new Set(rows.map(r=>r.gov).filter(Boolean)).size+' / '+(ALL_GOVS?ALL_GOVS.length:14));
-  runV3DataHealth();
-}
-function exportV3FilteredCSV(){
-  const rows=typeof filtered==='function'?filtered():(ALL_DATA||[]);
-  if(!rows.length){alert('لا توجد بيانات قابلة للتصدير ضمن الفلاتر الحالية.');return;}
-  const headers=Object.keys(rows[0]);
-  const esc=v=>{const s=String(v??''); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
-  const csv='\uFEFF'+[headers,...rows.map(r=>headers.map(h=>r[h]??''))].map(r=>r.map(esc).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mosal_dashboard_filtered_'+new Date().toISOString().slice(0,10)+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-
-// Refresh executive status whenever the main data pipeline finishes.
-const _v3OriginalProcess = window.processCSVData;
-if(typeof _v3OriginalProcess==='function'){
-  window.processCSVData = function(){ const result=_v3OriginalProcess.apply(this,arguments); setTimeout(updateV3Status,0); return result; };
-}
-window.addEventListener('DOMContentLoaded',()=>setTimeout(updateV3Status,700));
-</script>
-
-<!-- =========================================================
-     PROFESSIONAL v3.1 — INDICATOR GOVERNANCE LAYER
-     ========================================================= -->
-<style>
-.pv31-shell{margin:18px 0;font-family:Cairo,Tajawal,sans-serif}
-.pv31-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;
-  background:var(--paper,#fff);border:1px solid var(--line,#ddd);border-radius:16px;padding:12px;
-  box-shadow:0 5px 20px rgba(0,0,0,.05)}
-.pv31-toolbar button,.pv31-toolbar select,.pv31-toolbar input{font-family:inherit}
-.pv31-btn{border:1px solid var(--line,#ddd);background:var(--paper,#fff);color:var(--ink,#222);
-  border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer}
-.pv31-btn.primary{background:#0B5A7A;color:#fff;border-color:#0B5A7A}
-.pv31-btn:hover{transform:translateY(-1px)}
-.pv31-status{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.pv31-stat{background:var(--sand,#f6f2ea);border:1px solid var(--line,#ddd);border-radius:12px;padding:12px}
-.pv31-stat b{display:block;font-size:19px;font-family:"IBM Plex Mono",monospace}
-.pv31-stat span{font-size:11px;color:var(--ink-soft,#777)}
-.pv31-panel{margin-top:12px;background:var(--paper,#fff);border:1px solid var(--line,#ddd);
- border-radius:16px;padding:16px;display:none}
-.pv31-panel.open{display:block}
-.pv31-search{width:100%;max-width:420px;padding:10px;border:1px solid var(--line,#ddd);border-radius:10px}
-.pv31-table-wrap{overflow:auto;margin-top:12px}
-.pv31-table{width:100%;border-collapse:collapse;min-width:850px;font-size:12px}
-.pv31-table th,.pv31-table td{padding:9px;border-bottom:1px solid #eee;text-align:right;vertical-align:top}
-.pv31-table th{background:#f5f7f8;position:sticky;top:0;z-index:1}
-.pv31-tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef5f7;font-size:10px}
-.pv31-quality-good{color:#2f6b45;font-weight:800}.pv31-quality-warn{color:#9a6b00;font-weight:800}
-.pv31-quality-bad{color:#a13f35;font-weight:800}
-.pv31-note{font-size:11px;color:#777;line-height:1.7;margin-top:8px}
-@media(max-width:700px){.pv31-toolbar{align-items:stretch}.pv31-btn{width:100%}}
-</style>
-
-<section class="pv31-shell" id="pv31Governance">
-  <div class="pv31-toolbar">
-    <button class="pv31-btn primary" onclick="PV31.toggleDictionary()">📚 قاموس المؤشرات</button>
-    <button class="pv31-btn" onclick="PV31.runQualityCheck()">🧪 فحص جودة البيانات</button>
-    <button class="pv31-btn" onclick="PV31.exportFilteredCSV()">⬇️ تصدير البيانات المفلترة</button>
-    <button class="pv31-btn" onclick="PV31.configureSheets()">⚙️ إعداد مصدر البيانات</button>
-  </div>
-  <div class="pv31-status">
-    <div class="pv31-stat"><b id="pv31Rows">0</b><span>عدد السجلات المحملة</span></div>
-    <div class="pv31-stat"><b id="pv31Govs">0</b><span>المحافظات</span></div>
-    <div class="pv31-stat"><b id="pv31Indicators">0</b><span>المؤشرات الرقمية</span></div>
-    <div class="pv31-stat"><b id="pv31Quality">—</b><span>جودة البيانات</span></div>
-  </div>
-
-  <div class="pv31-panel" id="pv31Dictionary">
-    <input class="pv31-search" id="pv31Search" placeholder="ابحث باسم المؤشر أو رمزه أو تصنيفه..." oninput="PV31.renderDictionary()">
-    <div class="pv31-table-wrap"><table class="pv31-table">
-      <thead><tr><th>الرمز</th><th>اسم المؤشر</th><th>التصنيف</th><th>الوحدة</th><th>الدورية</th><th>طريقة القياس</th><th>ملاحظة</th></tr></thead>
-      <tbody id="pv31DictionaryBody"></tbody>
-    </table></div>
-    <div class="pv31-note">القاموس الحالي يولّد توصيفًا أوليًا من الحقول الموجودة في الملف. يمكن اعتماد التعريفات الرسمية والأهداف لاحقًا من قبل الجهة المختصة.</div>
-  </div>
-
-  <div class="pv31-panel" id="pv31QualityPanel">
-    <div id="pv31QualityDetails"></div>
-  </div>
-</section>
-
-<script>
-(function(){
-  const CATEGORY = {
-    population:'السكان والديموغرافيا', employed:'سوق العمل والتشغيل',
-    insurance:'التأمينات والحماية الاجتماعية', rural:'التنمية الريفية',
-    platform:'التحول الرقمي', aid:'الإغاثة والمساعدات',
-    disability:'الأشخاص ذوو الإعاقة', children:'الطفولة والرعاية',
-    inspection:'التفتيش والعمل', ngos:'المنظمات غير الحكومية'
-  };
-  const UNIT = {};
-  const PERIOD = 'شهري';
-  const NON_INDICATOR = new Set(['gov','month','year','achievements','recommendations','needs','report']);
-
-  function labelFor(k){
-    try { return (window.COLUMN_MAP_INV && COLUMN_MAP_INV[k]) || k; } catch(e){ return k; }
-  }
-  function catFor(k){
-    if(/population|employed|unemployment|labor|workforce/i.test(k)) return CATEGORY.employed;
-    if(/insurance|pension|work_injury/i.test(k)) return CATEGORY.insurance;
-    if(/rural/i.test(k)) return CATEGORY.rural;
-    if(/platform|digital/i.test(k)) return CATEGORY.platform;
-    if(/aid|food|cash|in_kind|camp/i.test(k)) return CATEGORY.aid;
-    if(/disability/i.test(k)) return CATEGORY.disability;
-    if(/orphan|elderly|beggar|child/i.test(k)) return CATEGORY.children;
-    if(/inspection|permit|license/i.test(k)) return CATEGORY.inspection;
-    if(/ngo|organization/i.test(k)) return CATEGORY.ngos;
-    if(/population|female|male|age/i.test(k)) return CATEGORY.population;
-    return 'عام';
-  }
-  function indicators(){
-    const rows = Array.isArray(window.ALL_DATA) ? window.ALL_DATA : [];
-    const keys = new Set();
-    rows.forEach(r => Object.keys(r||{}).forEach(k => {
-      if(!NON_INDICATOR.has(k) && rows.some(x => typeof x?.[k] === 'number')) keys.add(k);
-    }));
-    return [...keys];
-  }
-  function filtered(){
-    const rows = Array.isArray(window.ALL_DATA) ? window.ALL_DATA : [];
-    try { return typeof window.filtered === 'function' ? window.filtered() : rows; } catch(e){ return rows; }
-  }
-  function esc(v){ return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-  window.PV31 = {
-    toggleDictionary(){
-      const p=document.getElementById('pv31Dictionary');
-      p.classList.toggle('open');
-      if(p.classList.contains('open')) this.renderDictionary();
-    },
-    renderDictionary(){
-      const body=document.getElementById('pv31DictionaryBody');
-      const q=(document.getElementById('pv31Search').value||'').trim().toLowerCase();
-      const rows=indicators().map(k=>({k,label:labelFor(k),cat:catFor(k)}))
-        .filter(x=>!q || [x.k,x.label,x.cat].join(' ').toLowerCase().includes(q));
-      body.innerHTML=rows.map(x=>`<tr>
-        <td><code>${esc(x.k)}</code></td><td>${esc(x.label)}</td>
-        <td><span class="pv31-tag">${esc(x.cat)}</span></td><td>عدد / نسبة حسب الحقل</td>
-        <td>${PERIOD}</td><td>قيمة دورية</td><td>يحتاج اعتماد تعريف وهدف رسمي</td>
-      </tr>`).join('') || '<tr><td colspan="7">لا توجد مؤشرات مطابقة.</td></tr>';
-    },
-    runQualityCheck(){
-      const rows=Array.isArray(window.ALL_DATA)?window.ALL_DATA:[];
-      const govs=new Set(rows.map(r=>r.gov).filter(Boolean));
-      const keys=indicators();
-      let missingGov=0,missingMonth=0,invalid=0,duplicates=0;
-      const seen=new Set();
-      rows.forEach(r=>{
-        if(!r.gov) missingGov++;
-        if(!r.month) missingMonth++;
-        const id=[r.gov,r.month,r.year].join('|');
-        if(seen.has(id)) duplicates++; else seen.add(id);
-        keys.forEach(k=>{ if(r[k]!==undefined && r[k]!=='' && typeof r[k]!=='number' && !isNaN(Number(r[k]))) return; if(r[k]!==undefined && r[k]!=='' && typeof r[k]!=='number') invalid++; });
-      });
-      const totalIssues=missingGov+missingMonth+invalid+duplicates;
-      const quality=rows.length?Math.max(0,Math.round(100-totalIssues/Math.max(1,rows.length)*100)):0;
-      document.getElementById('pv31Quality').textContent=quality+'%';
-      document.getElementById('pv31Quality').className=quality>=95?'pv31-quality-good':quality>=80?'pv31-quality-warn':'pv31-quality-bad';
-      document.getElementById('pv31QualityPanel').classList.add('open');
-      document.getElementById('pv31QualityDetails').innerHTML=`
-        <h3>نتيجة فحص جودة البيانات</h3>
-        <div class="pv31-status">
-          <div class="pv31-stat"><b>${rows.length}</b><span>السجلات</span></div>
-          <div class="pv31-stat"><b>${missingGov}</b><span>بدون محافظة</span></div>
-          <div class="pv31-stat"><b>${missingMonth}</b><span>بدون شهر</span></div>
-          <div class="pv31-stat"><b>${duplicates}</b><span>سجلات مكررة حسب المحافظة/الشهر/السنة</span></div>
-          <div class="pv31-stat"><b>${invalid}</b><span>قيم تحتاج مراجعة</span></div>
-        </div>`;
-    },
-    exportFilteredCSV(){
-      const rows=filtered();
-      if(!rows.length){alert('لا توجد بيانات لتصديرها.');return;}
-      const keys=[...new Set(rows.flatMap(r=>Object.keys(r)))];
-      const csv=[keys.map(k=>`"${labelFor(k).replace(/"/g,'""')}"`),
-        ...rows.map(r=>keys.map(k=>`"${String(r[k]??'').replace(/"/g,'""')}"`))].map(a=>a.join(',')).join('\n');
-      const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-      a.download='MOSAL_filtered_data.csv'; a.click(); URL.revokeObjectURL(a.href);
-    },
-    configureSheets(){
-      const current=localStorage.getItem('MOSAL_SHEETS_API_KEY')||'';
-      const key=prompt('أدخل Google Sheets API Key. سيتم حفظه محليًا في هذا المتصفح فقط:',current);
-      if(key===null)return;
-      localStorage.setItem('MOSAL_SHEETS_API_KEY',key.trim());
-      alert('تم حفظ المفتاح محليًا. أعد تحميل الصفحة لتطبيق الإعداد.');
-    },
-    refresh(){
-      const rows=Array.isArray(window.ALL_DATA)?window.ALL_DATA:[];
-      document.getElementById('pv31Rows').textContent=rows.length.toLocaleString('ar-SY');
-      document.getElementById('pv31Govs').textContent=new Set(rows.map(r=>r.gov).filter(Boolean)).size;
-      document.getElementById('pv31Indicators').textContent=indicators().length;
-      if(!document.getElementById('pv31Quality').textContent || document.getElementById('pv31Quality').textContent==='—') this.runQualityCheck();
-    }
-  };
-
-  function hook(){
-    PV31.refresh();
-    const oldLoad=window.loadFromSheet;
-    if(typeof oldLoad==='function'){
-      window.loadFromSheet=async function(){
-        const r=await oldLoad.apply(this,arguments);
-        setTimeout(()=>PV31.refresh(),100);
-        return r;
-      };
-    }
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(hook,500));
-  else setTimeout(hook,500);
-})();
-</script>
-
-
-<!-- =========================================================
-     MOSAL PROFESSIONAL v3.2 — INDICATOR MANAGEMENT SYSTEM
-     ========================================================= -->
-<style>
-#pv32{font-family:Cairo,Tajawal,sans-serif;margin:14px 0}
-.p32-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-.p32-btn{border:1px solid #d8dee2;background:#fff;border-radius:10px;padding:9px 12px;cursor:pointer;font-family:inherit;font-weight:700}
-.p32-btn.primary{background:#0B5A7A;color:#fff;border-color:#0B5A7A}
-.p32-btn.danger{color:#9d3830}
-.p32-panel{display:none;border:1px solid #d8dee2;border-radius:16px;background:#fff;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.05)}
-.p32-panel.active{display:block}
-.p32-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
-.p32-field{display:flex;flex-direction:column;gap:5px}.p32-field label{font-size:11px;font-weight:800}
-.p32-field input,.p32-field select,.p32-field textarea{border:1px solid #d8dee2;border-radius:9px;padding:9px;font-family:inherit;background:#fff}
-.p32-field textarea{min-height:65px;resize:vertical}
-.p32-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.p32-tablewrap{overflow:auto;margin-top:14px}.p32-table{width:100%;border-collapse:collapse;min-width:1050px;font-size:12px}
-.p32-table th,.p32-table td{padding:8px;border-bottom:1px solid #edf0f2;text-align:right;vertical-align:middle}
-.p32-table th{background:#f5f7f8;position:sticky;top:0;z-index:2}
-.p32-badge{padding:3px 8px;border-radius:999px;font-size:10px;white-space:nowrap}
-.p32-green{background:#e7f4ea;color:#27633b}.p32-yellow{background:#fff4d7;color:#8a6500}.p32-red{background:#fbe7e5;color:#9a3931}.p32-gray{background:#eef1f3;color:#56616a}
-.p32-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px}
-.p32-kpi{border:1px solid #e2e7ea;border-radius:12px;padding:11px}.p32-kpi b{font-size:20px;display:block}.p32-kpi small{color:#6d777d}
-.p32-help{font-size:11px;color:#6b747a;line-height:1.8;margin-top:8px}
-.p32-modal{position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;align-items:center;justify-content:center;z-index:9999;padding:15px}
-.p32-modal.open{display:flex}.p32-card{background:#fff;border-radius:16px;padding:18px;max-width:850px;width:100%;max-height:90vh;overflow:auto}
-</style>
-
-<section id="pv32">
-  <div class="p32-nav">
-    <button class="p32-btn primary" onclick="PV32.openPanel('registry')">📚 سجل المؤشرات</button>
-    <button class="p32-btn" onclick="PV32.openPanel('targets')">🎯 الأهداف والحدود</button>
-    <button class="p32-btn" onclick="PV32.openPanel('performance')">📈 أداء المؤشرات</button>
-    <button class="p32-btn" onclick="PV32.exportRegistry()">⬇️ تصدير قاموس المؤشرات</button>
-  </div>
-
-  <div class="p32-panel active" id="p32-registry">
-    <div class="p32-kpis">
-      <div class="p32-kpi"><b id="p32-count">0</b><small>إجمالي المؤشرات</small></div>
-      <div class="p32-kpi"><b id="p32-defined">0</b><small>مؤشرات معرفة</small></div>
-      <div class="p32-kpi"><b id="p32-targeted">0</b><small>مؤشرات لها أهداف</small></div>
-      <div class="p32-kpi"><b id="p32-redcount">0</b><small>تحت الحد الأحمر</small></div>
-    </div>
-    <div class="p32-grid">
-      <div class="p32-field"><label>بحث</label><input id="p32-search" oninput="PV32.render()" placeholder="اسم، رمز، تصنيف..."></div>
-      <div class="p32-field"><label>التصنيف</label><select id="p32-category" onchange="PV32.render()"><option value="">كل التصنيفات</option></select></div>
-      <div class="p32-field"><label>حالة التعريف</label><select id="p32-definition" onchange="PV32.render()"><option value="">الكل</option><option value="defined">معرف</option><option value="undefined">غير معرف</option></select></div>
-    </div>
-    <div class="p32-tablewrap"><table class="p32-table">
-      <thead><tr>
-        <th>الرمز</th><th>المؤشر</th><th>التصنيف</th><th>الوحدة</th><th>الاتجاه</th>
-        <th>الخط الأساسي</th><th>الهدف</th><th>القيمة الحالية</th><th>الإنجاز</th><th>الحالة</th><th>إجراء</th>
-      </tr></thead>
-      <tbody id="p32-body"></tbody>
-    </table></div>
-    <div class="p32-help">الهدف والحالة لا يتم استنتاجهما كحقائق رسمية؛ يتم إدخالهما من قاموس المؤشرات المعتمد. عند عدم وجود تعريف رسمي يظهر المؤشر بحالة «غير معرف».</div>
-  </div>
-
-  <div class="p32-panel" id="p32-targets">
-    <h3>🎯 إدارة تعريف المؤشر والهدف</h3>
-    <div class="p32-grid">
-      <div class="p32-field"><label>رمز المؤشر</label><input id="p32-code" readonly></div>
-      <div class="p32-field"><label>اسم المؤشر</label><input id="p32-name" readonly></div>
-      <div class="p32-field"><label>التصنيف</label><input id="p32-cat" readonly></div>
-      <div class="p32-field"><label>الوحدة</label><select id="p32-unit"><option>عدد</option><option>نسبة %</option><option>معدل</option><option>مليون</option><option>مدة زمنية</option><option>مؤشر مركب</option></select></div>
-      <div class="p32-field"><label>اتجاه المؤشر</label><select id="p32-direction"><option value="higher">الأعلى أفضل</option><option value="lower">الأدنى أفضل</option><option value="neutral">محايد</option></select></div>
-      <div class="p32-field"><label>الخط الأساسي Baseline</label><input id="p32-baseline" type="number" step="any"></div>
-      <div class="p32-field"><label>الهدف Target</label><input id="p32-target" type="number" step="any"></div>
-      <div class="p32-field"><label>الحد الأخضر</label><input id="p32-green" type="number" step="any"></div>
-      <div class="p32-field"><label>الحد الأصفر</label><input id="p32-yellow" type="number" step="any"></div>
-      <div class="p32-field"><label>المصدر</label><input id="p32-source" placeholder="مثال: مديرية التخطيط والإحصاء"></div>
-      <div class="p32-field"><label>دورية القياس</label><select id="p32-period"><option>شهري</option><option>ربع سنوي</option><option>نصف سنوي</option><option>سنوي</option></select></div>
-      <div class="p32-field" style="grid-column:1/-1"><label>تعريف المؤشر وطريقة الحساب</label><textarea id="p32-description" placeholder="اكتب التعريف الرسمي وطريقة الحساب..."></textarea></div>
-    </div>
-    <div class="p32-actions">
-      <button class="p32-btn primary" onclick="PV32.saveMeta()">💾 حفظ</button>
-      <button class="p32-btn" onclick="PV32.closeEditor()">إغلاق</button>
-    </div>
-  </div>
-
-  <div class="p32-panel" id="p32-performance">
-    <h3>📈 لوحة أداء المؤشرات</h3>
-    <div id="p32-performance-body"></div>
-  </div>
-</section>
-
-<div class="p32-modal" id="p32-modal">
-  <div class="p32-card">
-    <h3 id="p32-modal-title">تفاصيل المؤشر</h3>
-    <div id="p32-modal-body"></div>
-    <div class="p32-actions"><button class="p32-btn" onclick="PV32.closeModal()">إغلاق</button></div>
-  </div>
-</div>
-
-<script>
-(function(){
-  const KEY='MOSAL_INDICATOR_REGISTRY_V32';
-  const DEFAULT_META={unit:'عدد',direction:'higher',baseline:'',target:'',green:'',yellow:'',source:'',period:'شهري',description:''};
-  const categoryMap={
-    population:'السكان والديموغرافيا',employed:'سوق العمل والتشغيل',insurance:'التأمينات والحماية الاجتماعية',
-    rural:'التنمية الريفية',platform:'التحول الرقمي',aid:'الإغاثة والمساعدات',disability:'الأشخاص ذوو الإعاقة',
-    children:'الطفولة والرعاية',inspection:'التفتيش والعمل',ngos:'المنظمات غير الحكومية'
-  };
-  const badNames=new Set(['gov','month','year','achievements','recommendations','needs','report']);
-
-  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-  function label(k){try{return (window.COLUMN_MAP_INV&&window.COLUMN_MAP_INV[k])||k}catch(e){return k}}
-  function category(k){
-    if(/population|female|male|age/i.test(k))return categoryMap.population;
-    if(/unemployment|employed|workforce|labor|work/i.test(k))return categoryMap.employed;
-    if(/insurance|pension|work_injury/i.test(k))return categoryMap.insurance;
-    if(/rural/i.test(k))return categoryMap.rural;
-    if(/platform|digital/i.test(k))return categoryMap.platform;
-    if(/aid|food|cash|camp/i.test(k))return categoryMap.aid;
-    if(/disability/i.test(k))return categoryMap.disability;
-    if(/orphan|elderly|beggar|child/i.test(k))return categoryMap.children;
-    if(/inspection|permit|license/i.test(k))return categoryMap.inspection;
-    if(/ngo|organization/i.test(k))return categoryMap.ngos;
-    return 'عام';
-  }
-  function data(){
-    return Array.isArray(window.ALL_DATA)?window.ALL_DATA:[];
-  }
-  function keys(){
-    const rs=data(), s=new Set();
-    rs.forEach(r=>Object.keys(r||{}).forEach(k=>{
-      if(!badNames.has(k) && rs.some(x=>typeof x?.[k]==='number'))s.add(k);
-    }));
-    return [...s];
-  }
-  function registry(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
-  function saveRegistry(r){localStorage.setItem(KEY,JSON.stringify(r))}
-  function meta(k){return {...DEFAULT_META,...registry()[k]}}
-  function current(k){
-    const rs=data().filter(r=>typeof r?.[k]==='number');
-    if(!rs.length)return null;
-    try{
-      if(typeof window.filtered==='function'){
-        const f=window.filtered().filter(r=>typeof r?.[k]==='number');
-        if(f.length)return f.reduce((a,r)=>a+Number(r[k]||0),0)/f.length;
-      }
-    }catch(e){}
-    return rs.reduce((a,r)=>a+Number(r[k]||0),0)/rs.length;
-  }
-  function achievement(k,v){
-    const m=meta(k), b=Number(m.baseline), t=Number(m.target);
-    if(!Number.isFinite(v)||!Number.isFinite(t)||t===b)return null;
-    if(m.direction==='lower')return ((b-v)/(b-t))*100;
-    return ((v-b)/(t-b))*100;
-  }
-  function status(k,v){
-    const m=meta(k), g=Number(m.green), y=Number(m.yellow);
-    if(!Number.isFinite(v))return ['gray','غير متاح'];
-    if(Number.isFinite(g)&&Number.isFinite(y)){
-      if(m.direction==='lower') return v<=g?['green','أخضر']:v<=y?['yellow','أصفر']:['red','أحمر'];
-      return v>=g?['green','أخضر']:v>=y?['yellow','أصفر']:['red','أحمر'];
-    }
-    if(!m.target)return ['gray','غير محدد'];
-    const a=achievement(k,v);
-    if(a==null)return ['gray','غير محدد'];
-    return a>=100?['green','محقق']:a>=80?['yellow','قريب']:['red','دون الهدف'];
-  }
-  function badge(s){return `<span class="p32-badge p32-${s[0]}">${s[1]}</span>`}
-
-  window.PV32={
-    openPanel(id){
-      document.querySelectorAll('#pv32 .p32-panel').forEach(x=>x.classList.remove('active'));
-      document.getElementById('p32-'+id).classList.add('active');
-      if(id==='registry')this.render();
-      if(id==='performance')this.performance();
-    },
-    render(){
-      const ks=keys(), r=registry(), q=(document.getElementById('p32-search').value||'').toLowerCase().trim();
-      const cat=document.getElementById('p32-category').value, def=document.getElementById('p32-definition').value;
-      const body=document.getElementById('p32-body');
-      const rows=ks.map(k=>({k,m:meta(k),v:current(k),c:category(k)})).filter(x=>
-        (!q||[x.k,label(x.k),x.c].join(' ').toLowerCase().includes(q))&&(!cat||x.c===cat)&&
-        (!def||(def==='defined'?!!r[x.k]:!r[x.k]))
-      );
-      body.innerHTML=rows.map(x=>{
-        const a=achievement(x.k,x.v), s=status(x.k,x.v);
-        return `<tr><td><code>${esc(x.k)}</code></td><td>${esc(label(x.k))}</td><td>${esc(x.c)}</td>
-        <td>${esc(x.m.unit)}</td><td>${x.m.direction==='lower'?'الأدنى أفضل':x.m.direction==='higher'?'الأعلى أفضل':'محايد'}</td>
-        <td>${x.m.baseline===''?'—':esc(x.m.baseline)}</td><td>${x.m.target===''?'—':esc(x.m.target)}</td>
-        <td>${x.v==null?'—':Number(x.v).toLocaleString('ar-SY',{maximumFractionDigits:2})}</td>
-        <td>${a==null?'—':a.toFixed(1)+'%'}</td><td>${badge(s)}</td>
-        <td><button class="p32-btn" onclick="PV32.edit('${esc(x.k)}')">تعديل</button></td></tr>`;
-      }).join('')||'<tr><td colspan="11">لا توجد مؤشرات مطابقة.</td></tr>';
-      document.getElementById('p32-count').textContent=ks.length;
-      document.getElementById('p32-defined').textContent=ks.filter(k=>r[k]?.description).length;
-      document.getElementById('p32-targeted').textContent=ks.filter(k=>r[k]?.target!=='').length;
-      document.getElementById('p32-redcount').textContent=ks.filter(k=>status(k,current(k))[0]==='red').length;
-    },
-    edit(k){
-      const m=meta(k);
-      document.getElementById('p32-code').value=k;
-      document.getElementById('p32-name').value=label(k);
-      document.getElementById('p32-cat').value=category(k);
-      ['unit','direction','baseline','target','green','yellow','source','period','description'].forEach(id=>document.getElementById('p32-'+id).value=m[id]??'');
-      this.openPanel('targets');
-    },
-    saveMeta(){
-      const k=document.getElementById('p32-code').value;if(!k)return;
-      const r=registry(); r[k]={unit:p32('unit'),direction:p32('direction'),baseline:p32('baseline'),target:p32('target'),
-        green:p32('green'),yellow:p32('yellow'),source:p32('source'),period:p32('period'),description:p32('description')};
-      saveRegistry(r);alert('تم حفظ بطاقة المؤشر محليًا.');this.openPanel('registry');
-    },
-    closeEditor(){this.openPanel('registry')},
-    performance(){
-      const ks=keys(), body=document.getElementById('p32-performance-body');
-      const rows=ks.map(k=>{const v=current(k),a=achievement(k,v),s=status(k,v);return {k,v,a,s}})
-        .sort((a,b)=>(a.a??-999)-(b.a??-999));
-      body.innerHTML=`<div class="p32-tablewrap"><table class="p32-table"><thead><tr><th>المؤشر</th><th>القيمة</th><th>الهدف</th><th>الإنجاز</th><th>الحالة</th></tr></thead>
-      <tbody>${rows.map(x=>`<tr><td>${esc(label(x.k))}</td><td>${x.v==null?'—':Number(x.v).toFixed(2)}</td><td>${meta(x.k).target||'—'}</td>
-      <td>${x.a==null?'—':x.a.toFixed(1)+'%'}</td><td>${badge(x.s)}</td></tr>`).join('')}</tbody></table></div>`;
-    },
-    exportRegistry(){
-      const r=registry(), ks=keys(), headers=['الرمز','المؤشر','التصنيف','الوحدة','الاتجاه','الخط الأساسي','الهدف','الحد الأخضر','الحد الأصفر','المصدر','الدورية','التعريف'];
-      const escCsv=v=>`"${String(v??'').replace(/"/g,'""')}"`;
-      const lines=[headers.map(escCsv).join(',')];
-      ks.forEach(k=>{const m=meta(k);lines.push([k,label(k),category(k),m.unit,m.direction,m.baseline,m.target,m.green,m.yellow,m.source,m.period,m.description].map(escCsv).join(','))});
-      const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);a.download='MOSAL_indicator_registry_v3_2.csv';a.click();URL.revokeObjectURL(a.href);
-    },
-    closeModal(){document.getElementById('p32-modal').classList.remove('open')}
-  };
-  function p32(id){return document.getElementById('p32-'+id).value.trim()}
-  function init(){
-    const c=document.getElementById('p32-category');
-    [...new Set(keys().map(category))].sort().forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;c.appendChild(o)});
-    PV32.render();
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,600));else setTimeout(init,600);
-})();
-</script>
-
 </body>
 </html>
