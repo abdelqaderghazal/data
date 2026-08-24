@@ -438,7 +438,26 @@
 @media(max-width:760px){.form-grid,.log-filter{grid-template-columns:1fr;}.admin-dashboard{padding:16px;}.users-table,.logs-table{font-size:10.5px;}}
 
 
-  /* ===== UNIFIED DESIGN SYSTEM ===== */
+  
+/* ===== TARGET / MESTAHAD STYLES ===== */
+.target-badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.target-badge{background:linear-gradient(135deg,#fff8e1,#ffffff);border:1px solid #f0a500;border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:8px;font-size:12px;flex:1;min-width:200px;}
+.target-badge .tb-icon{font-size:16px;}
+.target-badge .tb-label{color:var(--ink-soft);font-weight:600;}
+.target-badge .tb-actual{font-family:'IBM Plex Mono';font-weight:700;color:#0B5A7A;font-size:14px;}
+.target-badge .tb-sep{color:#ccc;}
+.target-badge .tb-target{font-family:'IBM Plex Mono';font-size:12px;color:#f0a500;font-weight:600;}
+.target-badge .tb-pct{font-family:'IBM Plex Mono';font-size:11px;padding:2px 8px;border-radius:100px;font-weight:700;margin-inline-start:auto;}
+.target-badge .tb-pct.on-track{background:#e8f5f0;color:#0B5A7A;}
+.target-badge .tb-pct.warning{background:#fff3cd;color:#856404;}
+.target-badge .tb-pct.off-track{background:#ffebee;color:#c62828;}
+.target-progress-mini{height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden;margin-top:4px;flex-basis:100%;}
+.target-progress-mini .fill{height:100%;border-radius:2px;transition:width .5s ease;}
+.target-progress-mini .fill.on-track{background:#0B5A7A;}
+.target-progress-mini .fill.warning{background:#f0a500;}
+.target-progress-mini .fill.off-track{background:#c62828;}
+
+/* ===== UNIFIED DESIGN SYSTEM ===== */
   :root{
     --radius-sm:10px;
     --radius-md:14px;
@@ -556,6 +575,7 @@
 
 @media(max-width:760px){.chart-wrap,.profile-card,.strat-axis-card,.comparison-card,.insight-card,.monthly-report-card{border-radius:14px;}.chart-wrap{padding:12px 10px;}}
 </style>
+<base target="_blank">
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
@@ -1400,6 +1420,53 @@ const COLUMN_MAP = {
   "الاحتياجات الرئيسية": "needs",
 };
 
+  // === TARGET COLUMNS (المستهدف) ===
+  "المستهدف بطاقات الإعاقة": "target_disabled_cards",
+  "مستهدف بطاقات الإعاقة": "target_disabled_cards",
+  "target_disabled_cards": "target_disabled_cards",
+  "المستهدف رعاية المسنين": "target_elderly_benef",
+  "مستهدف رعاية المسنين": "target_elderly_benef",
+  "target_elderly_benef": "target_elderly_benef",
+  "المستهدف التأمينات": "target_insurance_total",
+  "مستهدف التأمينات": "target_insurance_total",
+  "target_insurance_total": "target_insurance_total",
+  "المستهدف التوظيف": "target_employed",
+  "مستهدف التوظيف": "target_employed",
+  "target_employed": "target_employed",
+  "المستهدف السكان": "target_population",
+  "مستهدف السكان": "target_population",
+  "target_population": "target_population",
+  "المستهدف المنظمات": "target_ngo_active",
+  "مستهدف المنظمات": "target_ngo_active",
+  "target_ngo_active": "target_ngo_active",
+  "المستهدف المساعدات الغذائية": "target_food_baskets",
+  "مستهدف المساعدات الغذائية": "target_food_baskets",
+  "target_food_baskets": "target_food_baskets",
+  "المستهدف المخيمات": "target_camps_count",
+  "مستهدف المخيمات": "target_camps_count",
+  "target_camps_count": "target_camps_count",
+  "المستهدف زيارات تفتيشية": "target_insp_total",
+  "مستهدف زيارات تفتيشية": "target_insp_total",
+  "target_insp_total": "target_insp_total",
+  "المستهدف فرص العمل": "target_platform_jobs",
+  "مستهدف فرص العمل": "target_platform_jobs",
+  "target_platform_jobs": "target_platform_jobs",
+  "المستهدف تدريب": "target_platform_training",
+  "مستهدف تدريب": "target_platform_training",
+  "target_platform_training": "target_platform_training",
+  "المستهدف أيتام": "target_orphan_homes",
+  "مستهدف أيتام": "target_orphan_homes",
+  "target_orphan_homes": "target_orphan_homes",
+  "المستهدف إعاقة": "target_disability_centers",
+  "مستهدف إعاقة": "target_disability_centers",
+  "target_disability_centers": "target_disability_centers",
+  "المستهدف تنمية ريفية": "target_rural_dev_benef",
+  "مستهدف تنمية ريفية": "target_rural_dev_benef",
+  "target_rural_dev_benef": "target_rural_dev_benef",
+  "المستهدف": "target_value",
+  "مستهدف": "target_value",
+
+
 // Build inverse mapping
 Object.keys(COLUMN_MAP).forEach(k => { COLUMN_MAP_INV[COLUMN_MAP[k]] = k; });
 
@@ -2159,6 +2226,8 @@ function renderCategory(cat){
   const arr = filtered();
 
   if(cat === 'disability'){
+    const targetHtml = renderCategoryTargets(arr, 'disability');
+    if(targetHtml) document.getElementById('note-disability').insertAdjacentHTML('afterend', targetHtml);
     barChart('chart-disability', 'disabled_cards');
     renderCards('cards-disability', [
       {em:'🦽',n:sum('disabled_cards',arr),t:'إجمالي بطاقات الإعاقة الصادرة'},
@@ -2174,6 +2243,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'social'){
+    const targetHtml2 = renderCategoryTargets(arr, 'social');
+    if(targetHtml2) document.getElementById('note-social').insertAdjacentHTML('afterend', targetHtml2);
     barChart('chart-social', 'elderly_benef');
     renderCards('cards-social', [
       {em:'👵',n:sum('elderly_homes',arr),t:'دور رعاية كبار السن'},
@@ -2198,6 +2269,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'ngo'){
+    const targetHtml3 = renderCategoryTargets(arr, 'ngo');
+    if(targetHtml3) document.getElementById('note-ngo').insertAdjacentHTML('afterend', targetHtml3);
     barChart('chart-ngo', 'ngo_active');
     renderCards('cards-ngo', [
       {em:'📜',n:sum('ngo_new_pct',arr),t:'عدد المنظمات غير الحكومية المشهرة (عام)'},
@@ -2208,6 +2281,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'juvenile'){
+    const targetHtml4 = renderCategoryTargets(arr, 'juvenile');
+    if(targetHtml4) document.getElementById('note-juvenile').insertAdjacentHTML('afterend', targetHtml4);
     barChart('chart-juvenile', 'juvenile_inmates');
     renderCards('cards-juvenile', [
       {em:'🏛️',n:sum('juvenile_inst',arr),t:'معاهد إصلاح الأحداث (الكلي)'},
@@ -2222,6 +2297,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'rural'){
+    const targetHtml5 = renderCategoryTargets(arr, 'rural');
+    if(targetHtml5) document.getElementById('note-rural').insertAdjacentHTML('afterend', targetHtml5);
     barChart('chart-rural', 'rural_dev_benef');
     renderCards('cards-rural', [
       {em:'🌾',n:sum('rural_dev_total',arr),t:'عدد مراكز التنمية الريفية خارج الخدمة'},
@@ -2238,6 +2315,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'labor'){
+    const targetHtml6 = renderCategoryTargets(arr, 'labor');
+    if(targetHtml6) document.getElementById('note-labor').insertAdjacentHTML('afterend', targetHtml6);
     // Check if new split columns exist, otherwise fall back to insp_total
     const hasInspInd = arr.some(d => d.insp_industrial !== undefined && d.insp_industrial !== null && d.insp_industrial !== '');
     const hasInspAgri = arr.some(d => d.insp_agricultural !== undefined && d.insp_agricultural !== null && d.insp_agricultural !== '');
@@ -2311,6 +2390,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'labor_market'){
+    const targetHtml7 = renderCategoryTargets(arr, 'labor_market');
+    if(targetHtml7) document.getElementById('note-labor_market').insertAdjacentHTML('afterend', targetHtml7);
     barChart('chart-labor_market', 'employed');
     renderCards('cards-labor_market', [
       {em:'💪',n:sum('labor_force',arr),t:'حجم قوة العمل (مليون)'},
@@ -2338,6 +2419,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'insurance'){
+    const targetHtml8 = renderCategoryTargets(arr, 'insurance');
+    if(targetHtml8) document.getElementById('note-insurance').insertAdjacentHTML('afterend', targetHtml8);
     barChart('chart-insurance', 'insurance_total');
     renderCards('cards-insurance', [
       {em:'🏛️',n:sum('insurance_public',arr),t:'مسجّلون تأمينات — قطاع عام'},
@@ -2358,6 +2441,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'aid'){
+    const targetHtml9 = renderCategoryTargets(arr, 'aid');
+    if(targetHtml9) document.getElementById('note-aid').insertAdjacentHTML('afterend', targetHtml9);
     barChart('chart-aid', 'food_baskets');
     renderCards('cards-aid', [
       {em:'🍞',n:sum('food_baskets',arr),t:'سلل غذائية موزّعة'},
@@ -2374,6 +2459,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'camps'){
+    const targetHtml10 = renderCategoryTargets(arr, 'camps');
+    if(targetHtml10) document.getElementById('note-camps').insertAdjacentHTML('afterend', targetHtml10);
     barChart('chart-camps', 'camps_count');
     renderCards('cards-camps', [
       {em:'🏕️',n:sum('camps_count',arr),t:'عدد المخيمات'},
@@ -2389,6 +2476,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'platform'){
+    const targetHtml11 = renderCategoryTargets(arr, 'platform');
+    if(targetHtml11) document.getElementById('note-platform').insertAdjacentHTML('afterend', targetHtml11);
     barChart('chart-platform', 'platform_registered');
     renderCards('cards-platform', [
       {em:'👤',n:sum('platform_registered',arr),t:'مسجّلون على المنصة'},
@@ -2408,6 +2497,8 @@ function renderCategory(cat){
   }
 
   if(cat === 'demographics'){
+    const targetHtml12 = renderCategoryTargets(arr, 'demographics');
+    if(targetHtml12) document.getElementById('note-demographics').insertAdjacentHTML('afterend', targetHtml12);
     barChart('chart-demographics', 'population');
     renderCards('cards-demographics', [
       {em:'👥',n:sumStatic('population'),t:'إجمالي عدد السكان'},
@@ -2656,6 +2747,253 @@ function renderAdvancedAnalytics(){
     data:{labels:months, datasets:[{label:meta.label, data:values, borderColor:'#2563EB', backgroundColor:'rgba(37,99,235,.14)', fill:true, tension:.42, borderWidth:3, pointRadius:4, pointHoverRadius:7, pointBorderWidth:2, pointBorderColor:'#fff', pointBackgroundColor:'#06B6D4'}]},
     options:{responsive:true, maintainAspectRatio:false, animation:{duration:1000,easing:'easeOutQuart'},interaction:{intersect:false,mode:'index'},plugins:{legend:{display:false},tooltip:{rtl:true,padding:12,cornerRadius:10,displayColors:false,callbacks:{label:ctx=>`${analyticsNumber(ctx.raw)} ${meta.unit}`}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(128,160,172,.16)',drawBorder:false},ticks:{callback:v=>analyticsNumber(v)}},x:{grid:{display:false},ticks:{font:{family:'Cairo',weight:'600'}}}}}
   });
+}
+
+
+
+// =====================
+// TARGET / MESTAHAD FUNCTIONS
+// =====================
+function getTarget(arr, actualField){
+  const targetField = 'target_' + actualField;
+  const hasTarget = arr.some(d => d[targetField] !== undefined && d[targetField] !== null && d[targetField] !== '');
+  if(!hasTarget) return null;
+  return arr.reduce((a, r) => {
+    const val = r[targetField];
+    if(val === undefined || val === null || val === '') return a;
+    const num = parseFloat(val);
+    return a + (isNaN(num) ? 0 : num);
+  }, 0);
+}
+
+function getTargetForGov(arr, gov, actualField){
+  const targetField = 'target_' + actualField;
+  const govData = arr.filter(d => d.gov === gov);
+  if(govData.length === 0) return null;
+  const hasTarget = govData.some(d => d[targetField] !== undefined && d[targetField] !== null && d[targetField] !== '');
+  if(!hasTarget) return null;
+  return govData.reduce((a, r) => {
+    const val = r[targetField];
+    if(val === undefined || val === null || val === '') return a;
+    const num = parseFloat(val);
+    return a + (isNaN(num) ? 0 : num);
+  }, 0);
+}
+
+function calcProgress(actual, target){
+  if(!target || target === 0) return 0;
+  return Math.min(100, Math.round((actual / target) * 100));
+}
+
+function getProgressStatus(pct){
+  if(pct >= 90) return 'on-track';
+  if(pct >= 60) return 'warning';
+  return 'off-track';
+}
+
+function getProgressLabel(pct){
+  if(pct >= 90) return 'على المسار ✅';
+  if(pct >= 60) return 'يحتاج متابعة ⚠️';
+  return 'خارج الهدف 🔴';
+}
+
+function renderTargetBadge(arr, actualField, label, icon){
+  const actual = sum(actualField, arr);
+  const target = getTarget(arr, actualField);
+  if(target === null || target === 0) return '';
+  const pct = calcProgress(actual, target);
+  const status = getProgressStatus(pct);
+  const statusText = getProgressLabel(pct);
+  return `<div class="target-badge">
+    <span class="tb-icon">${icon}</span>
+    <span class="tb-label">${label}</span>
+    <span class="tb-actual">${fmt(actual)}</span>
+    <span class="tb-sep">/</span>
+    <span class="tb-target">هدف: ${fmt(target)}</span>
+    <span class="tb-pct ${status}">${pct}% — ${statusText}</span>
+    <div class="target-progress-mini"><div class="fill ${status}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function renderTargetBadgesRow(arr, fields){
+  const badges = fields.map(f => renderTargetBadge(arr, f.field, f.label, f.icon)).filter(b => b !== '');
+  if(badges.length === 0) return '';
+  return `<div class="target-badge-row">${badges.join('')}</div>`;
+}
+
+// =====================
+// STRATEGIC COMPASS — READ TARGETS FROM DATA
+// =====================
+const STRATEGIC_AXES = [
+  {key:'disabled_cards', title:'بطاقات الإعاقة', icon:'🦽', desc:'تغطية الأشخاص ذوي الإعاقة'},
+  {key:'elderly_benef', title:'رعاية المسنين', icon:'👵', desc:'خدمات دور رعاية المسنين'},
+  {key:'insurance_total', title:'التأمينات الاجتماعية', icon:'🏥', desc:'المسجلون القائمون على رأس عملهم'},
+  {key:'employed', title:'التوظيف', icon:'💼', desc:'المشتغلون في القوى العاملة'},
+  {key:'food_baskets', title:'المساعدات الغذائية', icon:'🍞', desc:'السلل الغذائية الموزعة'},
+  {key:'platform_jobs', title:'فرص العمل الرقمية', icon:'💻', desc:'فرص العمل على المنصة'},
+  {key:'camps_count', title:'المخيمات', icon:'🏕️', desc:'عدد المخيمات والتجمعات'},
+  {key:'ngo_active', title:'المنظمات', icon:'🤝', desc:'المنظمات المسحوب ترخيصها'},
+  {key:'insp_total', title:'التفتيش', icon:'🏗️', desc:'الزيارات التفتيشية (صناعي+زراعي)', fallback:'insp_industrial'},
+  {key:'rural_dev_benef', title:'التنمية الريفية', icon:'🌾', desc:'مستفيدو مراكز التنمية الريفية'},
+  {key:'vocational_benef', title:'التأهيل المهني', icon:'🎓', desc:'مستفيدو مراكز التأهيل والتدريب'},
+  {key:'orphan_homes', title:'رعاية الأيتام', icon:'👶', desc:'دور رعاية الأيتام'},
+];
+
+function renderStrategicCompass(){
+  const arr = filtered();
+  const axesGrid = document.getElementById('stratAxesGrid');
+  const overall = document.getElementById('stratOverall');
+  if(!axesGrid) return;
+
+  if(arr.length === 0){
+    axesGrid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink-soft);grid-column:1/-1;"><div style="font-size:36px;margin-bottom:10px;">📂</div><div style="font-size:14px;">ارفع ملف CSV لعرض مؤشرات الخطة الاستراتيجية</div></div>';
+    return;
+  }
+
+  let onTrack = 0, warning = 0, offTrack = 0, totalPct = 0, axisCount = 0;
+  let axesHtml = '';
+
+  STRATEGIC_AXES.forEach(axis => {
+    const actual = sum(axis.key, arr, axis.fallback);
+    const target = getTarget(arr, axis.key);
+    if(target === null || target === 0) return;
+
+    const pct = calcProgress(actual, target);
+    const status = getProgressStatus(pct);
+    const statusLabel = getProgressLabel(pct);
+
+    if(status === 'on-track') onTrack++;
+    else if(status === 'warning') warning++;
+    else offTrack++;
+    totalPct += pct;
+    axisCount++;
+
+    axesHtml += `
+      <div class="strat-axis-card ${status}">
+        <div class="sac-header">
+          <span class="sac-icon">${axis.icon}</span>
+          <div>
+            <div class="sac-title">${axis.title}</div>
+            <div class="sac-axis">${axis.desc}</div>
+          </div>
+          <span class="sac-status-badge ${status}">${statusLabel}</span>
+        </div>
+        <div class="sac-values">
+          <div class="sac-actual">${fmt(actual)}</div>
+          <div class="sac-target-info">المستهدف<br><span>${fmt(target)}</span></div>
+        </div>
+        <div class="sac-progress-bar">
+          <div class="sac-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="sac-pct">${pct}% من الهدف</div>
+        <div class="sac-note">${pct >= 100 ? '✅ تم تحقيق الهدف' : pct >= 75 ? '⏳ قريب من الهدف' : '🔴 يحتاج تسريع الإنجاز'}</div>
+      </div>
+    `;
+  });
+
+  axesGrid.innerHTML = axesHtml || '<div style="text-align:center;padding:40px;color:var(--ink-soft);grid-column:1/-1;"><div style="font-size:36px;margin-bottom:10px;">📂</div><div style="font-size:14px;">لا توجد أعمدة مستهدفة في البيانات. أضف أعمدة تبدأ بـ "target_" أو "المستهدف" في ملف CSV.</div></div>';
+
+  // Update overall cards
+  const avgPct = axisCount > 0 ? Math.round(totalPct / axisCount) : 0;
+  const ovStatus = getProgressStatus(avgPct);
+  const ovOnTrack = document.getElementById('stratOnTrackCount');
+  const ovWarning = document.getElementById('stratWarningCount');
+  const ovOffTrack = document.getElementById('stratOffTrackCount');
+  const ovAvg = document.getElementById('stratAvgPct');
+  if(ovOnTrack) ovOnTrack.textContent = onTrack;
+  if(ovWarning) ovWarning.textContent = warning;
+  if(ovOffTrack) ovOffTrack.textContent = offTrack;
+  if(ovAvg) ovAvg.textContent = avgPct + '%';
+
+  // Color-code the average card
+  const avgCard = ovAvg?.parentElement;
+  if(avgCard){
+    avgCard.className = 'strat-overall-card ' + ovStatus;
+    avgCard.style.borderColor = ovStatus === 'on-track' ? '#0B5A7A' : ovStatus === 'warning' ? '#f0a500' : '#c62828';
+    avgCard.style.background = ovStatus === 'on-track' ? '#e8f5f0' : ovStatus === 'warning' ? '#fff8e1' : '#ffebee';
+    ovAvg.style.color = ovStatus === 'on-track' ? '#0B5A7A' : ovStatus === 'warning' ? '#f0a500' : '#c62828';
+  }
+
+  // Update quarterly timeline (simplified)
+  const q1 = document.getElementById('q1pct');
+  const q2 = document.getElementById('q2pct');
+  const q3 = document.getElementById('q3pct');
+  const q4 = document.getElementById('q4pct');
+  if(q1) q1.textContent = avgPct + '%';
+  if(q2) q2.textContent = avgPct + '%';
+  if(q3) q3.textContent = avgPct + '%';
+  if(q4) q4.textContent = '—';
+}
+
+function toggleStrategicCompass(){
+  document.getElementById('strategicCompass').classList.toggle('open');
+}
+
+// =====================
+// CATEGORY TARGET BADGES
+// =====================
+function renderCategoryTargets(arr, cat){
+  const targetsByCat = {
+    disability: [
+      {field:'disabled_cards', label:'بطاقات الإعاقة', icon:'🦽'},
+      {field:'disability_centers', label:'معاهد الإعاقة', icon:'🏛️'},
+      {field:'disability_benef', label:'طلاب المعاهد', icon:'👨‍🎓'},
+    ],
+    social: [
+      {field:'elderly_benef', label:'رعاية المسنين', icon:'👵'},
+      {field:'orphan_homes', label:'دور الأيتام', icon:'👶'},
+      {field:'sponsor_internal', label:'كفالة داخلية', icon:'💞'},
+      {field:'sponsor_external', label:'كفالة خارجية', icon:'🌍'},
+    ],
+    ngo: [
+      {field:'ngo_active', label:'منظمات مسحوبة', icon:'🤝'},
+      {field:'ngo_new_pct', label:'منظمات مشهرة', icon:'📜'},
+    ],
+    juvenile: [
+      {field:'juvenile_inmates', label:'نزلاء الأحداث', icon:'⚖️'},
+      {field:'juvenile_inst_active', label:'معاهد بالخدمة', icon:'🏛️'},
+    ],
+    rural: [
+      {field:'rural_dev_benef', label:'تنمية ريفية', icon:'🌾'},
+      {field:'rural_ind_benef', label:'صناعات ريفية', icon:'🏭'},
+    ],
+    labor: [
+      {field:'insp_industrial', label:'زيارات صناعية', icon:'🏭'},
+      {field:'insp_agricultural', label:'زيارات زراعية', icon:'🌾'},
+      {field:'violations', label:'مخالفات', icon:'⚠️'},
+    ],
+    labor_market: [
+      {field:'employed', label:'المشتغلون', icon:'💼'},
+      {field:'unemployed', label:'المتعطلون', icon:'🚫'},
+    ],
+    insurance: [
+      {field:'insurance_total', label:'المسجلون', icon:'🏥'},
+      {field:'pensioners', label:'المتقاعدون', icon:'👴'},
+    ],
+    aid: [
+      {field:'food_baskets', label:'سلل غذائية', icon:'🍞'},
+      {field:'cash_assistance', label:'إعانات مالية', icon:'💵'},
+      {field:'in_kind_aid', label:'مساعدات عينية', icon:'💊'},
+    ],
+    camps: [
+      {field:'camps_count', label:'المخيمات', icon:'🏕️'},
+      {field:'camp_families', label:'الأسر المقيمة', icon:'👨‍👩‍👧‍👦'},
+    ],
+    platform: [
+      {field:'platform_registered', label:'مسجّلون', icon:'👤'},
+      {field:'platform_jobs', label:'فرص عمل', icon:'💼'},
+      {field:'platform_training', label:'فرص تدريب', icon:'🎓'},
+      {field:'vocational_benef', label:'التأهيل المهني', icon:'🏫'},
+    ],
+    demographics: [
+      {field:'population', label:'السكان', icon:'👥'},
+      {field:'employed', label:'المشتغلون', icon:'💼'},
+    ],
+  };
+
+  const fields = targetsByCat[cat];
+  if(!fields) return '';
+  return renderTargetBadgesRow(arr, fields);
 }
 
 
