@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root{--ink:#0B5A7A;--ink-2:#084a66;--sand:#F0F7FA;--sand-2:#E0F0F5;--paper:#ffffff;--brass:#0D8BA8;--brass-light:#5BA3C0;--alert:#e74c3c;--good:#0B5A7A;--line:#c0d8e0;--ink-soft:#4a6a7a;--accent-blue:#0B5A7A;--accent-green:#0D8BA8;--syria-green:#0B5A7A;--syria-white:#ffffff;--syria-black:#052a3a;--syria-red:#0D8BA8;}
+  :root{--ink:#0B5A7A;--ink-2:#084a66;--sand:#F0F7FA;--sand-2:#E0F0F5;--paper:#ffffff;--brass:#0D8BA8;--brass-light:#5BA3C0;--alert:#e74c3c;--good:#0B5A7A;--line:#c0d8e0;--ink-soft:#4a6a7a;--accent-blue:#0B5A7A;--accent-green:#0D8BA8;--syria-green:#0B5A7A;--syria-white:#ffffff;--syria-black:#052a3a;--accent-teal:#0D8BA8;--syria-red:var(--accent-teal);/* alias للتوافق مع الكود القديم */}
   *{box-sizing:border-box;}body{margin:0;background:var(--sand);color:var(--ink);font-family:'Cairo',sans-serif;}
   ::selection{background:#b8dce8;color:#052a3a;}
   .masthead{background:linear-gradient(135deg,#0B5A7A 0%,#084a66 50%,#052a3a 100%);color:var(--syria-white);padding:28px 28px 24px;position:relative;overflow:hidden;border-bottom:4px solid #0D8BA8;}
@@ -158,13 +158,14 @@
   .user-name{font-size:13px;color:var(--ink-soft);}
   .btn-sm{padding:6px 14px;font-size:12px;border-radius:6px;}
 
-  /* Change password form */
-  .change-pw-form{background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px;text-align:right;}
-  .change-pw-form h4{margin:0 0 12px;font-family:'Tajawal';font-size:14px;color:var(--ink);}
-  .change-pw-form input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:center;letter-spacing:2px;margin-bottom:8px;direction:ltr;}
-  .change-pw-form input:focus{outline:none;border-color:var(--syria-green);}
-  .change-pw-form .success-msg{color:var(--good);font-size:12px;margin-top:8px;display:none;}
-  .change-pw-form .success-msg.show{display:block;}
+  /* Change password form (موحَّد مع .change-pw-section) */
+  .change-pw-form,.change-pw-section{background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px;text-align:right;}
+  .change-pw-form h4,.change-pw-section h4{margin:0 0 12px;font-family:'Tajawal';font-size:14px;color:var(--ink);}
+  .change-pw-form input,.change-pw-section input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:center;letter-spacing:2px;margin-bottom:8px;direction:ltr;}
+  .change-pw-form input:focus,.change-pw-section input:focus{outline:none;border-color:#0B5A7A;}
+  .change-pw-form .success-msg,.change-pw-section .success-msg{color:var(--good);font-size:12px;margin-top:8px;display:none;}
+  .change-pw-form .success-msg.show,.change-pw-section .success-msg.show{display:block;}
+  .change-pw-section .btn-sm{padding:8px 16px;font-size:12px;border-radius:6px;}
 
   /* Read-only mode indicator */
   .read-only-banner{position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#1565c0,#0d47a1);color:white;padding:8px 20px;text-align:center;font-size:13px;font-weight:600;z-index:999;font-family:'Cairo';display:none;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
@@ -175,13 +176,7 @@
   body.readonly .btn-success{opacity:0.4;pointer-events:none;}
   body.readonly .btn-primary[id="refreshBtn"]{opacity:0.4;pointer-events:none;}
   body.readonly #fileDropZone{opacity:0.4;pointer-events:none;}
-  body.readonly .gsheet-input{opacity:0.6;pointer-events:none;}  .change-pw-section{background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:20px;text-align:right;}
-  .change-pw-section h4{margin:0 0 12px;font-family:'Tajawal';font-size:14px;color:var(--ink);}
-  .change-pw-section input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:center;letter-spacing:2px;margin-bottom:8px;direction:ltr;}
-  .change-pw-section input:focus{outline:none;border-color:#0B5A7A;}
-  .change-pw-section .btn-sm{padding:8px 16px;font-size:12px;border-radius:6px;}
-  .change-pw-section .success-msg{color:var(--good);font-size:12px;margin-top:8px;display:none;}
-  .change-pw-section .success-msg.show{display:block;}
+  body.readonly .gsheet-input{opacity:0.6;pointer-events:none;}
 
   /* ===== INSIGHTS & COMPARISONS SECTION ===== */
   .insights-section{background:var(--paper);border:1px solid var(--line);border-radius:18px;margin-bottom:24px;overflow:hidden;}
@@ -503,16 +498,14 @@
   input,select,textarea{transition:border-color .15s ease,box-shadow .15s ease;}
   input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(13,139,168,.12);}
   @media(max-width:640px){
-    .filter-panel{top:6px;margin:14px 14px 0;padding:16px;}
-    .filter-head{align-items:stretch;flex-direction:column;}
-    .filter-reset{width:100%;}
+    .filter-panel{top:5px;margin:8px 10px 0;padding:10px 12px;}
+    .filter-head{flex-direction:row;align-items:center;}
+    .filter-reset{width:auto;}
+    .filter-head p{display:none;}
     .filter-fields{grid-template-columns:1fr;}
     .cat-head,.map-head,.insights-head{padding:16px;}
     .cat-body,.insights-body,.strategic-compass-body{padding:16px;}
   }
-
-  
-  @media(max-width:640px){.filter-panel{top:5px;margin:8px 10px 0;padding:10px 12px;}.filter-head{flex-direction:row;align-items:center;}.filter-reset{width:auto;}.filter-head p{display:none;}}
   .storage-meter{margin:10px 0 14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--sand);}
   .storage-meter-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;color:var(--ink);font-size:12px;font-weight:700;}
   .storage-meter-head strong{color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:11px;direction:ltr;}
@@ -549,17 +542,25 @@
 </style>
 <base target="_blank">
 
+<!-- Leaflet CSS — loaded eagerly since the map section is visible on first scroll -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet JS — loaded lazily; initMapOnDemand() triggers it only when needed -->
+<script>
+(function(){
+  var _leafletLoaded = false;
+  window._loadLeafletIfNeeded = function(cb){
+    if(_leafletLoaded || typeof L !== 'undefined'){ if(cb) cb(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    s.onload = function(){ _leafletLoaded = true; if(cb) cb(); };
+    document.head.appendChild(s);
+  };
+})();
+</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-
 @media(max-width:760px){.chart-wrap,.profile-card,.strat-axis-card,.comparison-card,.insight-card,.monthly-report-card{border-radius:14px;}.chart-wrap{padding:12px 10px;}}
 </style>
-<base target="_blank">
-<base target="_blank">
-<base target="_blank">
-<base target="_blank">
 </head>
 <body class="locked">
 
@@ -696,7 +697,7 @@
 
 
 
-<div class="read-only-banner" id="readOnlyBanner">👁️ وضع القراءة فقط — لا يمكنك تعديل البيانات <button class="close-banner" onclick="document.getElementById('readOnlyBanner').classList.remove('show')">×</button></div>
+<div class="read-only-banner" id="readOnlyBanner">👁️ وضع القراءة فقط — لا يمكنك تعديل البيانات <button class="close-banner" onclick="document.getElementById('readOnlyBanner').classList.remove('show')" aria-label="إغلاق شريط التنبيه">×</button></div>
 <button class="theme-toggle" id="themeToggle" type="button" aria-label="تفعيل الوضع الليلي" title="تفعيل الوضع الليلي">☾</button>
 <header class="masthead">
   <div class="masthead-inner">
@@ -888,8 +889,8 @@
   </section>
 
   <section class="category open map-section" data-cat="map">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🗺️</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">🗺️</div>
       <div><h2>الخريطة التفاعلية للمحافظات</h2><p>انقر على أي محافظة لعرض مؤشراتها التشغيلية</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -907,10 +908,10 @@
   </section>
 
   <section class="category" data-cat="disability">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🦽</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false" aria-controls="body-disability">
+      <div class="icon" aria-hidden="true">🦽</div>
       <div><h2>رعاية ذوي الإعاقة</h2><p>بطاقات الإعاقة، الطلاب، برامج التأهيل والتدريب المهني</p></div>
-      <div class="chev">⌄</div>
+      <div class="chev" aria-hidden="true">⌄</div>
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-disability">💡 ارفع ملف CSV لعرض البيانات</p>
@@ -920,10 +921,10 @@
   </section>
 
   <section class="category" data-cat="social">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">👵</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false" aria-controls="body-social">
+      <div class="icon" aria-hidden="true">👵</div>
       <div><h2>الرعاية الاجتماعية: المسنون، الأيتام، المتسولون، الكفالة</h2><p>دور الرعاية والمستفيدون منها</p></div>
-      <div class="chev">⌄</div>
+      <div class="chev" aria-hidden="true">⌄</div>
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-social">💡 ارفع ملف CSV لعرض البيانات</p>
@@ -933,8 +934,8 @@
   </section>
 
   <section class="category" data-cat="ngo">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🤝</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">🤝</div>
       <div><h2>المنظمات غير الحكومية</h2><p>المشهرة والمسحوبة تراخيصها والندوات التوعوية</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -946,8 +947,8 @@
   </section>
 
   <section class="category" data-cat="juvenile">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">⚖️</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">⚖️</div>
       <div><h2>معاهد إصلاح الأحداث</h2><p>عدد المعاهد والنزلاء</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -959,8 +960,8 @@
   </section>
 
   <section class="category" data-cat="rural">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🌾</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">🌾</div>
       <div><h2>التنمية الريفية والصناعات الريفية</h2><p>المراكز والوحدات والمستفيدون</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -972,8 +973,8 @@
   </section>
 
   <section class="category" data-cat="labor">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🏗️</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">🏗️</div>
       <div><h2>التفتيش العمالي والزراعي والصناعي</h2><p>الزيارات والمخالفات والعمال المسجّلون حديثاً</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -985,8 +986,8 @@
   </section>
 
   <section class="category" data-cat="labor_market">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">💼</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">💼</div>
       <div><h2>سوق العمل والبطالة</h2><p>حجم القوى العاملة، المشتغلون، المتعطلون، ومعدلات البطالة</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -998,8 +999,8 @@
   </section>
 
   <section class="category" data-cat="insurance">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🏥</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">🏥</div>
       <div><h2>التأمينات الاجتماعية</h2><p>المسجّلون في القطاع العام والخاص والمتقاعدون</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -1011,8 +1012,8 @@
   </section>
 
   <section class="category" data-cat="aid">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🍞</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">🍞</div>
       <div><h2>المساعدات الإنسانية والإغاثية</h2><p>السلل الغذائية، المساعدات العينية، والإعانات المالية</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -1024,8 +1025,8 @@
   </section>
 
   <section class="category" data-cat="camps">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">🏕️</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">🏕️</div>
       <div><h2>المخيمات والنازحون والعائدون</h2><p>عدد المخيمات والأسر المقيمة فيها والعائدين</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -1037,8 +1038,8 @@
   </section>
 
   <section class="category" data-cat="platform">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">💻</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">💻</div>
       <div><h2>منصة سوق العمل الرقمية</h2><p>المسجّلون، المنشآت، فرص العمل والتدريب</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -1050,8 +1051,8 @@
   </section>
 
   <section class="category" data-cat="demographics">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">👨‍👩‍👧‍👦</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
       <div><h2>المؤشرات الديموغرافية والسكانية</h2><p>عدد السكان، الذكور، الإناث، والتوزيع الجغرافي</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -1128,8 +1129,8 @@
   </section>
 
   <section class="category open" data-cat="details">
-    <div class="cat-head" onclick="toggleCat(this)">
-      <div class="icon">📖</div>
+    <div class="cat-head" onclick="toggleCat(this)" role="button" aria-expanded="false">
+      <div class="icon" aria-hidden="true">📖</div>
       <div><h2>ملف كل محافظة: أهم الإنجازات والتوصيات والاحتياجات</h2><p>انقر على اسم المحافظة لعرض التفاصيل النوعية</p></div>
       <div class="chev">⌄</div>
     </div>
@@ -2579,8 +2580,11 @@ function updateFooterNote(){
 }
 
 function toggleCat(headEl){
-  headEl.parentElement.classList.toggle('open');
-  const cat = headEl.parentElement.getAttribute('data-cat');
+  const section = headEl.parentElement;
+  section.classList.toggle('open');
+  const isOpen = section.classList.contains('open');
+  headEl.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  const cat = section.getAttribute('data-cat');
   if(cat !== 'details') setTimeout(() => renderCategory(cat), 0);
   if(cat === 'map') initMapOnDemand();
 }
@@ -4044,6 +4048,17 @@ const AUTH_DB_VERSION = 1;
 const USERS_STORE = 'users';
 const LOGS_STORE = 'auditLogs';
 const GOOGLE_CLIENT_ID_KEY = 'govDashboard_googleClientId';
+/**
+ * ⚠️ تنبيه أمني للمطوّر:
+ * كلمات المرور الافتراضية أدناه مرئية في الكود المصدري.
+ * قبل نشر هذا الملف للعموم:
+ *   1. غيِّر جميع كلمات المرور الافتراضية من لوحة المدير فور تسجيل الدخول.
+ *   2. لا تشارك هذا الملف مع أشخاص غير مصرَّح لهم.
+ *   3. للإنتاج الرسمي: استخدم خادم مصادقة حقيقي (backend auth).
+ *
+ * ملاحظة: كلمات المرور مخزَّنة بصيغة SHA-256 hash في قاعدة بيانات IndexedDB
+ * بعد أول تسجيل دخول ناجح — الكلمات النصية هنا هي القيم الابتدائية فقط.
+ */
 const DEFAULT_LOCAL_USERS = [
   { id:'u-admin', name:'المدير الرئيسي', email:'admin@local', role:'admin', password:'246269', provider:'local', active:true },
   { id:'u-editor', name:'المحرر الافتراضي', email:'editor@local', role:'editor', password:'editor123', provider:'local', active:true },
@@ -4091,11 +4106,10 @@ async function getUserById(id){
       req.onerror=()=>reject(req.error);
     });
   }catch(error){
+    // IndexedDB unavailable — fall back to localStorage users
     const users=await ensureFallbackUsers();
     return users.find(u=>u.id===id)||null;
   }
-  const users=await ensureFallbackUsers();
-  return users.find(u=>u.id===id)||null;
 }
 
 async function checkCurrentSession(){
