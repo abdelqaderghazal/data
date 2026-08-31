@@ -465,6 +465,21 @@
   .active-filters{gap:5px;margin-top:8px;padding-top:7px;}
   .active-filters-label{font-size:9px;}
   .filter-tag{padding:3px 7px;font-size:9px;}
+
+  /* ===== COLLAPSIBLE FILTER PANEL ===== */
+  .filter-panel.collapsed .filter-body {
+    display: none;
+  }
+  .filter-panel.collapsed #filterToggleIcon {
+    transform: rotate(-90deg);
+  }
+  .filter-panel.collapsed {
+    padding-bottom: 12px;
+  }
+  .filter-head {
+    cursor: pointer;
+    user-select: none;
+  }
   @media(max-width:640px){.filter-panel{top:5px;margin:8px 10px 0;padding:10px 12px;}.filter-head{flex-direction:row;align-items:center;}.filter-reset{width:auto;}.filter-head p{display:none;}}
   .filter-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;}
   .filter-kicker{display:block;color:var(--brass);font-size:11px;font-weight:700;margin-bottom:3px;}
@@ -512,6 +527,21 @@
   }
 
   
+
+  /* ===== COLLAPSIBLE FILTER PANEL ===== */
+  .filter-panel.collapsed .filter-body {
+    display: none;
+  }
+  .filter-panel.collapsed #filterToggleIcon {
+    transform: rotate(-90deg);
+  }
+  .filter-panel.collapsed {
+    padding-bottom: 12px;
+  }
+  .filter-head {
+    cursor: pointer;
+    user-select: none;
+  }
   @media(max-width:640px){.filter-panel{top:5px;margin:8px 10px 0;padding:10px 12px;}.filter-head{flex-direction:row;align-items:center;}.filter-reset{width:auto;}.filter-head p{display:none;}}
   .storage-meter{margin:10px 0 14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--sand);}
   .storage-meter-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;color:var(--ink);font-size:12px;font-weight:700;}
@@ -556,6 +586,7 @@
 
 @media(max-width:760px){.chart-wrap,.profile-card,.strat-axis-card,.comparison-card,.insight-card,.monthly-report-card{border-radius:14px;}.chart-wrap{padding:12px 10px;}}
 </style>
+<base target="_blank">
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
@@ -717,15 +748,19 @@
 
 <!-- Unified Filters -->
 <div class="filter-panel" id="filterPanel">
-  <div class="filter-head">
-    <div>
+  <div class="filter-head" onclick="toggleFilterPanel()" style="cursor:pointer;user-select:none;position:relative;">
+    <div style="flex:1;min-width:0;">
       <span class="filter-kicker">خيارات العرض</span>
-      <h3>تصفية المؤشرات</h3>
-      <p>اختر المحافظة والشهر لعرض البيانات المطلوبة</p>
+      <h3 style="display:flex;align-items:center;gap:10px;margin:0;">
+        <span id="filterToggleIcon" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--sand);border:1px solid var(--line);font-size:14px;transition:transform .25s ease;">⌄</span>
+        تصفية المؤشرات
+      </h3>
+      <p id="filterDesc" style="margin:4px 0 0;color:var(--ink-soft);font-size:12px;">اختر المحافظة والشهر لعرض البيانات المطلوبة — انقر للطي</p>
     </div>
-    <button class="filter-reset" id="filterReset" type="button">إعادة التعيين</button>
+    <button class="filter-reset" id="filterReset" type="button" onclick="event.stopPropagation(); resetFilters();">إعادة التعيين</button>
   </div>
-  <div class="filter-fields">
+  <div class="filter-body" id="filterBody">
+    <div class="filter-fields">
     <label class="filter-field">
       <span>🏛️ المحافظة</span>
       <select id="govSelect">
@@ -751,6 +786,7 @@
   <div class="active-filters" id="activeFilters">
     <span class="active-filters-label">الحالة الحالية:</span>
     <span class="filter-tag">كل المحافظات</span><span class="filter-tag">كل الأشهر</span>
+  </div>
   </div>
 </div>
 
@@ -809,7 +845,7 @@
   <!-- ═══════════════════════════════════════════
        بوصلة الخطة الاستراتيجية
        ═══════════════════════════════════════════ -->
-  <section class="strategic-compass open" id="strategicCompass">
+  <section class="strategic-compass" id="strategicCompass">
     <div class="strategic-compass-head" onclick="toggleStrategicCompass()">
       <div class="icon">🎯</div>
       <div>
@@ -887,7 +923,7 @@
     </div>
   </section>
 
-  <section class="category open map-section" data-cat="map">
+  <section class="category map-section" data-cat="map">
     <div class="cat-head" onclick="toggleCat(this)">
       <div class="icon">🗺️</div>
       <div><h2>الخريطة التفاعلية للمحافظات</h2><p>انقر على أي محافظة لعرض مؤشراتها التشغيلية</p></div>
@@ -1063,7 +1099,7 @@
   </section>
 
   <!-- INSIGHTS & COMPARISONS SECTION -->
-  <section class="insights-section open" data-cat="insights" id="insightsSection">
+  <section class="insights-section" data-cat="insights" id="insightsSection">
     <div class="insights-head" onclick="toggleInsights(this)">
       <div class="icon">💡</div>
       <div><h2>المقارنات والدروس المستفادة</h2><p>تحليل ذكي للبيانات — رؤى ومقارنات تلقائية بين المحافظات</p></div>
@@ -1079,7 +1115,7 @@
   </section>
 
   <!-- ADVANCED ANALYTICS SECTION -->
-  <section class="analytics-section open" data-cat="analytics" id="advancedAnalyticsSection">
+  <section class="analytics-section" data-cat="analytics" id="advancedAnalyticsSection">
     <div class="analytics-head" onclick="toggleAdvancedAnalytics(this)">
       <div class="icon">📈</div>
       <div><h2>التحليلات التفاعلية المتقدمة</h2><p>اتجاهات زمنية، مقارنة المحافظات، ومؤشرات التغير بناءً على البيانات المحددة</p></div>
@@ -1127,7 +1163,7 @@
     </div>
   </section>
 
-  <section class="category open" data-cat="details">
+  <section class="category" data-cat="details">
     <div class="cat-head" onclick="toggleCat(this)">
       <div class="icon">📖</div>
       <div><h2>ملف كل محافظة: أهم الإنجازات والتوصيات والاحتياجات</h2><p>انقر على اسم المحافظة لعرض التفاصيل النوعية</p></div>
@@ -1702,6 +1738,32 @@ function setupMonthFilter(){
 // =====================
 // GOVERNORATE FILTER
 // =====================
+
+// ===== COLLAPSIBLE FILTER PANEL =====
+function toggleFilterPanel(){
+  const panel = document.getElementById('filterPanel');
+  const icon = document.getElementById('filterToggleIcon');
+  const desc = document.getElementById('filterDesc');
+  panel.classList.toggle('collapsed');
+  const isCollapsed = panel.classList.contains('collapsed');
+  if(desc){
+    desc.textContent = isCollapsed 
+      ? 'انقر لعرض خيارات التصفية' 
+      : 'اختر المحافظة والشهر لعرض البيانات المطلوبة — انقر للطي';
+  }
+}
+
+function resetFilters(){
+  activeGov = 'all';
+  selectedMonthChips.clear();
+  selectedMonths = new Set([...new Set(ALL_DATA.map(d => normalizeMonth(d.month)))].filter(m => m));
+  const govSelect = document.getElementById('govSelect');
+  const monthSelect = document.getElementById('monthSelect');
+  if(govSelect) govSelect.value = 'all';
+  if(monthSelect) monthSelect.value = 'all';
+  updateActiveFilters();
+  renderAll();
+}
 function setupGovFilter(){
   const select = document.getElementById('govSelect');
   const reset = document.getElementById('filterReset');
