@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سِجل المؤشرات التشغيلية — المحافظات</title>
+<title>سِجل المؤشرات التشغيلية والتنمية المجتمعية — المحافظات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -576,6 +576,21 @@
   .modern-chart-title small{color:var(--chart-muted);}
   .modern-chart-canvas{min-height:280px;}
   @media(max-width:640px){.chart-wrap{padding:14px 10px;}.modern-chart-card{padding:14px;}.modern-chart-canvas{min-height:240px;}}
+
+  /* ===== SECTION TABS ===== */
+  .section-tabs{display:flex;gap:10px;max-width:1180px;margin:20px auto 0;padding:0 28px;}
+  .tab-btn{flex:1;padding:14px 20px;border:2px solid var(--line);background:var(--sand);border-radius:14px;font-family:'Tajawal',sans-serif;font-size:15px;font-weight:700;color:var(--ink-soft);cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:10px;}
+  .tab-btn:hover{border-color:#0D8BA8;color:#0B5A7A;}
+  .tab-btn.active{background:linear-gradient(135deg,#0B5A7A,#084a66);color:#fff;border-color:#0B5A7A;box-shadow:0 4px 14px rgba(11,90,122,.25);}
+  .tab-content{display:none;animation:fadeIn .3s ease;}
+  .tab-content.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .community-cat .cat-head{background:linear-gradient(90deg,#e8f5e9 0%,#fff 72%);}
+  .community-cat .cat-head .icon{background:#2e7d32;border-color:#4caf50;}
+  .community-cat .cat-head h2{color:#1b5e20;}
+  .community-cat .cat-note{border-inline-start-color:#4caf50;background:#f1f8e9;}
+  .community-kpi{background:rgba(46,125,50,0.8);}
+  .community-kpi .seal{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4);}
 </style>
 <base target="_blank">
 
@@ -608,7 +623,7 @@
     <div class="lock-icon">🔐</div>
     <h2>وزارة الشؤون الاجتماعية والعمل</h2>
     <h3 style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;margin:4px 0 8px;color:#0B5A7A;">مديرية الإحصاء والتخطيط</h3>
-    <p style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:15px;margin:0 0 16px;color:var(--ink);">سجل المؤشرات التشغيلية</p>
+    <p style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:15px;margin:0 0 16px;color:var(--ink);">سجل المؤشرات التشغيلية والتنمية المجتمعية</p>
 
     <div class="login-fields">
       <input type="email" id="loginEmail" placeholder="البريد الإلكتروني / اسم المستخدم" autocomplete="username">
@@ -737,7 +752,7 @@
     <div class="masthead-content">
       <p class="sub" style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;color:#D4AF37;text-shadow:0 1px 2px rgba(0,0,0,0.3);margin:0 0 4px;line-height:1.4;">الجمهورية العربية السورية</p>
       <p class="sub" style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;color:var(--syria-white);text-shadow:0 2px 4px rgba(0,0,0,0.3);margin:0 0 4px;line-height:1.4;">وزارة الشؤون الاجتماعية والعمل / مديرية التخطيط والإحصاء</p>
-      <h1 style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;margin:0 0 6px;line-height:1.4;color:var(--syria-white);text-shadow:0 2px 4px rgba(0,0,0,0.3);">سِجل المؤشرات التشغيلية وفق المحافظات</h1>
+      <h1 style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;margin:0 0 6px;line-height:1.4;color:var(--syria-white);text-shadow:0 2px 4px rgba(0,0,0,0.3);">سِجل المؤشرات التشغيلية والتنمية المجتمعية وفق المحافظات</h1>
       <span class="month-badge" id="mastheadBadge">🗓️ ارفع ملف CSV للبدء</span>
     </div>
     <div class="masthead-actions">
@@ -747,6 +762,17 @@
 </header>
 
 <!-- Unified Filters -->
+
+<!-- SECTION TABS -->
+<div class="section-tabs" id="sectionTabs">
+  <button class="tab-btn active" data-tab="operational" onclick="switchTab('operational')">
+    <span style="font-size:18px;">📊</span> المؤشرات التشغيلية
+  </button>
+  <button class="tab-btn" data-tab="community" onclick="switchTab('community')">
+    <span style="font-size:18px;">🌱</span> التنمية المجتمعية
+  </button>
+</div>
+<div id="operational-section" class="tab-content active">
 <div class="filter-panel" id="filterPanel">
   <div class="filter-head" onclick="toggleFilterPanel()" style="cursor:pointer;user-select:none;position:relative;">
     <div style="flex:1;min-width:0;">
@@ -1177,6 +1203,131 @@
 
   
 </main>
+
+</div>
+
+<!-- COMMUNITY DEVELOPMENT SECTION -->
+<div id="community-section" class="tab-content">
+
+  <!-- Community Data Source Bar -->
+  <div class="data-panel">
+    <div class="data-source-bar" style="background:linear-gradient(90deg,#e8f5e9,#ffffff);border-color:#4caf50;">
+      <span class="label" style="color:#2e7d32;">🌱 مصدر بيانات التنمية المجتمعية:</span>
+      <input type="text" class="gsheet-input" id="communitySheetUrl" placeholder="أدخل رابط Google Sheet للتنمية المجتمعية أو ارفع ملف CSV منفصل" style="background:#f1f8e9;border-color:#4caf50;">
+      <button class="btn btn-primary" onclick="loadCommunityFromSheet()" style="background:#2e7d32;">🔄 تحميل البيانات</button>
+      <button class="btn btn-success" onclick="showCommunityUploadModal()" style="background:#4caf50;">📁 رفع ملف CSV للتنمية المجتمعية</button>
+      <span class="status-badge status-loading" id="communityDataStatus">في انتظار البيانات...</span>
+    </div>
+  </div>
+
+  <main>
+    <div class="kpi-grid" id="communityKpiGrid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));"></div>
+
+    <!-- Community Categories -->
+    <section class="category community-cat" data-cat="community_education">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">📚</div>
+        <div><h2>التعليم المجتمعي ومحو الأمية</h2><p>مراكز محو الأمية، التعليم غير النظامي، والبرامج التعليمية المجتمعية</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-note" id="note-community_education">💡 ارفع ملف CSV لعرض بيانات التنمية المجتمعية</p>
+        <div class="chart-wrap"><canvas id="chart-community_education"></canvas></div>
+        <div class="ind-cards" id="cards-community_education"></div>
+      </div>
+    </section>
+
+    <section class="category community-cat" data-cat="community_health">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">🏥</div>
+        <div><h2>الصحة المجتمعية</h2><p>المراكز الصحية المجتمعية، التطعيمات، والفحوصات الوقائية</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-note" id="note-community_health">💡 ارفع ملف CSV لعرض بيانات التنمية المجتمعية</p>
+        <div class="chart-wrap"><canvas id="chart-community_health"></canvas></div>
+        <div class="ind-cards" id="cards-community_health"></div>
+      </div>
+    </section>
+
+    <section class="category community-cat" data-cat="community_infrastructure">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">🏗️</div>
+        <div><h2>البنية التحتية المجتمعية</h2><p>مشاريع المياه، الصرف الصحي، الطرق المحلية، والإنارة العامة</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-note" id="note-community_infrastructure">💡 ارفع ملف CSV لعرض بيانات التنمية المجتمعية</p>
+        <div class="chart-wrap"><canvas id="chart-community_infrastructure"></canvas></div>
+        <div class="ind-cards" id="cards-community_infrastructure"></div>
+      </div>
+    </section>
+
+    <section class="category community-cat" data-cat="community_participation">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">🤝</div>
+        <div><h2>المشاركة المجتمعية</h2><p>اللجان المجتمعية، المتطوعون، الاجتماعات المحلية، ومبادرات المواطنين</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-note" id="note-community_participation">💡 ارفع ملف CSV لعرض بيانات التنمية المجتمعية</p>
+        <div class="chart-wrap"><canvas id="chart-community_participation"></canvas></div>
+        <div class="ind-cards" id="cards-community_participation"></div>
+      </div>
+    </section>
+
+    <section class="category community-cat" data-cat="community_economic">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">💰</div>
+        <div><h2>التمكين الاقتصادي المجتمعي</h2><p>برامج الإقراض، المشاريع الصغيرة، التدريب المهني، والتعاونيات</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-note" id="note-community_economic">💡 ارفع ملف CSV لعرض بيانات التنمية المجتمعية</p>
+        <div class="chart-wrap"><canvas id="chart-community_economic"></canvas></div>
+        <div class="ind-cards" id="cards-community_economic"></div>
+      </div>
+    </section>
+
+    <section class="category community-cat" data-cat="community_environment">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">🌳</div>
+        <div><h2>البرامج البيئية المجتمعية</h2><p>الحدائق العامة، حملات التشجير، إدارة النفايات، والطاقة المتجددة</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-note" id="note-community_environment">💡 ارفع ملف CSV لعرض بيانات التنمية المجتمعية</p>
+        <div class="chart-wrap"><canvas id="chart-community_environment"></canvas></div>
+        <div class="ind-cards" id="cards-community_environment"></div>
+      </div>
+    </section>
+
+    <section class="category community-cat" data-cat="community_culture">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">🎭</div>
+        <div><h2>الثقافة والرياضة المجتمعية</h2><p>المراكز الثقافية، الفعاليات، الأندية الرياضية، والبرامج الشبابية</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <p class="cat-note" id="note-community_culture">💡 ارفع ملف CSV لعرض بيانات التنمية المجتمعية</p>
+        <div class="chart-wrap"><canvas id="chart-community_culture"></canvas></div>
+        <div class="ind-cards" id="cards-community_culture"></div>
+      </div>
+    </section>
+
+    <!-- Community Governorate Details -->
+    <section class="category community-cat" data-cat="community_details">
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="icon">📖</div>
+        <div><h2>ملف محافظات التنمية المجتمعية</h2><p>الإنجازات والتوصيات والاحتياجات في مجال التنمية المجتمعية</p></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="cat-body">
+        <div class="gov-list" id="communityGovList"></div>
+      </div>
+    </section>
+  </main>
+</div>
 
 <footer>
   <div class="line" id="footerNote">⚠️ ارفع ملف CSV لعرض البيانات</div>
@@ -6320,6 +6471,482 @@ if (typeof Chart !== 'undefined') {
   Chart.defaults.plugins.tooltip.cornerRadius = 12;
   Chart.defaults.plugins.tooltip.displayColors = false;
 }
+
+
+// =====================
+// COMMUNITY DEVELOPMENT COLUMN MAPPING
+// =====================
+const COLUMN_MAP_COMMUNITY = {
+  "المحافظة": "gov",
+  "المحافظة ": "gov",
+  "الشهر": "month",
+  "السنة": "year",
+
+  // Education
+  "عدد مراكز محو الأمية": "literacy_centers",
+  "عدد المستفيدين من محو الأمية": "literacy_benef",
+  "عدد مراكز التعليم غير النظامي": "informal_edu_centers",
+  "عدد الطلاب في التعليم غير النظامي": "informal_edu_students",
+  "عدد برامج التعليم المجتمعي": "community_edu_programs",
+  "عدد المستفيدين من برامج التعليم المجتمعي": "community_edu_benef",
+
+  // Health
+  "عدد المراكز الصحية المجتمعية": "community_health_centers",
+  "عدد المستفيدين من المراكز الصحية": "community_health_benef",
+  "عدد حملات التطعيم المجتمعية": "vaccination_campaigns",
+  "عدد المستفيدين من التطعيمات": "vaccination_benef",
+  "عدد الفحوصات الوقائية": "preventive_exams",
+  "عدد برامج التوعية الصحية": "health_awareness_programs",
+
+  // Infrastructure
+  "عدد مشاريع المياه المجتمعية": "water_projects",
+  "عدد المستفيدين من مشاريع المياه": "water_benef",
+  "عدد مشاريع الصرف الصحي": "sewage_projects",
+  "عدد المستفيدين من الصرف الصحي": "sewage_benef",
+  "عدد مشاريع الطرق المحلية": "road_projects",
+  "عدد مشاريع الإنارة العامة": "lighting_projects",
+  "عدد مراكز الاتصالات المجتمعية": "community_comms",
+
+  // Participation
+  "عدد اللجان المجتمعية النشطة": "active_committees",
+  "عدد المتطوعين المجتمعيين": "community_volunteers",
+  "عدد الاجتماعات المجتمعية": "community_meetings",
+  "عدد مبادرات المواطنين": "citizen_initiatives",
+  "نسبة المشاركة المجتمعية": "participation_rate",
+
+  // Economic Empowerment
+  "عدد برامج الإقراض المجتمعي": "microfinance_programs",
+  "عدد المستفيدين من الإقراض": "microfinance_benef",
+  "قيمة الإقراض المجتمعي (مليون ل.س)": "microfinance_value",
+  "عدد المشاريع الصغيرة المدعومة": "small_projects",
+  "عدد برامج التدريب المهني المجتمعي": "community_vocational",
+  "عدد المستفيدين من التدريب المجتمعي": "community_vocational_benef",
+  "عدد التعاونيات النشطة": "active_cooperatives",
+  "عدد أعضاء التعاونيات": "cooperative_members",
+
+  // Environment
+  "عدد الحدائق العامة": "public_parks",
+  "عدد حملات التشجير": "afforestation_campaigns",
+  "عدد الأشجار المزروعة": "trees_planted",
+  "عدد برامج إدارة النفايات": "waste_programs",
+  "عدد مشاريع الطاقة المتجددة المجتمعية": "renewable_projects",
+  "نسبة المساحات الخضراء": "green_spaces_pct",
+
+  // Culture & Sports
+  "عدد المراكز الثقافية المجتمعية": "cultural_centers",
+  "عدد الفعاليات الثقافية": "cultural_events",
+  "عدد المستفيدين من الفعاليات الثقافية": "cultural_benef",
+  "عدد الأندية الرياضية المجتمعية": "sports_clubs",
+  "عدد الرياضيين المسجلين": "registered_athletes",
+  "عدد برامج الشباب المجتمعية": "youth_programs",
+  "عدد المستفيدين من برامج الشباب": "youth_benef",
+
+  // Qualitative
+  "أهم إنجازات التنمية المجتمعية": "comm_achievements",
+  "أهم توصيات التنمية المجتمعية": "comm_recommendations",
+  "احتياجات التنمية المجتمعية": "comm_needs",
+};
+
+// =====================
+// COMMUNITY STATE
+// =====================
+let ALL_DATA_COMMUNITY = [];
+
+// =====================
+// TAB SWITCHING
+// =====================
+function switchTab(tabName){
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
+  document.getElementById(tabName + '-section').classList.add('active');
+  if(tabName === 'community' && ALL_DATA_COMMUNITY.length > 0){
+    renderCommunityAll();
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// =====================
+// COMMUNITY CSV PARSING
+// =====================
+function processCommunityCSV(csvText){
+  try {
+    const delimiter = detectDelimiter(csvText);
+    const parsed = parseCSVWithDelimiterCommunity(csvText, delimiter);
+    if(parsed.length === 0) throw new Error('لا توجد بيانات في ملف التنمية المجتمعية');
+    ALL_DATA_COMMUNITY = parsed;
+    const statusEl = document.getElementById('communityDataStatus');
+    statusEl.textContent = `تم التحميل: ${parsed.length} سجل`;
+    statusEl.className = 'status-badge status-ok';
+    renderCommunityAll();
+    return true;
+  } catch(err) {
+    const statusEl = document.getElementById('communityDataStatus');
+    statusEl.textContent = 'خطأ: ' + err.message;
+    statusEl.className = 'status-badge status-error';
+    alert('خطأ في معالجة بيانات التنمية المجتمعية: ' + err.message);
+    return false;
+  }
+}
+
+function parseCSVWithDelimiterCommunity(csvText, delimiter){
+  const rows = [];
+  let currentRow = [];
+  let currentField = '';
+  let inQuotes = false;
+  let i = 0;
+
+  function pushField(){
+    let val = currentField.trim();
+    if(val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+    val = val.replace(/""/g, '"');
+    currentRow.push(val);
+    currentField = '';
+  }
+  function pushRow(){
+    if(currentRow.length > 0){ rows.push(currentRow); currentRow = []; }
+  }
+
+  while(i < csvText.length){
+    const char = csvText[i];
+    const nextChar = csvText[i+1];
+    if(char === '"'){
+      if(inQuotes && nextChar === '"'){ currentField += '"'; i += 2; continue; }
+      inQuotes = !inQuotes; i++; continue;
+    }
+    if(char === '\r'){ i++; continue; }
+    if(char === '\n'){
+      if(inQuotes){ currentField += '\n'; i++; continue; }
+      pushField(); pushRow(); i++; continue;
+    }
+    if(char === delimiter && !inQuotes){ pushField(); i++; continue; }
+    currentField += char; i++;
+  }
+  if(currentField !== '' || currentRow.length > 0){ pushField(); pushRow(); }
+  if(rows.length < 2) return [];
+
+  const rawHeaders = rows[0];
+  const headers = rawHeaders.map(h => {
+    const key = h.trim();
+    return COLUMN_MAP_COMMUNITY[key] || key;
+  });
+
+  const result = [];
+  for(let r = 1; r < rows.length; r++){
+    const values = rows[r];
+    if(values.length < 2) continue;
+    const obj = {};
+    headers.forEach((h, idx) => {
+      let val = values[idx] !== undefined ? values[idx].trim() : '';
+      if(h === 'month' && val) val = normalizeMonth(val);
+      if(val && val !== ''){
+        const cleanVal = val.replace(/%/g, '').replace(/,/g, '').trim();
+        const num = parseFloat(cleanVal);
+        if(!isNaN(num) && cleanVal !== '' && /^-?\d+\.?\d*$/.test(cleanVal)) obj[h] = num;
+        else obj[h] = val;
+      } else obj[h] = null;
+    });
+    result.push(obj);
+  }
+  return result;
+}
+
+function filteredCommunity(){
+  let data = ALL_DATA_COMMUNITY;
+  if(activeGov !== "all") data = data.filter(d => d.gov === activeGov);
+  if(selectedMonths.size > 0) data = data.filter(d => selectedMonths.has(normalizeMonth(d.month)));
+  return data;
+}
+
+// =====================
+// COMMUNITY RENDERERS
+// =====================
+function renderCommunityKPIs(){
+  const arr = filteredCommunity();
+  const kpis = [
+    {em:"📚", lbl:"مراكز محو الأمية", val: sum("literacy_centers", arr)},
+    {em:"👨‍🎓", lbl:"مستفيدو محو الأمية", val: sum("literacy_benef", arr)},
+    {em:"🏥", lbl:"المراكز الصحية المجتمعية", val: sum("community_health_centers", arr)},
+    {em:"💉", lbl:"المستفيدون من التطعيم", val: sum("vaccination_benef", arr)},
+    {em:"🏗️", lbl:"مشاريع المياه", val: sum("water_projects", arr)},
+    {em:"🤝", lbl:"لجان مجتمعية نشطة", val: sum("active_committees", arr)},
+    {em:"🙋", lbl:"متطوعون مجتمعيون", val: sum("community_volunteers", arr)},
+    {em:"💰", lbl:"برامج إقراض مجتمعي", val: sum("microfinance_programs", arr)},
+    {em:"🏭", lbl:"مشاريع صغيرة مدعومة", val: sum("small_projects", arr)},
+    {em:"🌳", lbl:"أشجار مزروعة", val: sum("trees_planted", arr)},
+    {em:"🎭", lbl:"فعاليات ثقافية", val: sum("cultural_events", arr)},
+    {em:"🏃", lbl:"أندية رياضية مجتمعية", val: sum("sports_clubs", arr)},
+  ];
+  document.getElementById('communityKpiGrid').innerHTML = kpis.map(k => 
+    `<div class="kpi community-kpi"><div class="seal">${k.em}</div><div class="val">${fmt(k.val)}</div><div class="lbl">${k.lbl}</div></div>`
+  ).join('');
+}
+
+function renderCommunityCategory(cat){
+  const arr = filteredCommunity();
+  if(cat === 'community_education'){
+    barChartCommunity('chart-community_education', 'literacy_centers');
+    renderCards('cards-community_education', [
+      {em:'📚', n:sum('literacy_centers',arr), t:'مراكز محو الأمية'},
+      {em:'👨‍🎓', n:sum('literacy_benef',arr), t:'مستفيدو محو الأمية'},
+      {em:'🏫', n:sum('informal_edu_centers',arr), t:'مراكز التعليم غير النظامي'},
+      {em:'🎒', n:sum('informal_edu_students',arr), t:'طلاب التعليم غير النظامي'},
+      {em:'📖', n:sum('community_edu_programs',arr), t:'برامج التعليم المجتمعي'},
+      {em:'👥', n:sum('community_edu_benef',arr), t:'مستفيدو برامج التعليم المجتمعي'},
+    ]);
+    document.getElementById('note-community_education').textContent = 
+      `💡 إجمالي المستفيدين من برامج التعليم المجتمعي: ${fmt(sum('community_edu_benef',arr) + sum('literacy_benef',arr) + sum('informal_edu_students',arr))} مستفيد.`;
+  }
+  if(cat === 'community_health'){
+    barChartCommunity('chart-community_health', 'community_health_centers');
+    renderCards('cards-community_health', [
+      {em:'🏥', n:sum('community_health_centers',arr), t:'المراكز الصحية المجتمعية'},
+      {em:'🩺', n:sum('community_health_benef',arr), t:'المستفيدون من المراكز الصحية'},
+      {em:'💉', n:sum('vaccination_campaigns',arr), t:'حملات التطعيم'},
+      {em:'🛡️', n:sum('vaccination_benef',arr), t:'المستفيدون من التطعيمات'},
+      {em:'🔬', n:sum('preventive_exams',arr), t:'الفحوصات الوقائية'},
+      {em:'📢', n:sum('health_awareness_programs',arr), t:'برامج التوعية الصحية'},
+    ]);
+    document.getElementById('note-community_health').textContent = 
+      `💡 ${fmt(sum('community_health_centers',arr))} مركز صحي مجتمعي يخدم ${fmt(sum('community_health_benef',arr))} مستفيد. حملات تطعيم: ${fmt(sum('vaccination_campaigns',arr))}.`;
+  }
+  if(cat === 'community_infrastructure'){
+    barChartCommunity('chart-community_infrastructure', 'water_projects');
+    renderCards('cards-community_infrastructure', [
+      {em:'💧', n:sum('water_projects',arr), t:'مشاريع المياه المجتمعية'},
+      {em:'👥', n:sum('water_benef',arr), t:'المستفيدون من مشاريع المياه'},
+      {em:'🚰', n:sum('sewage_projects',arr), t:'مشاريع الصرف الصحي'},
+      {em:'🏘️', n:sum('sewage_benef',arr), t:'المستفيدون من الصرف الصحي'},
+      {em:'🛣️', n:sum('road_projects',arr), t:'مشاريع الطرق المحلية'},
+      {em:'💡', n:sum('lighting_projects',arr), t:'مشاريع الإنارة العامة'},
+      {em:'📡', n:sum('community_comms',arr), t:'مراكز الاتصالات المجتمعية'},
+    ]);
+    document.getElementById('note-community_infrastructure').textContent = 
+      `💡 ${fmt(sum('water_projects',arr))} مشروع مياه + ${fmt(sum('sewage_projects',arr))} مشروع صرف صحي + ${fmt(sum('road_projects',arr))} مشروع طرق.`;
+  }
+  if(cat === 'community_participation'){
+    barChartCommunity('chart-community_participation', 'active_committees');
+    renderCards('cards-community_participation', [
+      {em:'🤝', n:sum('active_committees',arr), t:'لجان مجتمعية نشطة'},
+      {em:'🙋', n:sum('community_volunteers',arr), t:'متطوعون مجتمعيون'},
+      {em:'🗣️', n:sum('community_meetings',arr), t:'اجتماعات مجتمعية'},
+      {em:'💡', n:sum('citizen_initiatives',arr), t:'مبادرات مواطنين'},
+      {em:'📊', n:avg('participation_rate',arr)+'%', t:'معدل المشاركة المجتمعية', raw:true},
+    ]);
+    document.getElementById('note-community_participation').textContent = 
+      `💡 ${fmt(sum('active_committees',arr))} لجان نشطة بمشاركة ${fmt(sum('community_volunteers',arr))} متطوع. معدل المشاركة: ${avg('participation_rate',arr)}%.`;
+  }
+  if(cat === 'community_economic'){
+    barChartCommunity('chart-community_economic', 'microfinance_programs');
+    renderCards('cards-community_economic', [
+      {em:'💰', n:sum('microfinance_programs',arr), t:'برامج الإقراض المجتمعي'},
+      {em:'👥', n:sum('microfinance_benef',arr), t:'مستفيدو الإقراض'},
+      {em:'💵', n:sum('microfinance_value',arr), t:'قيمة الإقراض (مليون ل.س)'},
+      {em:'🏭', n:sum('small_projects',arr), t:'مشاريع صغيرة مدعومة'},
+      {em:'🔧', n:sum('community_vocational',arr), t:'برامج تدريب مهني مجتمعي'},
+      {em:'👷', n:sum('community_vocational_benef',arr), t:'مستفيدو التدريب المجتمعي'},
+      {em:'🏢', n:sum('active_cooperatives',arr), t:'تعاونيات نشطة'},
+      {em:'👨‍👩‍👧‍👦', n:sum('cooperative_members',arr), t:'أعضاء التعاونيات'},
+    ]);
+    document.getElementById('note-community_economic').textContent = 
+      `💡 ${fmt(sum('microfinance_programs',arr))} برنامج إقراض بقيمة ${fmt(sum('microfinance_value',arr))} مليون ل.س. ${fmt(sum('small_projects',arr))} مشروع صغير مدعوم.`;
+  }
+  if(cat === 'community_environment'){
+    barChartCommunity('chart-community_environment', 'trees_planted');
+    renderCards('cards-community_environment', [
+      {em:'🌳', n:sum('public_parks',arr), t:'حدائق عامة'},
+      {em:'🌱', n:sum('afforestation_campaigns',arr), t:'حملات تشجير'},
+      {em:'🌲', n:sum('trees_planted',arr), t:'أشجار مزروعة'},
+      {em:'♻️', n:sum('waste_programs',arr), t:'برامج إدارة النفايات'},
+      {em:'⚡', n:sum('renewable_projects',arr), t:'مشاريع الطاقة المتجددة'},
+      {em:'🌿', n:avg('green_spaces_pct',arr)+'%', t:'نسبة المساحات الخضراء', raw:true},
+    ]);
+    document.getElementById('note-community_environment').textContent = 
+      `💡 ${fmt(sum('trees_planted',arr))} شجرة مزروعة في ${fmt(sum('afforestation_campaigns',arr))} حملة تشجير. ${fmt(sum('public_parks',arr))} حديقة عامة.`;
+  }
+  if(cat === 'community_culture'){
+    barChartCommunity('chart-community_culture', 'cultural_events');
+    renderCards('cards-community_culture', [
+      {em:'🎭', n:sum('cultural_centers',arr), t:'مراكز ثقافية مجتمعية'},
+      {em:'🎉', n:sum('cultural_events',arr), t:'فعاليات ثقافية'},
+      {em:'👥', n:sum('cultural_benef',arr), t:'مستفيدون من الفعاليات'},
+      {em:'⚽', n:sum('sports_clubs',arr), t:'أندية رياضية مجتمعية'},
+      {em:'🏃', n:sum('registered_athletes',arr), t:'رياضيون مسجلون'},
+      {em:'🎯', n:sum('youth_programs',arr), t:'برامج شباب مجتمعية'},
+      {em:'🧑‍🤝‍🧑', n:sum('youth_benef',arr), t:'مستفيدو برامج الشباب'},
+    ]);
+    document.getElementById('note-community_culture').textContent = 
+      `💡 ${fmt(sum('cultural_events',arr))} فعالية ثقافية و${fmt(sum('sports_clubs',arr))} نادٍ رياضي. إجمالي المستفيدين: ${fmt(sum('cultural_benef',arr) + sum('youth_benef',arr))}.`;
+  }
+}
+
+function barChartCommunity(canvasId, dataField){
+  const arr = filteredCommunity();
+  if(arr.length === 0){
+    const canvas = document.getElementById(canvasId);
+    if(canvas && canvas.parentElement) canvas.parentElement.innerHTML = '<div style="text-align:center;padding:40px;color:var(--ink-soft);"><div style="font-size:36px;margin-bottom:10px;">📂</div><div>لا توجد بيانات — ارفع ملف CSV للتنمية المجتمعية</div></div>';
+    return;
+  }
+  const grouped = {};
+  arr.forEach(d => {
+    if(!grouped[d.gov]) grouped[d.gov] = {...d};
+    else {
+      Object.keys(d).forEach(key => {
+        if(typeof d[key] === 'number') grouped[d.gov][key] = (grouped[d.gov][key] || 0) + d[key];
+      });
+    }
+  });
+  ALL_GOVS.forEach(gov => { if(!grouped[gov]) grouped[gov] = { gov: gov }; });
+  const govList = Object.values(grouped);
+  const labels = govList.map(d => d.gov);
+  const data = govList.map(d => d[dataField] || 0);
+  const chartHeight = Math.max(220, labels.length * 42);
+  const canvas = document.getElementById(canvasId);
+  if(canvas && canvas.parentElement) canvas.parentElement.style.height = chartHeight + 'px';
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const ctx = canvas.getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: labels.map((_,i) => ['#2e7d32','#4caf50','#81c784','#a5d6a7','#66bb6a','#43a047','#388e3c','#1b5e20','#00c853','#64dd17','#76ff03','#b2ff59','#ccff90','#f1f8e9'][i % 14]), borderColor: 'rgba(255,255,255,.7)', borderWidth: 1, hoverBackgroundColor: '#4caf50', borderRadius: 8, maxBarThickness: 30, barPercentage: 0.68, categoryPercentage: 0.78 }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { rtl: true, titleFont: { family: 'Cairo' }, bodyFont: { family: 'Cairo' } } }, scales: { x: { grid: { color: 'rgba(100,116,139,.14)', drawBorder: false }, ticks: { font: { family: 'IBM Plex Mono', size: 11 } }, beginAtZero: true }, y: { grid: { display: false }, ticks: { font: { family: 'Cairo', size: 12.5 } } } }, responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function renderCommunityGovList(){
+  const arr = filteredCommunity();
+  const grouped = {};
+  arr.forEach(d => {
+    if(!grouped[d.gov]) grouped[d.gov] = {...d};
+    else {
+      Object.keys(d).forEach(key => {
+        if(typeof d[key] === 'number') grouped[d.gov][key] = (grouped[d.gov][key] || 0) + d[key];
+        else if(typeof d[key] === 'string' && d[key] && key !== 'gov' && key !== 'month'){
+          if(!grouped[d.gov][key]) grouped[d.gov][key] = d[key];
+          else grouped[d.gov][key] += " | " + d[key];
+        }
+      });
+    }
+  });
+  const govList = Object.values(grouped);
+  document.getElementById('communityGovList').innerHTML = govList.map(d => `
+    <div class="gov-item">
+      <div class="gh" onclick="this.parentElement.classList.toggle('open')">
+        <div class="stamp" style="border-color:#2e7d32;color:#2e7d32;">${d.gov ? d.gov[0] : '?'}</div>
+        <strong>${d.gov || 'غير معروف'}</strong>
+        <div class="chev">⌄</div>
+      </div>
+      <div class="gb">
+        <div class="row"><b>🏆 أهم الإنجازات</b><span>${d.comm_achievements ? d.comm_achievements : '<span class="empty-note">لم تُدرَج بيانات</span>'}</span></div>
+        <div class="row"><b>📌 أهم التوصيات</b><span>${d.comm_recommendations ? d.comm_recommendations : '<span class="empty-note">لم تُدرَج بيانات</span>'}</span></div>
+        <div class="row"><b>🧰 الاحتياجات الرئيسية</b><span>${d.comm_needs ? d.comm_needs : '<span class="empty-note">لم تُدرَج بيانات</span>'}</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCommunityAll(){
+  const arr = filteredCommunity();
+  if(arr.length === 0) return;
+  renderCommunityKPIs();
+  ['community_education','community_health','community_infrastructure','community_participation','community_economic','community_environment','community_culture'].forEach(renderCommunityCategory);
+  renderCommunityGovList();
+}
+
+// =====================
+// COMMUNITY DATA LOADING
+// =====================
+function showCommunityUploadModal(){
+  showUploadModal();
+  // Override the paste handler temporarily for community data
+  window._communityMode = true;
+}
+
+function loadCommunityFromSheet(){
+  const urlInput = document.getElementById('communitySheetUrl').value.trim();
+  if(!urlInput || urlInput === 'متصل بـ Google Sheets API'){
+    alert('يرجى إدخال رابط Google Sheet صالح أو رفع ملف CSV');
+    return;
+  }
+  // Try to extract spreadsheet ID from URL
+  const match = urlInput.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if(match){
+    const sheetId = match[1];
+    const range = prompt('أدخل نطاق الورقة (مثال: Sheet2!A1:Z5000):', 'Sheet2!A1:Z5000') || 'Sheet2!A1:Z5000';
+    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?key=${SHEETS_CONFIG.apiKey}`)
+      .then(r => r.json())
+      .then(data => {
+        if(data.values && data.values.length > 1){
+          const csv = data.values.map(row => row.map(cell => {
+            const v = String(cell ?? '').replace(/"/g, '""');
+            return v.includes(',') || v.includes('\n') ? `"${v}"` : v;
+          }).join(',')).join('\n');
+          processCommunityCSV(csv);
+        } else {
+          throw new Error('لا توجد بيانات في الورقة المحددة');
+        }
+      })
+      .catch(err => {
+        document.getElementById('communityDataStatus').textContent = 'خطأ: ' + err.message;
+        document.getElementById('communityDataStatus').className = 'status-badge status-error';
+      });
+  } else {
+    alert('رابط غير صالح. يرجى نسخ رابط Google Sheet كاملاً.');
+  }
+}
+
+// Hook into existing CSV upload to support community mode
+const _originalHandleCSVUpload = handleCSVUpload;
+handleCSVUpload = function(input){
+  if(window._communityMode){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      processCommunityCSV(e.target.result);
+      window._communityMode = false;
+      closeUploadModal();
+    };
+    reader.readAsText(file);
+    return;
+  }
+  return _originalHandleCSVUpload(input);
+};
+
+const _originalHandleCSVPaste = handleCSVPaste;
+handleCSVPaste = function(){
+  if(window._communityMode){
+    const text = document.getElementById('csvPasteArea').value.trim();
+    if(!text){ alert('الصق البيانات أولاً'); return; }
+    processCommunityCSV(text);
+    window._communityMode = false;
+    closeUploadModal();
+    return;
+  }
+  return _originalHandleCSVPaste();
+};
+
+// =====================
+// INLINE DEMO DATA FOR COMMUNITY DEVELOPMENT
+// =====================
+const INLINE_CSV_COMMUNITY = `المحافظة,الشهر,السنة,عدد مراكز محو الأمية,عدد المستفيدين من محو الأمية,عدد مراكز التعليم غير النظامي,عدد الطلاب في التعليم غير النظامي,عدد برامج التعليم المجتمعي,عدد المستفيدين من برامج التعليم المجتمعي,عدد المراكز الصحية المجتمعية,عدد المستفيدين من المراكز الصحية,عدد حملات التطعيم المجتمعية,عدد المستفيدين من التطعيمات,عدد الفحوصات الوقائية,عدد برامج التوعية الصحية,عدد مشاريع المياه المجتمعية,عدد المستفيدين من مشاريع المياه,عدد مشاريع الصرف الصحي,عدد المستفيدين من الصرف الصحي,عدد مشاريع الطرق المحلية,عدد مشاريع الإنارة العامة,عدد مراكز الاتصالات المجتمعية,عدد اللجان المجتمعية النشطة,عدد المتطوعين المجتمعيين,عدد الاجتماعات المجتمعية,عدد مبادرات المواطنين,نسبة المشاركة المجتمعية,عدد برامج الإقراض المجتمعي,عدد المستفيدين من الإقراض,قيمة الإقراض المجتمعي (مليون ل.س),عدد المشاريع الصغيرة المدعومة,عدد برامج التدريب المهني المجتمعي,عدد المستفيدين من التدريب المجتمعي,عدد التعاونيات النشطة,عدد أعضاء التعاونيات,عدد الحدائق العامة,عدد حملات التشجير,عدد الأشجار المزروعة,عدد برامج إدارة النفايات,عدد مشاريع الطاقة المتجددة المجتمعية,نسبة المساحات الخضراء,عدد المراكز الثقافية المجتمعية,عدد الفعاليات الثقافية,عدد المستفيدين من الفعاليات الثقافية,عدد الأندية الرياضية المجتمعية,عدد الرياضيين المسجلين,عدد برامج الشباب المجتمعية,عدد المستفيدين من برامج الشباب,أهم إنجازات التنمية المجتمعية,أهم توصيات التنمية المجتمعية,احتياجات التنمية المجتمعية
+دمشق,كانون الثاني,2025,12,850,8,420,15,1200,18,6500,6,8500,3200,12,8,45000,5,32000,12,18,4,25,450,85,32,68.5,8,320,12.5,45,6,280,12,850,6,8,4500,4,2,8.5,8,24,8500,12,320,18,1200,إنشاء 3 مراكز تعليم مجتمعي جديدة,توسيع برامج محو الأمية في الأحياء الفقيرة,زيادة التمويل للبنية التحتية المجتمعية
+ريف دمشق,كانون الثاني,2025,10,720,6,350,12,980,15,5200,5,7200,2800,10,7,38000,4,28000,10,15,3,22,380,72,28,65.2,7,280,10.8,38,5,220,10,720,5,7,3800,3,2,7.2,6,18,6200,10,250,15,950,تطوير شبكة مياه ريفية في 5 قرى,تعزيز المشاركة المجتمعية في صنع القرار المحلي,دعم التعاونيات الزراعية
+حلب,كانون الثاني,2025,14,980,10,520,18,1450,22,8500,8,11200,4200,15,10,58000,7,42000,15,22,5,32,580,105,42,62.8,10,420,18.5,62,8,380,15,1150,8,12,6200,6,3,10.5,10,32,11200,15,420,22,1650,إعادة تأهيل المراكز الثقافية المتضررة,توسيع برامج التطعيم في المخيمات,دعم مشاريع الإعمار المجتمعي
+حمص,كانون الثاني,2025,8,580,5,280,10,720,12,4200,4,5800,2200,8,5,32000,3,22000,8,12,2,18,280,55,22,58.5,6,220,8.2,32,4,165,8,520,4,5,2800,3,1,6.8,5,14,4800,8,180,12,720,تطوير مراكز التأهيل المهني الريفي,تعزيز الشراكة مع المنظمات المحلية,زيادة عدد المتطوعين المجتمعيين
+حماه,كانون الثاني,2025,7,480,4,220,8,580,10,3200,3,4200,1800,6,4,22000,2,15000,6,10,2,15,220,42,18,55.8,5,180,6.5,25,3,120,6,380,3,4,1800,2,1,5.5,4,12,3200,6,140,10,580,توسيع برامج الإقراض الريفي,دعم مشاريع المياه في المناطق الجبلية,تطوير البنية التحتية الرياضية
+اللاذقية,كانون الثاني,2025,6,380,3,180,7,480,8,2800,3,3800,1500,6,3,18000,2,12000,5,8,1,12,180,35,15,72.5,4,150,5.2,20,2,95,5,280,3,3,1500,2,1,8.2,4,10,2800,5,110,8,480,تطوير السياحة المجتمعية البيئية,تعزيز برامج الحفاظ على البيئة الساحلية,دعم الصناعات الريفية التقليدية
+طرطوس,كانون الثاني,2025,5,320,3,150,6,420,7,2200,2,3200,1200,5,3,15000,2,10000,4,6,1,10,150,28,12,74.2,4,120,4.2,18,2,75,4,220,2,3,1200,1,1,7.5,3,8,2200,4,85,6,420,تطوير مراكز التدريب البحري,تعزيز برامج الأمن الغذائي الساحلي,دعم مشاريع الاستزراع السمكي
+السويداء,كانون الثاني,2025,3,150,2,85,4,220,4,1200,1,1800,650,3,2,8500,1,5500,3,4,1,6,85,18,8,78.5,2,65,2.8,10,1,42,2,120,1,2,650,1,0,12.5,2,5,1200,2,45,3,220,تطوير السياحة الريفية المجتمعية,تعزيز برامج الحفاظ على التراث الثقافي,دعم الزراعة العضوية التعاونية
+درعا,كانون الثاني,2025,5,280,3,140,6,380,6,1800,2,2800,1050,5,3,12000,2,8000,4,6,1,10,140,32,12,68.0,3,120,4.5,18,2,85,4,220,2,3,1200,2,1,6.2,3,10,1800,5,95,8,380,إعادة تأهيل المراكز الاجتماعية,توسيع برامج التوعية الصحية الريفية,دعم مشاريع الزراعة المستدامة
+القنيطرة,كانون الثاني,2025,1,45,1,28,2,85,2,450,1,650,220,2,1,3500,1,2200,2,2,0,3,45,8,3,82.0,1,28,1.2,5,1,18,1,55,1,1,350,0,0,15.2,1,3,450,1,22,2,85,تطوير السياحة البيئية,تعزيز برامج التوعية بمخاطر الألغام,دعم الزراعة المروية للمزارعين
+ادلب,كانون الثاني,2025,6,320,4,180,7,520,8,2800,3,4200,1600,6,3,18000,2,12000,5,8,2,12,180,42,16,58.5,4,150,5.8,22,3,110,5,320,3,4,1800,2,1,5.8,4,12,2800,6,130,10,520,تطوير مراكز التأهيل المهني,توسيع برامج المساعدات الإنسانية,دعم مشاريع الإعمار المجتمعي
+الرقة,كانون الثاني,2025,4,220,3,130,5,380,6,1800,2,2800,1050,5,2,12000,2,8000,4,6,1,10,130,32,12,60.2,3,110,4.2,18,2,85,4,220,2,3,1200,2,1,4.5,3,8,1800,4,95,6,380,إعادة تأهيل المراكز الاجتماعية,توسيع برامج التوعية بمخاطر الألغام,دعم مشاريع الزراعة المروية
+دير الزور,كانون الثاني,2025,5,280,3,160,6,450,7,2200,3,3500,1350,6,3,15000,2,10000,5,8,2,12,160,38,14,62.5,4,140,5.5,20,3,105,5,280,3,4,1500,2,1,5.2,4,10,2200,5,120,8,450,تطوير مراكز التأهيل المهني,توسيع برامج المساعدات الإنسانية,دعم مشاريع الزراعة المروية
+الحسكة,كانون الثاني,2025,6,320,4,180,7,520,8,2800,3,4200,1600,6,3,18000,2,12000,5,8,2,12,180,42,16,64.8,4,160,6.2,22,3,120,5,320,3,4,1800,2,1,6.5,4,12,2800,6,140,10,520,تطوير مراكز التنمية الريفية الحدودية,تعزيز برامج التوعية بالحقوق الاجتماعية,دعم مشاريع الزراعة المروية`;
+
+// Auto-load demo community data on startup (optional - comment out if not needed)
+// processCommunityCSV(INLINE_CSV_COMMUNITY);
+
 </script>
 </body>
 </html>
