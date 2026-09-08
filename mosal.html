@@ -1718,6 +1718,35 @@ function syncMonthChipsWithData(){
 // =====================
 // MONTH FILTER SETUP
 // =====================
+// تحديث قائمة المحافظات بناءً على الشهر المحدد.
+// عند اختيار شهر، تظهر فقط المحافظات التي لديها بيانات فعلية في ذلك الشهر.
+function updateGovFilterByMonth(){
+  const govSelect = document.getElementById('govSelect');
+  if(!govSelect) return;
+
+  const currentGov = activeGov;
+  const selected = selectedMonths.size > 0
+    ? ALL_DATA.filter(d => selectedMonths.has(normalizeMonth(d.month)))
+    : ALL_DATA;
+
+  const availableGovs = [...new Set(selected.map(d => String(d.gov || '').trim()).filter(Boolean))];
+
+  // ترتيب المحافظات حسب الترتيب الرسمي الموجود في ALL_GOVS
+  const orderedGovs = ALL_GOVS.filter(g => availableGovs.includes(g));
+
+  govSelect.innerHTML =
+    '<option value="all">كل المحافظات</option>' +
+    orderedGovs.map(g => `<option value="${g}">${g}</option>`).join('');
+
+  // إذا كانت المحافظة الحالية لا تملك بيانات في الشهر المختار،
+  // نرجع تلقائياً إلى "كل المحافظات".
+  if(currentGov !== 'all' && !orderedGovs.includes(currentGov)){
+    activeGov = 'all';
+  }
+
+  govSelect.value = activeGov;
+}
+
 function setupMonthFilter(){
   const select = document.getElementById('monthSelect');
   if(!select) return;
@@ -1725,11 +1754,14 @@ function setupMonthFilter(){
     const month = normalizeMonth(this.value);
     if(month === 'all'){
       selectedMonthChips.clear();
-      selectedMonths = new Set([...new Set(ALL_DATA.map(d => normalizeMonth(d.month)))]);
+      selectedMonths = new Set([...new Set(ALL_DATA.map(d => normalizeMonth(d.month)))].filter(Boolean));
     } else {
       selectedMonthChips = new Set([month]);
       selectedMonths = new Set([month]);
     }
+
+    // مهم: تحديث المحافظات مباشرةً وفق الشهر المختار
+    updateGovFilterByMonth();
     updateActiveFilters();
     renderAll();
   });
@@ -1761,12 +1793,16 @@ function resetFilters(){
   const monthSelect = document.getElementById('monthSelect');
   if(govSelect) govSelect.value = 'all';
   if(monthSelect) monthSelect.value = 'all';
+  updateGovFilterByMonth();
   updateActiveFilters();
   renderAll();
 }
 function setupGovFilter(){
   const select = document.getElementById('govSelect');
   const reset = document.getElementById('filterReset');
+
+  // تهيئة المحافظات وفق الشهر الحالي عند تحميل الصفحة
+  updateGovFilterByMonth();
   if(select){
     select.addEventListener('change', function(){
       activeGov = this.value;
@@ -1782,6 +1818,7 @@ function setupGovFilter(){
       if(select) select.value = 'all';
       const monthSelect = document.getElementById('monthSelect');
       if(monthSelect) monthSelect.value = 'all';
+      updateGovFilterByMonth();
       updateActiveFilters();
       renderAll();
     });
