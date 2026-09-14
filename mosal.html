@@ -3944,6 +3944,35 @@ function initMap(){
 function normalizeArabic(value){
   return String(value||'').trim().replace(/[إأآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').toLowerCase();
 }
+function getIntensityLabel(intensity){
+  if(intensity===0) return {label:'لا بيانات', cls:'none'};
+  if(intensity>5000) return {label:'مرتفعة جداً', cls:'very-high'};
+  if(intensity>2000) return {label:'مرتفعة', cls:'high'};
+  if(intensity>500) return {label:'متوسطة', cls:'medium'};
+  return {label:'منخفضة', cls:'low'};
+}
+function renderGovSidebar(){
+  const body=document.getElementById('govSidebarBody');
+  const summary=document.getElementById('govSidebarSummary');
+  if(!body || typeof ALL_GOVS==='undefined') return;
+  const arr=typeof filtered==='function' ? filtered() : [];
+  const rows=ALL_GOVS.map(gov=>{
+    const intensity=getGovIntensity(gov,arr);
+    const dataCount=arr.filter(d=>d.gov===gov).length;
+    return {gov,intensity,dataCount,level:getIntensityLabel(intensity)};
+  }).sort((a,b)=>b.intensity-a.intensity);
+  body.innerHTML=rows.map(row=>`<tr class="gov-table-row" data-gov="${escapeHtml(row.gov)}" tabindex="0" role="button" aria-label="عرض ${escapeHtml(row.gov)}">
+    <td><span class="gov-table-pin">●</span><strong>${escapeHtml(row.gov)}</strong></td>
+    <td><span class="intensity-pill ${row.level.cls}">${row.level.label}</span></td>
+    <td><span class="gov-record-count">${row.dataCount ? row.dataCount.toLocaleString('ar-SY') : '—'}</span></td>
+  </tr>`).join('');
+  body.querySelectorAll('.gov-table-row').forEach(row=>{
+    const open=()=>showGovOnMap(row.dataset.gov);
+    row.addEventListener('click',open);
+    row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+  });
+  if(summary) summary.textContent=`${ALL_GOVS.length} محافظة · ${arr.length.toLocaleString('ar-SY')} سجل حالي`;
+}
 function animateGovSelection(gov){
   document.querySelectorAll('.gov-table-row.gov-selected').forEach(row=>row.classList.remove('gov-selected'));
   const row=document.querySelector(`.gov-table-row[data-gov="${CSS.escape(gov)}"]`);
