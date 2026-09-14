@@ -118,9 +118,7 @@
   .map-info-window::-webkit-scrollbar{width:6px;}
   .map-info-window::-webkit-scrollbar-track{background:#f1f1f1;border-radius:3px;}
   .map-info-window::-webkit-scrollbar-thumb{background:#0B5A7A;border-radius:3px;}
-  .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.25);}
-  .leaflet-popup-content{margin:12px 16px;}
-  .leaflet-popup-tip{background:white;}
+  .gm-style .map-info-window{padding:2px 0;}
 
 
   /* ===== LOGIN OVERLAY ===== */
@@ -579,8 +577,8 @@
 </style>
 <base target="_blank">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Google Maps JavaScript API is loaded on demand by initMapOnDemand().
+     Set GOOGLE_MAPS_API_KEY below, or save it in localStorage under googleMapsApiKey. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 
@@ -3781,10 +3779,36 @@ if(dropZone){
 
 
 // =====================
-// MAP - Leaflet OpenStreetMap
+// MAP - Google Maps
 // =====================
 let map = null;
 let mapMarkers = {};
+let mapInfoWindow = null;
+let googleMapsLoadPromise = null;
+// ضع مفتاح Google Maps JavaScript API هنا، أو احفظه في localStorage باسم googleMapsApiKey.
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCJ1xkZxmF0UnWMdQYjLElklIPYgCkHM2A';
+
+function getGoogleMapsApiKey(){
+  const fromUrl = new URLSearchParams(location.search).get('googleMapsKey');
+  return (fromUrl || GOOGLE_MAPS_API_KEY || localStorage.getItem('googleMapsApiKey') || '').trim();
+}
+
+function loadGoogleMapsApi(){
+  if(window.google?.maps) return Promise.resolve();
+  if(googleMapsLoadPromise) return googleMapsLoadPromise;
+  const key = getGoogleMapsApiKey();
+  if(!key) return Promise.reject(new Error('لم يتم ضبط مفتاح Google Maps API'));
+  googleMapsLoadPromise = new Promise((resolve, reject) => {
+    const callbackName = '__googleMapsReady_' + Date.now();
+    window[callbackName] = () => { delete window[callbackName]; resolve(); };
+    const script = document.createElement('script');
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&callback=' + callbackName + '&language=ar&region=SY';
+    script.async = true; script.defer = true;
+    script.onerror = () => { delete window[callbackName]; reject(new Error('تعذر تحميل Google Maps API')); };
+    document.head.appendChild(script);
+  });
+  return googleMapsLoadPromise;
+}
 
 const GOV_COORDS = {
   "دمشق": [33.5138, 36.2765],
@@ -3832,55 +3856,32 @@ function getIntensityColor(intensity){
 
 function initMap(){
   if(map !== null) return;
-  if(typeof L === 'undefined'){
-    const mapEl = document.getElementById('govMap');
-    if(mapEl) mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;"><div style="font-size:36px;">🗺️</div><div>تعذّر تحميل الخريطة — تأكد من الاتصال بالإنترنت لتحميل مكتبة Leaflet</div></div>';
-    return;
-  }
+  if(!window.google?.maps) return;
+  const mapEl = document.getElementById('govMap');
+  if(!mapEl) return;
 
-  // نطاق سوريا التقريبي: يركّز العرض على الأراضي السورية ويمنع سحب الخريطة بعيداً عنها.
-  const syriaBounds = L.latLngBounds(
-    [32.25, 35.55], // الجنوب الغربي
-    [37.40, 42.45]  // الشمال الشرقي
-  );
-
-  map = L.map('govMap', {
+  const syriaBounds = {north:37.40, south:32.25, west:35.55, east:42.45};
+  map = new google.maps.Map(mapEl, {
+    center: {lat:35.2, lng:38.2},
+    zoom: 7,
     minZoom: 6,
     maxZoom: 13,
-    maxBounds: syriaBounds,
-    maxBoundsViscosity: 1.0,
-    zoomControl: true,
-    worldCopyJump: false
+    restriction: {latLngBounds: syriaBounds, strictBounds: true},
+    streetViewControl: false,
+    fullscreenControl: true,
+    mapTypeControl: true,
+    mapTypeControlOptions: {position: google.maps.ControlPosition.TOP_RIGHT},
+    mapTypeId: 'roadmap'
   });
-
-  map.fitBounds(syriaBounds, {padding: [18, 18]});
-
-  // طبقات الخريطة: أساسية + تضاريس بخطوط الارتفاع
-  const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19,
-    noWrap: true
-  });
-  const terrainLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenTopoMap contributors, © OpenStreetMap contributors',
-    maxZoom: 17,
-    noWrap: true
-  });
-  streetLayer.addTo(map);
-  L.control.layers({
-    'خريطة الشوارع': streetLayer,
-    'التضاريس والارتفاعات': terrainLayer
-  }, null, {collapsed: false, position: 'topright'}).addTo(map);
-
+  mapInfoWindow = new google.maps.InfoWindow();
+  map.fitBounds(syriaBounds, 18);
   updateMapMarkers();
 }
-
 function updateMapMarkers(){
-  if(!map || typeof L === 'undefined') return;
-  if(typeof L === 'undefined') return;
+  if(!map || !window.google?.maps) return;
 
   // Clear existing markers
-  Object.values(mapMarkers).forEach(m => map.removeLayer(m));
+  Object.values(mapMarkers).forEach(m => m.setMap(null));
   mapMarkers = {};
 
   const arr = filtered();
@@ -3893,29 +3894,18 @@ function updateMapMarkers(){
     const color = getIntensityColor(intensity);
     const govData = arr.filter(d => d.gov === gov);
 
-    // Create custom icon
-    const customIcon = L.divIcon({
-      className: 'custom-marker',
-      html: `<div style="
-        width:28px;height:28px;
-        background:${color};
-        border:3px solid white;
-        border-radius:50%;
-        box-shadow:0 2px 8px rgba(0,0,0,0.3);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:white;
-        font-weight:700;
-        font-size:11px;
-        font-family:'IBM Plex Mono',monospace;
-      ">${gov[0]}</div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
+    // Google Maps marker using an inline SVG circle, preserving the existing color scale.
+    const markerIcon = {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="14" fill="${color}" stroke="white" stroke-width="3"/><text x="18" y="22" text-anchor="middle" fill="white" font-size="11" font-family="Arial" font-weight="700">${gov[0]}</text></svg>`),
+      scaledSize: new google.maps.Size(36, 36),
+      anchor: new google.maps.Point(18, 18)
+    };
+    const marker = new google.maps.Marker({position: {lat: coords[0], lng: coords[1]}, map, icon: markerIcon, title: gov});
+    marker.addListener('click', function(){
+      mapInfoWindow.setContent(popupContent);
+      mapInfoWindow.open({map, anchor: marker});
+      openGovProfile(gov);
     });
-
-    const marker = L.marker(coords, { icon: customIcon }).addTo(map);
-    marker.on('click', function(){ openGovProfile(gov); });
 
     // Build popup content
     let popupContent = `<div class="map-info-window">
@@ -4103,37 +4093,29 @@ function updateMapMarkers(){
     }
     popupContent += `</div>`;
 
-    marker.bindPopup(popupContent, { 
-      maxWidth: 340,
-      minWidth: 280,
-      className: 'gov-popup',
-      autoPan: true,
-      autoPanPadding: [50, 50]
+    // The click listener is attached after the popup content is built below.
+    marker.addListener('click', function(){
+      mapInfoWindow.setContent(popupContent);
+      mapInfoWindow.open({map, anchor: marker});
     });
-
     mapMarkers[gov] = marker;
   });
 }
 
 // Initialize map when the map section is opened
 function initMapOnDemand(){
-  if(typeof L === 'undefined'){
-    const mapEl = document.getElementById('govMap');
-    if(mapEl && !mapEl.querySelector('.map-unavailable')) {
-      mapEl.innerHTML = '<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;"><div style="font-size:36px;">🗺️</div><div>تعذّر تحميل الخريطة — تأكد من الاتصال بالإنترنت</div></div>';
+  const mapEl = document.getElementById('govMap');
+  if(!mapEl) return;
+  loadGoogleMapsApi().then(() => {
+    if(!map) initMap();
+    else updateMapMarkers();
+  }).catch(err => {
+    console.warn('Google Maps unavailable:', err);
+    if(!mapEl.querySelector('.map-unavailable')){
+      mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;text-align:center;padding:20px;"><div style="font-size:36px;">🗺️</div><div>تعذّر تحميل Google Maps</div><div style="font-size:12px;max-width:520px;line-height:1.8;">${err.message}. أضف مفتاح Google Maps JavaScript API في المتغير GOOGLE_MAPS_API_KEY داخل الملف، أو احفظه في localStorage باسم <code>googleMapsApiKey</code>.</div></div>`;
     }
-    return;
-  }
-  if(!map){
-    setTimeout(() => {
-      initMap();
-      updateMapMarkers();
-    }, 300);
-  } else {
-    updateMapMarkers();
-  }
+  });
 }
-
 
 // =====================
 // LOCAL USERS / ROLES / GOOGLE AUTH
@@ -5824,9 +5806,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   @media(max-width:760px){.theme-toggle{top:12px;inset-inline-start:12px;width:38px;height:38px;font-size:17px}.toolbar-inner{gap:7px}.toolbar-label{width:100%;margin:0}.chip{padding:7px 11px;font-size:12px}.data-source-bar{padding:12px}.gsheet-input{min-width:0}.cat-head h2,.map-head h2,.insights-head h2,.analytics-head h2{font-size:16px}.cat-head p,.map-head p,.insights-head p,.analytics-head p{font-size:12px}.modal-overlay{padding:12px}.modal-box{max-height:92vh}.modal-header,.modal-body{padding:16px}.comparison-grid{grid-template-columns:1fr}.strat-timeline{grid-template-columns:repeat(2,1fr)}.strat-overall{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:480px){.theme-toggle{top:10px}.masthead{padding-top:52px}.masthead-inner{gap:10px}.masthead-content{width:100%}.eyebrow{justify-content:center;font-size:10px}.month-badge{font-size:11px;padding:6px 11px}.data-panel,main{padding-left:12px;padding-right:12px}.kpi-grid{margin-bottom:28px}.kpi .val{font-size:16px}.kpi .lbl{min-height:0}.map-legend{padding:10px 14px;gap:8px}.legend-item{font-size:11px}.modal-box{border-radius:14px}.password-overlay{padding:12px}.password-box{padding:28px 20px;border-radius:16px}}
   .masthead-actions{flex-shrink:0;display:flex;align-items:flex-start;margin-inline-start:auto;position:relative;z-index:2}.top-logout-btn{border:1px solid rgba(255,255,255,.4);border-radius:10px;background:rgba(198,40,40,.9);color:#fff;padding:9px 14px;font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 5px 14px rgba(0,0,0,.18);transition:transform .18s ease,background .18s ease,box-shadow .18s ease;white-space:nowrap}.top-logout-btn:hover{background:#b71c1c;transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.25)}
-  .leaflet-control-layers{border:1px solid var(--line)!important;border-radius:10px!important;box-shadow:var(--shadow-sm)!important;font-family:'Cairo',sans-serif;font-size:12px;direction:rtl;text-align:right}.leaflet-control-layers-expanded{padding:8px 10px!important;background:rgba(255,255,255,.96)}html[data-theme="dark"] .leaflet-control-layers-expanded{background:rgba(18,48,61,.96);color:var(--ink);border-color:var(--line)!important}html[data-theme="dark"] .leaflet-control-layers-separator{border-color:var(--line)}
-  @media(max-width:760px){.masthead-actions{position:absolute;top:8px;inset-inline-end:0}.top-logout-btn{padding:7px 10px;font-size:11px}.top-logout-btn span{display:none}.masthead{padding-top:52px}.leaflet-control-layers-expanded{font-size:11px;padding:6px 8px!important}}
-  @media(max-width:480px){.masthead-actions{top:4px}.top-logout-btn{padding:6px 9px}.leaflet-control-layers{max-width:170px}}
+
+  @media(max-width:760px){.masthead-actions{position:absolute;top:8px;inset-inline-end:0}.top-logout-btn{padding:7px 10px;font-size:11px}.top-logout-btn span{display:none}.masthead{padding-top:52px}}
+  @media(max-width:480px){.masthead-actions{top:4px}.top-logout-btn{padding:6px 9px}}
   /* ===== MODERN CHART PRESENTATION ===== */
   .chart-wrap{position:relative;min-height:250px;padding:18px;border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(232,243,246,.72));border:1px solid rgba(158,195,205,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 22px rgba(7,60,85,.06);overflow:hidden}
   .chart-wrap::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(13,139,168,.06),transparent 42%)}
