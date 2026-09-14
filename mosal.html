@@ -3786,12 +3786,21 @@ let mapMarkers = {};
 let mapInfoWindow = null;
 let googleMapsLoadPromise = null;
 // ضع مفتاح Google Maps JavaScript API هنا، أو احفظه في localStorage باسم googleMapsApiKey.
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCJ1xkZxmF0UnWMdQYjLElklIPYgCkHM2A';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAGI6yqE0GfOZUDwtyN1JdHz2YZZjZgB5U';
 
 function getGoogleMapsApiKey(){
   const fromUrl = new URLSearchParams(location.search).get('googleMapsKey');
   return (fromUrl || GOOGLE_MAPS_API_KEY || localStorage.getItem('googleMapsApiKey') || '').trim();
 }
+
+// Google calls this global handler when the key, billing, API, or referrer
+// restriction is rejected. Show an actionable message instead of the generic
+// "Google Maps didn't load correctly" banner.
+window.gm_authFailure = function(){
+  const mapEl = document.getElementById('govMap');
+  if(!mapEl) return;
+  mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;text-align:center;padding:20px;"><div style="font-size:36px;">⚠️</div><div style="font-weight:700;color:#b3261e;">رفضت Google Maps استخدام المفتاح</div><div style="font-size:12px;max-width:560px;line-height:1.9;">تحقق من تفعيل Maps JavaScript API، تفعيل الفوترة، وإضافة نطاق هذه الصفحة ضمن Websites / HTTP referrers في قيود المفتاح. راجع Console لمعرفة الخطأ التفصيلي.</div></div>`;
+};
 
 function loadGoogleMapsApi(){
   if(window.google?.maps) return Promise.resolve();
