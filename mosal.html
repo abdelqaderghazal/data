@@ -75,6 +75,14 @@
   .cat-note{font-size:13.5px;color:var(--ink-soft);background:var(--sand);border-inline-start:3px solid #0D8BA8;padding:10px 14px;border-radius:6px;margin-bottom:18px;line-height:1.8;}
   .chart-wrap{background:var(--sand);border-radius:12px;padding:16px;margin-bottom:18px;min-height:220px;}
   .chart-wrap canvas{max-height:320px;}
+  .camps-charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;background:var(--sand);border-radius:12px;padding:14px;}
+  .camp-chart-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0;}
+  .camp-chart-title{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:13px;margin-bottom:8px;}
+  .camp-chart-title strong{font-family:'Tajawal',sans-serif;}
+  .camp-chart-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .camp-chart-context{margin-inline-start:auto;color:var(--ink-soft);font-size:10px;font-weight:400;}
+  .camp-chart-canvas{height:230px;position:relative;}
+  @media(max-width:760px){.camps-charts-grid{grid-template-columns:1fr;padding:10px;gap:10px;}.camp-chart-canvas{height:220px;}}
   .ind-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;}
   .ind-card{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:var(--paper);display:flex;gap:10px;align-items:flex-start;}
   .ind-card .em{font-size:19px;flex-shrink:0;}
@@ -1116,7 +1124,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-camps">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-camps"></canvas></div>
+      <div class="camps-charts-grid" id="chart-camps"></div>
       <div class="ind-cards" id="cards-camps"></div>
     </div>
   </section>
@@ -2027,8 +2035,8 @@ function barChart(canvasId, dataField){
   });
 }
 
-// Camps chart: show every camp/displacement/return indicator.
-function renderCampsIndicatorsChart(canvasId, arr){
+// Camps charts: one chart for each indicator shown in the cards list.
+function renderCampsIndicatorsChart(containerId, arr){
   const indicators = [
     {key:'camps_count', label:'عدد المخيمات', color:'#2563EB'},
     {key:'camp_families', label:'الأسر المقيمة', color:'#06B6D4'},
@@ -2038,56 +2046,79 @@ function renderCampsIndicatorsChart(canvasId, arr){
     {key:'returned_by_convoys', label:'العائدة بالقوافل', color:'#F43F5E'},
     {key:'evacuated_camps', label:'المخيمات المفرغة', color:'#10B981'}
   ];
+  const container = document.getElementById(containerId);
+  if(!container) return;
 
-  if(activeGov !== 'all' && arr.length > 0){
-    renderSingleGovChart(canvasId, arr, 'camps_count');
-    return;
-  }
+  // Destroy any previous charts belonging to this section.
+  Object.keys(charts).filter(id => id.startsWith('chart-camps-')).forEach(id => {
+    if(charts[id]) charts[id].destroy();
+    delete charts[id];
+  });
 
   const grouped = {};
-  arr.forEach(row => {
-    const gov = row.gov || 'غير محدد';
-    if(!grouped[gov]) grouped[gov] = {gov};
-    indicators.forEach(({key}) => {
-      const value = parseFloat(row[key]);
-      if(!isNaN(value)) grouped[gov][key] = (grouped[gov][key] || 0) + value;
+  if(activeGov !== 'all'){
+    // For a selected governorate, show the selected months on the x-axis.
+    arr.forEach(row => {
+      const label = normalizeMonth(row.month) || 'غير محدد';
+      if(!grouped[label]) grouped[label] = {label};
+      indicators.forEach(({key}) => {
+        const value = parseFloat(row[key]);
+        if(!isNaN(value)) grouped[label][key] = (grouped[label][key] || 0) + value;
+      });
     });
-  });
-  ALL_GOVS.forEach(gov => { if(!grouped[gov]) grouped[gov] = {gov}; });
-  const govList = ALL_GOVS.map(gov => grouped[gov]).filter(Boolean);
-  const labels = govList.map(row => row.gov);
-  const datasets = indicators.map(indicator => ({
-    label: indicator.label,
-    data: govList.map(row => row[indicator.key] || 0),
-    backgroundColor: indicator.color,
-    borderColor: indicator.color,
-    borderWidth: 1,
-    borderRadius: 4,
-    barPercentage: 0.86,
-    categoryPercentage: 0.72
-  }));
+  } else {
+    // For all governorates, aggregate each indicator by governorate.
+    arr.forEach(row => {
+      const gov = row.gov || 'غير محدد';
+      if(!grouped[gov]) grouped[gov] = {label:gov};
+      indicators.forEach(({key}) => {
+        const value = parseFloat(row[key]);
+        if(!isNaN(value)) grouped[gov][key] = (grouped[gov][key] || 0) + value;
+      });
+    });
+  }
 
-  const canvas = document.getElementById(canvasId);
-  if(!canvas) return;
-  if(canvas.parentElement) canvas.parentElement.style.height = Math.max(420, labels.length * 58) + 'px';
-  if(charts[canvasId]) charts[canvasId].destroy();
-  charts[canvasId] = new Chart(canvas.getContext('2d'), {
-    type:'bar',
-    data:{labels, datasets},
-    options:{
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
-      interaction:{mode:'index', intersect:false},
-      plugins:{
-        legend:{display:true, position:'bottom', rtl:true, labels:{font:{family:'Cairo', size:11}, usePointStyle:true, boxWidth:10}},
-        tooltip:{rtl:true, titleFont:{family:'Cairo'}, bodyFont:{family:'Cairo'}, callbacks:{label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.raw || 0)}`}}
+  const labels = activeGov !== 'all'
+    ? MONTHS_LIST.filter(month => grouped[month]).concat(Object.keys(grouped).filter(month => !MONTHS_LIST.includes(month)))
+    : ALL_GOVS.filter(gov => grouped[gov]).concat(Object.keys(grouped).filter(gov => !ALL_GOVS.includes(gov)));
+  const rows = labels.map(label => grouped[label] || {label});
+
+  container.innerHTML = indicators.map((indicator, index) => `
+    <div class="camp-chart-card">
+      <div class="camp-chart-title"><span class="camp-chart-dot" style="background:${indicator.color}"></span><strong>${indicator.label}</strong><span class="camp-chart-context">${activeGov !== 'all' ? activeGov : 'حسب المحافظة'}</span></div>
+      <div class="camp-chart-canvas"><canvas id="chart-camps-${indicator.key}"></canvas></div>
+    </div>`).join('');
+
+  indicators.forEach(indicator => {
+    const canvas = document.getElementById(`chart-camps-${indicator.key}`);
+    if(!canvas) return;
+    const chartId = `chart-camps-${indicator.key}`;
+    charts[chartId] = new Chart(canvas.getContext('2d'), {
+      type:'bar',
+      data:{
+        labels,
+        datasets:[{
+          label:indicator.label,
+          data:rows.map(row => row[indicator.key] || 0),
+          backgroundColor:indicator.color,
+          borderColor:indicator.color,
+          borderWidth:1,
+          borderRadius:6,
+          maxBarThickness:32
+        }]
       },
-      scales:{
-        x:{beginAtZero:true, grid:{color:'rgba(100,116,139,.14)', drawBorder:false}, ticks:{font:{family:'IBM Plex Mono', size:10}}},
-        y:{grid:{display:false}, ticks:{font:{family:'Cairo', size:11}}}
+      options:{
+        indexAxis:'y', responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{rtl:true, titleFont:{family:'Cairo'}, bodyFont:{family:'Cairo'}, callbacks:{label:ctx => ` ${indicator.label}: ${fmt(ctx.raw || 0)}`}}
+        },
+        scales:{
+          x:{beginAtZero:true, grid:{color:'rgba(100,116,139,.14)', drawBorder:false}, ticks:{font:{family:'IBM Plex Mono', size:10}}},
+          y:{grid:{display:false}, ticks:{font:{family:'Cairo', size:11}}}
+        }
       }
-    }
+    });
   });
 }
 
