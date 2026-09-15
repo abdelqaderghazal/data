@@ -1111,7 +1111,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
   <section class="category" data-cat="camps">
     <div class="cat-head" onclick="toggleCat(this)">
       <div class="icon">🏕️</div>
-      <div><h2>المخيمات والنازحون والعائدون</h2><p>عدد المخيمات والأسر المقيمة فيها والعائدين</p></div>
+      <div><h2>المخيمات والنازحون والعائدون</h2><p>عدد المخيمات، النازحين، قوافل العودة، والمخيمات المفرغة</p></div>
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
@@ -1411,6 +1411,16 @@ const COLUMN_MAP = {
   "عدد المخيمات": "camps_count",
   "عدد الاسر المقيمة في المخيمات": "camp_families",
   "عدد العائدين": "returnees",
+  "قوافل العودة": "return_convoys",
+  "عدد قوافل العودة": "return_convoys",
+  "عدد الافراد الحالي": "current_persons",
+  "عدد الأفراد الحالي": "current_persons",
+  "الأفراد الحاليين": "current_persons",
+  "العائدة بالقوافل": "returned_by_convoys",
+  "العائدون بالقوافل": "returned_by_convoys",
+  "عدد العائدة بالقوافل": "returned_by_convoys",
+  "المخيمات المفرغة": "evacuated_camps",
+  "عدد المخيمات المفرغة": "evacuated_camps",
 
   // === Insurance ===
   "عدد المسجلين في التأمينات الاجتماعية/ قطاع عام": "insurance_public",
@@ -2526,14 +2536,22 @@ function renderCategory(cat){
     renderCards('cards-camps', [
       {em:'🏕️',n:sum('camps_count',arr),t:'عدد المخيمات'},
       {em:'👨‍👩‍👧‍👦',n:sum('camp_families',arr),t:'الأسر المقيمة في المخيمات'},
-      {em:'🏠',n:sum('returnees',arr),t:'عدد العائدين'}
+      {em:'🏠',n:sum('returnees',arr),t:'عدد العائدين'},
+      {em:'🚌',n:sum('return_convoys',arr),t:'قوافل العودة'},
+      {em:'👥',n:sum('current_persons',arr),t:'عدد الأفراد الحالي'},
+      {em:'🔁',n:sum('returned_by_convoys',arr),t:'العائدة بالقوافل'},
+      {em:'🚪',n:sum('evacuated_camps',arr),t:'المخيمات المفرغة'}
     ]);
     const camps = sum('camps_count', arr);
     const families = sum('camp_families', arr);
     const returnees = sum('returnees', arr);
+    const returnConvoys = sum('return_convoys', arr);
+    const currentPersons = sum('current_persons', arr);
+    const returnedByConvoys = sum('returned_by_convoys', arr);
+    const evacuatedCamps = sum('evacuated_camps', arr);
     const avgPerCamp = camps > 0 ? Math.round(families / camps) : 0;
     document.getElementById('note-camps').textContent = 
-      `💡 ${fmt(camps)} مخيم يؤوي ${fmt(families)} أسرة (متوسط ${fmt(avgPerCamp)} أسرة لكل مخيم). عدد العائدين: ${fmt(returnees)}.`;
+      `💡 ${fmt(camps)} مخيم يؤوي ${fmt(families)} أسرة (متوسط ${fmt(avgPerCamp)} أسرة لكل مخيم). عدد الأفراد الحالي: ${fmt(currentPersons)}، العائدون: ${fmt(returnees)}، قوافل العودة: ${fmt(returnConvoys)}، العائدة بالقوافل: ${fmt(returnedByConvoys)}، المخيمات المفرغة: ${fmt(evacuatedCamps)}.`;
   }
 
   if(cat === 'platform'){
@@ -5112,6 +5130,10 @@ function generateSampleData(){
         in_kind_aid: Math.floor(Math.random() * 300),
         camps_count: Math.floor(Math.random() * 5),
         camp_families: Math.floor(Math.random() * 200),
+        return_convoys: Math.floor(Math.random() * 10),
+        current_persons: Math.floor(Math.random() * 500),
+        returned_by_convoys: Math.floor(Math.random() * 300),
+        evacuated_camps: Math.floor(Math.random() * 5),
         platform_registered: Math.floor(Math.random() * 1000),
         platform_establishments: Math.floor(Math.random() * 100),
         platform_jobs: Math.floor(Math.random() * 200),
