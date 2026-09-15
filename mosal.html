@@ -76,6 +76,14 @@
   .chart-wrap{background:var(--sand);border-radius:12px;padding:16px;margin-bottom:18px;min-height:220px;}
   .chart-wrap canvas{max-height:320px;}
   .camps-charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;background:var(--sand);border-radius:12px;padding:14px;}
+  .indicator-charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;background:var(--sand);border-radius:12px;padding:14px;}
+  .indicator-chart-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0;}
+  .indicator-chart-title{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:13px;margin-bottom:8px;}
+  .indicator-chart-title strong{font-family:'Tajawal',sans-serif;}
+  .indicator-chart-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .indicator-chart-context{margin-inline-start:auto;color:var(--ink-soft);font-size:10px;font-weight:400;}
+  .indicator-chart-canvas{height:230px;position:relative;}
+  @media(max-width:760px){.indicator-charts-grid{grid-template-columns:1fr;padding:10px;gap:10px;}.indicator-chart-canvas{height:220px;}}
   .camp-chart-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0;}
   .camp-chart-title{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:13px;margin-bottom:8px;}
   .camp-chart-title strong{font-family:'Tajawal',sans-serif;}
@@ -1007,7 +1015,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-disability">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-disability"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-disability"></div>
       <div class="ind-cards" id="cards-disability"></div>
     </div>
   </section>
@@ -1020,7 +1028,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-social">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-social"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-social"></div>
       <div class="ind-cards" id="cards-social"></div>
     </div>
   </section>
@@ -1033,7 +1041,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-ngo">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-ngo"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-ngo"></div>
       <div class="ind-cards" id="cards-ngo"></div>
     </div>
   </section>
@@ -1046,7 +1054,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-juvenile">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-juvenile"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-juvenile"></div>
       <div class="ind-cards" id="cards-juvenile"></div>
     </div>
   </section>
@@ -1059,7 +1067,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-rural">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-rural"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-rural"></div>
       <div class="ind-cards" id="cards-rural"></div>
     </div>
   </section>
@@ -1072,7 +1080,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-labor">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-labor"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-labor"></div>
       <div class="ind-cards" id="cards-labor"></div>
     </div>
   </section>
@@ -1085,7 +1093,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-labor_market">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-labor_market"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-labor_market"></div>
       <div class="ind-cards" id="cards-labor_market"></div>
     </div>
   </section>
@@ -1098,7 +1106,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-insurance">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-insurance"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-insurance"></div>
       <div class="ind-cards" id="cards-insurance"></div>
     </div>
   </section>
@@ -1111,7 +1119,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-aid">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-aid"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-aid"></div>
       <div class="ind-cards" id="cards-aid"></div>
     </div>
   </section>
@@ -1137,7 +1145,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-platform">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-platform"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-platform"></div>
       <div class="ind-cards" id="cards-platform"></div>
     </div>
   </section>
@@ -1150,7 +1158,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body">
       <p class="cat-note" id="note-demographics">💡 ارفع ملف CSV لعرض البيانات</p>
-      <div class="chart-wrap"><canvas id="chart-demographics"></canvas></div>
+      <div class="indicator-charts-grid" id="chart-demographics"></div>
       <div class="ind-cards" id="cards-demographics"></div>
     </div>
   </section>
@@ -1955,8 +1963,55 @@ function renderKPIs(){
 // =====================
 // CHARTS
 // =====================
+// Indicator definitions mirror the cards shown in each category.
+const CATEGORY_INDICATORS = {
+  disabled_cards: [
+    ['disabled_cards','إجمالي بطاقات الإعاقة'],['disability_centers','معاهد الإعاقة'],['disability_benef','طلاب المعاهد'],['mobility_aids','المعينات الحركية'],['disability_cash','المعونة النقدية']
+  ],
+  elderly_benef: [
+    ['elderly_homes','دور رعاية كبار السن'],['elderly_benef','مستفيدو دور المسنين'],['beggar_centers_total','مراكز رعاية المتسولين'],['beggar_inmates','نزلاء مراكز التسول'],['orphan_homes','دور رعاية الأيتام'],['orphan_total_benef','مستفيدو الأيتام'],['sponsor_internal','الكفالة الداخلية'],['sponsor_external','الكفالة الخارجية'],['dar_lahn_benef','مستفيدو دار لحن الحياة']
+  ],
+  ngo_active: [['ngo_new_pct','المنظمات المشهرة (عام)'],['ngo_new_pct_2025','المنظمات المشهرة 2025'],['ngo_active','المنظمات المسحوب ترخيصها']],
+  juvenile_inmates: [['juvenile_inst','معاهد إصلاح الأحداث'],['juvenile_inst_active','معاهد الأحداث في الخدمة'],['juvenile_inmates','نزلاء معاهد الأحداث']],
+  rural_dev_benef: [['rural_dev_total','مراكز التنمية خارج الخدمة'],['rural_dev_active','مراكز التنمية في الخدمة'],['rural_ind_total','وحدات الصناعات خارج الخدمة'],['rural_ind_active','وحدات الصناعة في الخدمة'],['rural_dev_benef','مستفيدو التنمية الريفية'],['rural_ind_benef','مستفيدو الصناعات الريفية']],
+  insp_industrial: [['new_workers_insp','عمال مسجلون حديثاً'],['insp_industrial','زيارات صناعية'],['insp_agricultural','زيارات زراعية'],['violations','مخالفات'],['legal_docs_new','صكوك قانونية جديدة'],['legal_docs_review','صكوك قيد المراجعة'],['work_permits_new','تراخيص عمل جديدة'],['work_permits_renew','تجديد تراخيص العمل'],['recruitment_offices','مكاتب استقدام'],['domestic_permits_new','تراخيص عاملات منزليات'],['domestic_offices_syrian','مكاتب تشغيل سوريين'],['private_offices_syrian','مكاتب تشغيل خاص']],
+  insp_total: [['new_workers_insp','عمال مسجلون حديثاً'],['insp_total','الزيارات التفتيشية'],['violations','مخالفات'],['legal_docs_new','صكوك قانونية جديدة'],['legal_docs_review','صكوك قيد المراجعة'],['work_permits_new','تراخيص عمل جديدة'],['work_permits_renew','تجديد تراخيص العمل'],['recruitment_offices','مكاتب استقدام'],['domestic_permits_new','تراخيص عاملات منزليات'],['domestic_offices_syrian','مكاتب تشغيل سوريين'],['private_offices_syrian','مكاتب تشغيل خاص']],
+  employed: [['labor_force','حجم قوة العمل'],['employed','المشتغلون'],['unemployed','المتعطلون'],['unemployment_rate','معدل البطالة'],['male_unemployment','بطالة الذكور'],['female_unemployment','بطالة الإناث'],['youth_unemployment','بطالة الشباب'],['male_participation','مشاركة الذكور'],['female_participation','مشاركة الإناث'],['unorganized_workers','عمال القطاع غير المنظم']],
+  insurance_total: [['insurance_public','التأمينات قطاع عام'],['insurance_private','التأمينات قطاع خاص'],['insurance_total','إجمالي المسجلين'],['pensioners','المتقاعدون'],['work_injury_comp','تعويضات إصابات العمل'],['service_merge_decisions','قرارات ضم الخدمة'],['injury_beneficiaries','مستفيدو تعويضات الإصابات'],['insurance_establishments','المنشآت المشمولة']],
+  food_baskets: [['food_baskets','السلال الغذائية'],['in_kind_aid','المساعدات العينية'],['cash_assistance','الإعانات المالية'],['unhcr_centers','المراكز المجتمعية'],['unfpa_safe_spaces','المساحات الآمنة']],
+  platform_registered: [['platform_registered','المسجلون على المنصة'],['platform_establishments','المنشآت المسجلة'],['platform_jobs','فرص العمل'],['platform_training','فرص التدريب'],['vocational_centers','مراكز التأهيل والإرشاد'],['vocational_benef','مستفيدو التأهيل']],
+  population: [['population','إجمالي السكان'],['males','الذكور'],['females','الإناث'],['pop_under15','السكان دون 15 سنة'],['pop_15_60','السكان 15-60 سنة'],['pop_over60','السكان 60+ سنة']]
+};
+
+function renderIndicatorCharts(containerId, arr, definitions){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  Object.keys(charts).filter(id => id.startsWith(containerId + '-')).forEach(id => { if(charts[id]) charts[id].destroy(); delete charts[id]; });
+  const grouped = {};
+  arr.forEach(row => {
+    const label = activeGov !== 'all' ? (normalizeMonth(row.month) || 'غير محدد') : (row.gov || 'غير محدد');
+    if(!grouped[label]) grouped[label] = {label};
+    definitions.forEach(([key]) => { const value = parseFloat(row[key]); if(!isNaN(value)) grouped[label][key] = (grouped[label][key] || 0) + value; });
+  });
+  const order = activeGov !== 'all' ? MONTHS_LIST : ALL_GOVS;
+  const labels = order.filter(label => grouped[label]).concat(Object.keys(grouped).filter(label => !order.includes(label)));
+  const rows = labels.map(label => grouped[label] || {label});
+  container.innerHTML = definitions.map(([key,label], i) => `<div class="indicator-chart-card"><div class="indicator-chart-title"><span class="indicator-chart-dot" style="background:${PALETTE[i % PALETTE.length]}"></span><strong>${label}</strong><span class="indicator-chart-context">${activeGov !== 'all' ? activeGov : 'حسب المحافظة'}</span></div><div class="indicator-chart-canvas"><canvas id="${containerId}-${key}"></canvas></div></div>`).join('');
+  definitions.forEach(([key,label], i) => {
+    const id = `${containerId}-${key}`;
+    const canvas = document.getElementById(id); if(!canvas) return;
+    const color = PALETTE[i % PALETTE.length];
+    charts[id] = new Chart(canvas.getContext('2d'), { type:'bar', data:{labels, datasets:[{label, data:rows.map(row => row[key] || 0), backgroundColor:color, borderColor:color, borderWidth:1, borderRadius:6, maxBarThickness:32}]}, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{rtl:true,titleFont:{family:'Cairo'},bodyFont:{family:'Cairo'},callbacks:{label:ctx => ` ${label}: ${fmt(ctx.raw || 0)}`}}},scales:{x:{beginAtZero:true,grid:{color:'rgba(100,116,139,.14)',drawBorder:false},ticks:{font:{family:'IBM Plex Mono',size:10}}},y:{grid:{display:false},ticks:{font:{family:'Cairo',size:11}}}}} });
+  });
+}
+
 function barChart(canvasId, dataField){
   const arr = filtered();
+  const container = document.getElementById(canvasId);
+  if(container && container.tagName === 'DIV' && CATEGORY_INDICATORS[dataField]){
+    renderIndicatorCharts(canvasId, arr, CATEGORY_INDICATORS[dataField]);
+    return;
+  }
 
   // If single governorate selected, show INDICATORS as bars instead of governorates
   if(activeGov !== 'all' && arr.length > 0){
