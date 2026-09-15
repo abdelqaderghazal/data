@@ -4174,18 +4174,24 @@ function initMap(){
   const mapEl = document.getElementById('govMap');
   if(!mapEl) return;
 
-  const syriaBounds = {north:37.40, south:32.25, west:35.55, east:42.45};
+  // نطاق إقليمي لإظهار سوريا والدول المجاورة: تركيا، العراق، الأردن، لبنان وفلسطين.
+  const syriaBounds = {north:39.60, south:30.20, west:32.00, east:44.80};
   map = new google.maps.Map(mapEl, {
-    center: {lat:35.2, lng:38.2},
-    zoom: 7,
-    minZoom: 6,
+    center: {lat:35.3, lng:38.4},
+    zoom: 6,
+    minZoom: 5,
     maxZoom: 13,
-    restriction: {latLngBounds: syriaBounds, strictBounds: true},
+    restriction: {latLngBounds: syriaBounds, strictBounds: false},
     streetViewControl: false,
     fullscreenControl: true,
     mapTypeControl: true,
     mapTypeControlOptions: {position: google.maps.ControlPosition.TOP_RIGHT},
-    mapTypeId: 'roadmap'
+    mapTypeId: 'roadmap',
+    styles: [
+      {featureType:'administrative.country',elementType:'geometry.stroke',stylers:[{color:'#0B5A7A'},{weight:2.2}]},
+      {featureType:'administrative.country',elementType:'labels.text',stylers:[{color:'#073C55'},{visibility:'on'}]},
+      {featureType:'administrative.province',elementType:'geometry.stroke',stylers:[{color:'#8CB7C4'},{weight:1}]}
+    ]
   });
   mapInfoWindow = new google.maps.InfoWindow();
   map.fitBounds(syriaBounds, 18);
