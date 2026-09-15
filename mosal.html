@@ -3914,6 +3914,21 @@ function getIntensityColor(intensity){
   if(intensity > 500) return '#4F7A63';  // Medium - green
   return '#6E8FA3'; // Low - blue
 }
+function fitAllGovernorates(){
+  if(!map || !window.google?.maps) return;
+  const bounds=new google.maps.LatLngBounds();
+  Object.values(GOV_COORDS).forEach(([lat,lng])=>bounds.extend({lat,lng}));
+  // Add a small geographic margin so the outer pins are never clipped.
+  const ne=bounds.getNorthEast(), sw=bounds.getSouthWest();
+  const latPad=Math.max((ne.lat()-sw.lat())*.08,.12);
+  const lngPad=Math.max((ne.lng()-sw.lng())*.08,.12);
+  bounds.extend({lat:ne.lat()+latPad,lng:ne.lng()+lngPad});
+  bounds.extend({lat:sw.lat()-latPad,lng:sw.lng()-lngPad});
+  map.fitBounds(bounds,28);
+  google.maps.event.addListenerOnce(map,'bounds_changed',()=>{
+    if(map.getZoom()>7) map.setZoom(7);
+  });
+}
 
 function initMap(){
   if(map !== null) return;
@@ -3935,7 +3950,7 @@ function initMap(){
     mapTypeId: 'roadmap'
   });
   mapInfoWindow = new google.maps.InfoWindow();
-  map.fitBounds(syriaBounds, 18);
+  fitAllGovernorates();
   setupMapTools();
   renderGovSidebar();
   updateMapMarkers();
