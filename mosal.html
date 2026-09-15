@@ -2027,6 +2027,70 @@ function barChart(canvasId, dataField){
   });
 }
 
+// Camps chart: show every camp/displacement/return indicator.
+function renderCampsIndicatorsChart(canvasId, arr){
+  const indicators = [
+    {key:'camps_count', label:'عدد المخيمات', color:'#2563EB'},
+    {key:'camp_families', label:'الأسر المقيمة', color:'#06B6D4'},
+    {key:'returnees', label:'عدد العائدين', color:'#14B8A6'},
+    {key:'return_convoys', label:'قوافل العودة', color:'#8B5CF6'},
+    {key:'current_persons', label:'عدد الأفراد الحالي', color:'#F59E0B'},
+    {key:'returned_by_convoys', label:'العائدة بالقوافل', color:'#F43F5E'},
+    {key:'evacuated_camps', label:'المخيمات المفرغة', color:'#10B981'}
+  ];
+
+  if(activeGov !== 'all' && arr.length > 0){
+    renderSingleGovChart(canvasId, arr, 'camps_count');
+    return;
+  }
+
+  const grouped = {};
+  arr.forEach(row => {
+    const gov = row.gov || 'غير محدد';
+    if(!grouped[gov]) grouped[gov] = {gov};
+    indicators.forEach(({key}) => {
+      const value = parseFloat(row[key]);
+      if(!isNaN(value)) grouped[gov][key] = (grouped[gov][key] || 0) + value;
+    });
+  });
+  ALL_GOVS.forEach(gov => { if(!grouped[gov]) grouped[gov] = {gov}; });
+  const govList = ALL_GOVS.map(gov => grouped[gov]).filter(Boolean);
+  const labels = govList.map(row => row.gov);
+  const datasets = indicators.map(indicator => ({
+    label: indicator.label,
+    data: govList.map(row => row[indicator.key] || 0),
+    backgroundColor: indicator.color,
+    borderColor: indicator.color,
+    borderWidth: 1,
+    borderRadius: 4,
+    barPercentage: 0.86,
+    categoryPercentage: 0.72
+  }));
+
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  if(canvas.parentElement) canvas.parentElement.style.height = Math.max(420, labels.length * 58) + 'px';
+  if(charts[canvasId]) charts[canvasId].destroy();
+  charts[canvasId] = new Chart(canvas.getContext('2d'), {
+    type:'bar',
+    data:{labels, datasets},
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{display:true, position:'bottom', rtl:true, labels:{font:{family:'Cairo', size:11}, usePointStyle:true, boxWidth:10}},
+        tooltip:{rtl:true, titleFont:{family:'Cairo'}, bodyFont:{family:'Cairo'}, callbacks:{label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.raw || 0)}`}}
+      },
+      scales:{
+        x:{beginAtZero:true, grid:{color:'rgba(100,116,139,.14)', drawBorder:false}, ticks:{font:{family:'IBM Plex Mono', size:10}}},
+        y:{grid:{display:false}, ticks:{font:{family:'Cairo', size:11}}}
+      }
+    }
+  });
+}
+
 // NEW: Chart for single governorate showing all indicators
 function renderSingleGovChart(canvasId, arr, categoryField){
   // Aggregate ALL rows for this governorate (multiple months)
@@ -2156,8 +2220,13 @@ function renderSingleGovChart(canvasId, arr, categoryField){
       {key:'female_participation', label:'مشاركة الإناث %'},
       {key:'unorganized_workers', label:'عمال غير منظم %'}],
     'camps_count': [
-      {key:'camps_count', label:'المخيمات'},
-      {key:'camp_families', label:'الأسر المقيمة'}
+      {key:'camps_count', label:'عدد المخيمات'},
+      {key:'camp_families', label:'الأسر المقيمة'},
+      {key:'returnees', label:'عدد العائدين'},
+      {key:'return_convoys', label:'قوافل العودة'},
+      {key:'current_persons', label:'عدد الأفراد الحالي'},
+      {key:'returned_by_convoys', label:'العائدة بالقوافل'},
+      {key:'evacuated_camps', label:'المخيمات المفرغة'}
     ]
   };
 
@@ -2532,7 +2601,7 @@ function renderCategory(cat){
   }
 
   if(cat === 'camps'){
-    barChart('chart-camps', 'camps_count');
+    renderCampsIndicatorsChart('chart-camps', arr);
     renderCards('cards-camps', [
       {em:'🏕️',n:sum('camps_count',arr),t:'عدد المخيمات'},
       {em:'👨‍👩‍👧‍👦',n:sum('camp_families',arr),t:'الأسر المقيمة في المخيمات'},
