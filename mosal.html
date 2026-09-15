@@ -4088,7 +4088,7 @@ function loadGoogleMapsApi(){
     const callbackName = '__googleMapsReady_' + Date.now();
     window[callbackName] = () => { delete window[callbackName]; resolve(); };
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&callback=' + callbackName + '&language=ar&region=SY&libraries=places,visualization';
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&callback=' + callbackName + '&language=ar&region=SY&libraries=places';
     script.async = true; script.defer = true;
     script.onerror = () => { delete window[callbackName]; reject(new Error('تعذر تحميل Google Maps API')); };
     document.head.appendChild(script);
@@ -4141,11 +4141,11 @@ function getIntensityColor(intensity){
 }
 
 const HEATMAP_LAYERS = {
-  camps_count:{gradient:['rgba(0,0,0,0)','rgba(37,99,235,.35)','rgba(37,99,235,.8)','rgba(139,92,246,1)']},
-  camp_families:{gradient:['rgba(0,0,0,0)','rgba(245,158,11,.35)','rgba(245,158,11,.8)','rgba(239,68,68,1)']},
-  returnees:{gradient:['rgba(0,0,0,0)','rgba(20,184,166,.35)','rgba(20,184,166,.8)','rgba(6,95,70,1)']},
-  food_baskets:{gradient:['rgba(0,0,0,0)','rgba(139,92,246,.35)','rgba(139,92,246,.8)','rgba(76,29,149,1)']},
-  population:{gradient:['rgba(0,0,0,0)','rgba(6,182,212,.35)','rgba(6,182,212,.8)','rgba(8,47,73,1)']}
+  camps_count:{color:'#2563EB'},
+  camp_families:{color:'#F59E0B'},
+  returnees:{color:'#14B8A6'},
+  food_baskets:{color:'#8B5CF6'},
+  population:{color:'#06B6D4'}
 };
 function setupHeatmapControls(){
   const box=document.getElementById('heatmapControls');
@@ -4155,15 +4155,16 @@ function setupHeatmapControls(){
 }
 function updateHeatmapLayers(){
   setupHeatmapControls();
-  Object.values(mapHeatLayers).forEach(layer=>layer.setMap(null)); mapHeatLayers={};
-  if(!map || !window.google?.maps?.visualization) return;
+  Object.values(mapHeatLayers).flat().forEach(layer=>layer.setMap(null)); mapHeatLayers={};
+  if(!map || !window.google?.maps?.Circle) return;
   const arr=filtered();
   [...document.querySelectorAll('#heatmapControls input:checked')].map(input=>input.value).forEach(key=>{
     const totals={}; arr.forEach(row=>{totals[row.gov]=(totals[row.gov]||0)+(parseFloat(row[key])||0);});
     const max=Math.max(...Object.values(totals),0); if(max<=0) return;
-    const points=ALL_GOVS.filter(gov=>GOV_COORDS[gov]).map(gov=>({location:new google.maps.LatLng(GOV_COORDS[gov][0],GOV_COORDS[gov][1]),weight:totals[gov]?Math.max(1,(totals[gov]/max)*10):0})).filter(point=>point.weight>0);
-    mapHeatLayers[key]=new google.maps.visualization.HeatmapLayer({data:points,dissipating:true,radius:32,opacity:.62,gradient:HEATMAP_LAYERS[key].gradient});
-    mapHeatLayers[key].setMap(map);
+    mapHeatLayers[key]=ALL_GOVS.filter(gov=>GOV_COORDS[gov] && totals[gov]>0).map(gov=>{
+      const ratio=totals[gov]/max;
+      return new google.maps.Circle({map,center:{lat:GOV_COORDS[gov][0],lng:GOV_COORDS[gov][1]},radius:Math.max(90000,220000*ratio),fillColor:HEATMAP_LAYERS[key].color,fillOpacity:.12+.28*ratio,strokeColor:HEATMAP_LAYERS[key].color,strokeOpacity:.35,strokeWeight:1.5,clickable:false});
+    });
   });
 }
 
@@ -4526,7 +4527,7 @@ function initMapOnDemand(){
   }).catch(err => {
     console.warn('Google Maps unavailable:', err);
     if(!mapEl.querySelector('.map-unavailable')){
-      mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;text-align:center;padding:20px;"><div style="font-size:36px;">🗺️</div><div>تعذّر تحميل Google Maps</div><div style="font-size:12px;max-width:520px;line-height:1.8;">${err.message}. أضف مفتاح Google Maps JavaScript API في المتغير GOOGLE_MAPS_API_KEY داخل الملف، أو احفظه في localStorage باسم <code>googleMapsApiKey</code>.</div></div>`;
+      mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;text-align:center;padding:20px;"><div style="font-size:36px;">🗺️</div><div>تعذّر تحميل Google Maps</div><div style="font-size:12px;max-width:520px;line-height:1.8;">${err.message.includes('مفتاح') ? err.message + '. تحقق من GOOGLE_MAPS_API_KEY أو localStorage باسم googleMapsApiKey.' : err.message + '. تحقق من تفعيل Maps JavaScript API وقيود النطاق في Google Cloud.'}</div></div>`;
     }
   });
 }
