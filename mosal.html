@@ -885,6 +885,17 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 <main>
   <div class="kpi-grid" id="kpiGrid"></div>
 
+  <section class="executive-summary-section" id="executiveSummarySection">
+    <div class="executive-summary-head">
+      <div class="executive-summary-icon">📌</div>
+      <div><h2>الملخص التنفيذي</h2><p>قراءة سريعة لأهم المؤشرات ضمن الفلاتر الحالية</p></div>
+    </div>
+    <div class="executive-summary-body">
+      <div class="executive-summary-cards" id="executiveSummaryCards"></div>
+      <div class="executive-summary-narrative" id="executiveSummaryNarrative"></div>
+    </div>
+  </section>
+
   <!-- ═══════════════════════════════════════════
        بوصلة الخطة الاستراتيجية
        ═══════════════════════════════════════════ -->
@@ -983,6 +994,14 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
           <div id="mapSearchSuggestions" class="map-search-suggestions" role="listbox" aria-label="اقتراحات البحث"></div>
           <small>اختر اقتراحًا للانتقال إليه على الخريطة</small>
         </div>
+      </div>
+      <div class="heatmap-controls" id="heatmapControls" aria-label="طبقات الخريطة الحرارية">
+        <strong>🌡️ الطبقات الحرارية:</strong>
+        <label><input type="checkbox" value="camps_count" checked> المخيمات</label>
+        <label><input type="checkbox" value="camp_families"> الأسر المقيمة</label>
+        <label><input type="checkbox" value="returnees"> العائدون</label>
+        <label><input type="checkbox" value="food_baskets"> المساعدات</label>
+        <label><input type="checkbox" value="population"> السكان</label>
       </div>
       <div class="map-legend" id="mapLegend">
         <span style="font-weight:600;color:var(--ink);font-size:12.5px;">🔴 شدة المؤشرات:</span>
@@ -2840,9 +2859,34 @@ function renderModernVisuals(){
   if(govCanvas) charts.modernGovernorChart=new Chart(govCanvas.getContext('2d'),{type:'bar',data:{labels:govRows.map(x=>x[0]),datasets:[{label:'عدد السكان',data:govRows.map(x=>x[1]),backgroundColor:govRows.map((_,i)=>i===0?'#2563EB':'#7DD3FC'),borderRadius:9,borderSkipped:false,barThickness:22}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{rtl:true,padding:12,cornerRadius:10,displayColors:false,callbacks:{label:ctx=>` ${analyticsNumber(ctx.raw)} نسمة`}}},scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{callback:v=>analyticsNumber(v),color:chartSoft}},y:{grid:{display:false},ticks:{font:{family:'Cairo',weight:'600'},color:chartInk}}},animation:{duration:900,easing:'easeOutQuart'}}});
 }
 
+function renderExecutiveSummary(){
+  const cards = document.getElementById('executiveSummaryCards');
+  const narrative = document.getElementById('executiveSummaryNarrative');
+  if(!cards || !narrative) return;
+  const arr = filtered();
+  const total = key => sum(key, arr);
+  const govTotals = {};
+  arr.forEach(row => { govTotals[row.gov] = (govTotals[row.gov] || 0) + (parseFloat(row.camp_families) || 0); });
+  const topGov = Object.entries(govTotals).sort((a,b)=>b[1]-a[1])[0];
+  const period = rangeFromMonth || rangeToMonth
+    ? `الفترة من ${rangeFromMonth || MONTHS_LIST[0]} إلى ${rangeToMonth || MONTHS_LIST[MONTHS_LIST.length-1]}`
+    : (selectedMonthChips.size ? `الأشهر: ${[...selectedMonthChips].join('، ')}` : 'جميع الأشهر المتاحة');
+  const values = [
+    ['عدد السجلات', arr.length],
+    ['عدد المحافظات', new Set(arr.map(d=>d.gov).filter(Boolean)).size],
+    ['المخيمات', total('camps_count')],
+    ['الأسر المقيمة', total('camp_families')],
+    ['العائدون', total('returnees')]
+  ];
+  cards.innerHTML = values.map(([label,value]) => `<div class="executive-summary-card"><div class="value">${fmt(Number(value)||0)}</div><div class="label">${label}</div></div>`).join('');
+  const topText = topGov && topGov[1] > 0 ? `وتستحوذ ${escapeHtml(topGov[0])} على أعلى عدد من الأسر المقيمة (${fmt(topGov[1])}).` : 'لا تتوفر بيانات كافية لاستخراج المحافظة الأعلى في الأسر المقيمة.';
+  narrative.innerHTML = `📅 ${period} · 🏛️ ${activeGov === 'all' ? 'كل المحافظات' : escapeHtml(activeGov)}. إجمالي العائدين ${fmt(total('returnees'))} مقابل ${fmt(total('camp_families'))} أسرة مقيمة، وإجمالي المساعدات الغذائية ${fmt(total('food_baskets'))}. ${topText}`;
+}
+
 function renderAll(){
   console.log('Rendering with', filtered().length, 'rows, activeGov:', activeGov, 'selectedMonths:', [...selectedMonths]);
   renderKPIs();
+  renderExecutiveSummary();
   renderModernVisuals();
   ['disability','social','ngo','juvenile','rural','labor','labor_market','insurance','aid','camps','platform','demographics'].forEach(renderCategory);
   renderGovList();
@@ -4017,6 +4061,7 @@ let mapMarkers = {};
 let mapInfoWindow = null;
 let googleMapsLoadPromise = null;
 let placesAutocomplete = null;
+let mapHeatLayers = {};
 // ضع مفتاح Google Maps JavaScript API هنا، أو احفظه في localStorage باسم googleMapsApiKey.
 const GOOGLE_MAPS_API_KEY = 'AIzaSyAGI6yqE0GfOZUDwtyN1JdHz2YZZjZgB5U';
 
@@ -4043,7 +4088,7 @@ function loadGoogleMapsApi(){
     const callbackName = '__googleMapsReady_' + Date.now();
     window[callbackName] = () => { delete window[callbackName]; resolve(); };
     const script = document.createElement('script');
-    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&callback=' + callbackName + '&language=ar&region=SY&libraries=places';
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&callback=' + callbackName + '&language=ar&region=SY&libraries=places,visualization';
     script.async = true; script.defer = true;
     script.onerror = () => { delete window[callbackName]; reject(new Error('تعذر تحميل Google Maps API')); };
     document.head.appendChild(script);
@@ -4095,6 +4140,33 @@ function getIntensityColor(intensity){
   return '#6E8FA3'; // Low - blue
 }
 
+const HEATMAP_LAYERS = {
+  camps_count:{gradient:['rgba(0,0,0,0)','rgba(37,99,235,.35)','rgba(37,99,235,.8)','rgba(139,92,246,1)']},
+  camp_families:{gradient:['rgba(0,0,0,0)','rgba(245,158,11,.35)','rgba(245,158,11,.8)','rgba(239,68,68,1)']},
+  returnees:{gradient:['rgba(0,0,0,0)','rgba(20,184,166,.35)','rgba(20,184,166,.8)','rgba(6,95,70,1)']},
+  food_baskets:{gradient:['rgba(0,0,0,0)','rgba(139,92,246,.35)','rgba(139,92,246,.8)','rgba(76,29,149,1)']},
+  population:{gradient:['rgba(0,0,0,0)','rgba(6,182,212,.35)','rgba(6,182,212,.8)','rgba(8,47,73,1)']}
+};
+function setupHeatmapControls(){
+  const box=document.getElementById('heatmapControls');
+  if(!box || box.dataset.ready) return;
+  box.dataset.ready='true';
+  box.querySelectorAll('input[type="checkbox"]').forEach(input=>input.addEventListener('change',updateHeatmapLayers));
+}
+function updateHeatmapLayers(){
+  setupHeatmapControls();
+  Object.values(mapHeatLayers).forEach(layer=>layer.setMap(null)); mapHeatLayers={};
+  if(!map || !window.google?.maps?.visualization) return;
+  const arr=filtered();
+  [...document.querySelectorAll('#heatmapControls input:checked')].map(input=>input.value).forEach(key=>{
+    const totals={}; arr.forEach(row=>{totals[row.gov]=(totals[row.gov]||0)+(parseFloat(row[key])||0);});
+    const max=Math.max(...Object.values(totals),0); if(max<=0) return;
+    const points=ALL_GOVS.filter(gov=>GOV_COORDS[gov]).map(gov=>({location:new google.maps.LatLng(GOV_COORDS[gov][0],GOV_COORDS[gov][1]),weight:totals[gov]?Math.max(1,(totals[gov]/max)*10):0})).filter(point=>point.weight>0);
+    mapHeatLayers[key]=new google.maps.visualization.HeatmapLayer({data:points,dissipating:true,radius:32,opacity:.62,gradient:HEATMAP_LAYERS[key].gradient});
+    mapHeatLayers[key].setMap(map);
+  });
+}
+
 function initMap(){
   if(map !== null) return;
   if(!window.google?.maps) return;
@@ -4117,6 +4189,7 @@ function initMap(){
   mapInfoWindow = new google.maps.InfoWindow();
   map.fitBounds(syriaBounds, 18);
   setupMapTools();
+  setupHeatmapControls();
   renderGovSidebar();
   updateMapMarkers();
 }
@@ -4215,6 +4288,7 @@ function setupMapTools(){setupMapSearch();setupMapSidebar();}
 function updateMapMarkers(){
   renderGovSidebar();
   if(!map || !window.google?.maps) return;
+  updateHeatmapLayers();
 
   // Clear existing markers
   Object.values(mapMarkers).forEach(m => m.setMap(null));
@@ -6192,6 +6266,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   html[data-theme="dark"] .chart-wrap{background:linear-gradient(145deg,#153b48,#0f2c38);border-color:#285663;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 12px 28px rgba(0,0,0,.2)}html[data-theme="dark"] .chart-wrap::before{background:linear-gradient(120deg,rgba(32,169,189,.14),transparent 45%)}html[data-theme="dark"] .modern-chart-card{background:linear-gradient(145deg,#153b48,#102d39);border-color:#285663}
   @media(max-width:760px){.modern-visuals-body{padding:16px}.modern-chart-grid{grid-template-columns:1fr}.modern-chart-card.wide{grid-column:auto}.modern-chart-canvas{height:250px}.modern-chart-canvas.donut-canvas{height:270px}.modern-chart-canvas.radar-canvas{height:290px}.modern-chart-canvas.governor-canvas{height:300px}}
   @media(max-width:480px){.modern-visuals-head{padding:17px 16px}.modern-visuals-head h2{font-size:17px}.modern-visuals-body{padding:12px}.modern-chart-card{padding:12px}.modern-chart-title h3{font-size:14px}.modern-chart-canvas{height:220px}.modern-chart-canvas.donut-canvas{height:240px}.modern-chart-canvas.radar-canvas{height:250px}.modern-chart-canvas.governor-canvas{height:270px}}
+  .executive-summary-section{background:var(--paper);border:1px solid var(--line);border-radius:20px;margin-bottom:24px;overflow:hidden;box-shadow:var(--shadow-md)}.executive-summary-head{display:flex;align-items:center;gap:14px;padding:22px 26px;color:#fff;background:linear-gradient(110deg,#0b5a7a,#0d8ba8 58%,#5ba3c0)}.executive-summary-icon{width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);font-size:24px}.executive-summary-head h2{font-family:Tajawal;margin:0;font-size:20px}.executive-summary-head p{margin:3px 0 0;color:rgba(255,255,255,.82);font-size:12.5px}.executive-summary-body{padding:20px 24px 24px}.executive-summary-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.executive-summary-card{padding:16px 12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,var(--paper),var(--sand));text-align:center}.executive-summary-card .value{font:700 22px 'IBM Plex Mono';color:var(--ink)}.executive-summary-card .label{font-size:12px;color:var(--ink-soft);margin-top:5px}.executive-summary-narrative{margin-top:16px;padding:13px 16px;border-inline-start:4px solid #0d8ba8;border-radius:8px;background:var(--sand);font-size:13px;line-height:1.9;color:var(--ink-soft)}.heatmap-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 24px;background:var(--sand);border-bottom:1px solid var(--sand-2);font-size:12px;color:var(--ink-soft)}.heatmap-controls strong{color:var(--ink)}.heatmap-controls label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}.heatmap-controls input{accent-color:#0d8ba8}.heatmap-controls label.active{font-weight:700;color:var(--ink)}html[data-theme="dark"] .executive-summary-section{background:var(--paper);border-color:var(--line)}html[data-theme="dark"] .executive-summary-card{background:#153b48;border-color:var(--line)}html[data-theme="dark"] .heatmap-controls{background:#102d39;border-color:var(--line)}@media(max-width:760px){.executive-summary-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.executive-summary-head{padding:17px 16px}.executive-summary-body{padding:16px}.heatmap-controls{padding:10px 14px;gap:8px}}@media(max-width:420px){.executive-summary-cards{grid-template-columns:1fr}.executive-summary-card .value{font-size:19px}}
 </style>
 
 <!-- Governorate Profile Modal -->
