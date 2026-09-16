@@ -381,7 +381,7 @@
   .analytics-note{font-size:12px;color:var(--ink-soft);}
   .month-comparison-panel{background:linear-gradient(135deg,#f0f8fa,#fff);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
   .month-comparison-title{font-family:'Tajawal',sans-serif;font-weight:800;color:var(--ink);font-size:15px;margin-bottom:10px;}
-  .month-comparison-controls{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:10px;}
+  .month-comparison-controls{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;}
   .month-comparison-controls label{display:grid;gap:5px;color:var(--ink-soft);font-size:11px;font-weight:700;}
   .month-comparison-controls select{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:8px 10px;font-family:'Cairo',sans-serif;font-size:12px;}
   .month-comparison-result{margin-top:12px;}
@@ -1172,6 +1172,26 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
   </section>
 
+  <section class="category month-comparison-section" data-cat="month-comparison" id="monthComparisonSection">
+    <div class="cat-head" onclick="toggleMonthComparison(this)">
+      <div class="icon">📅</div>
+      <div><h2>مقارنة شهر بشهر</h2><p>مقارنة مؤشر محدد بين شهرين للمحافظة نفسها</p></div>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body month-comparison-body" id="monthComparisonBody">
+      <div class="month-comparison-panel" id="monthComparisonPanel">
+        <div class="month-comparison-title">📊 اختر المحافظة والمؤشر والشهرين للمقارنة</div>
+        <div class="month-comparison-controls">
+          <label>المؤشر<select id="comparisonMetric" onchange="renderMonthComparison()"></select></label>
+          <label>المحافظة<select id="comparisonGov" onchange="renderMonthComparison()"></select></label>
+          <label>الشهر الأول<select id="comparisonMonthA" onchange="renderMonthComparison()"></select></label>
+          <label>الشهر الثاني<select id="comparisonMonthB" onchange="renderMonthComparison()"></select></label>
+        </div>
+        <div id="monthComparisonResult" class="month-comparison-result"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- INSIGHTS & COMPARISONS SECTION -->
   <section class="insights-section" data-cat="insights" id="insightsSection">
     <div class="insights-head" onclick="toggleInsights(this)">
@@ -1211,15 +1231,6 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
           <option value="ngo_new_pct_2025">المنظمات المشهرة 2025</option>
         </select>
         <span class="analytics-note">تتبع الرسوم فلاتر المحافظة والشهر المحددة في أعلى اللوحة.</span>
-      </div>
-      <div class="month-comparison-panel" id="monthComparisonPanel">
-        <div class="month-comparison-title">📅 مقارنة الأشهر داخل المحافظة نفسها</div>
-        <div class="month-comparison-controls">
-          <label>المحافظة<select id="comparisonGov" onchange="renderMonthComparison()"></select></label>
-          <label>الشهر الأول<select id="comparisonMonthA" onchange="renderMonthComparison()"></select></label>
-          <label>الشهر الثاني<select id="comparisonMonthB" onchange="renderMonthComparison()"></select></label>
-        </div>
-        <div id="monthComparisonResult" class="month-comparison-result"></div>
       </div>
       <div class="analytics-kpis" id="analyticsKpis"></div>
       <div class="analytics-grid">
@@ -2850,12 +2861,21 @@ function renderAll(){
   if(document.getElementById('advancedAnalyticsSection')?.classList.contains('open')){
     renderAdvancedAnalytics();
   }
+  if(document.getElementById('monthComparisonSection')?.classList.contains('open')){
+    renderMonthComparison();
+  }
 }
 
 function toggleAdvancedAnalytics(headEl){
   const section = headEl.parentElement;
   section.classList.toggle('open');
   if(section.classList.contains('open')) renderAdvancedAnalytics();
+}
+
+function toggleMonthComparison(headEl){
+  const section = headEl.parentElement;
+  section.classList.toggle('open');
+  if(section.classList.contains('open')) renderMonthComparison();
 }
 
 const ANALYTICS_METRICS = {
@@ -2914,6 +2934,7 @@ function toggleInsights(headEl){
 }
 
 function renderMonthComparison(){
+  const metricEl = document.getElementById('comparisonMetric');
   const govEl = document.getElementById('comparisonGov');
   const monthAEl = document.getElementById('comparisonMonthA');
   const monthBEl = document.getElementById('comparisonMonthB');
@@ -2923,7 +2944,11 @@ function renderMonthComparison(){
   const rows = Array.isArray(ALL_DATA) ? ALL_DATA : [];
   const govs = ALL_GOVS.filter(g => rows.some(d => String(d.gov || '').trim() === g));
   const months = MONTHS_LIST.filter(m => rows.some(d => normalizeMonth(d.month) === m));
-  const preserve = {gov:govEl.value, a:monthAEl.value, b:monthBEl.value};
+  const preserve = {metric:metricEl?.value, gov:govEl.value, a:monthAEl.value, b:monthBEl.value};
+  if(metricEl){
+    metricEl.innerHTML = Object.entries(ANALYTICS_METRICS).map(([key, meta]) => `<option value="${key}">${meta.label}</option>`).join('');
+    if(preserve.metric && ANALYTICS_METRICS[preserve.metric]) metricEl.value = preserve.metric;
+  }
   govEl.innerHTML = govs.map(g => `<option value="${g}">${g}</option>`).join('');
   monthAEl.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
   monthBEl.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
@@ -2937,7 +2962,7 @@ function renderMonthComparison(){
   const gov = govEl.value;
   const monthA = monthAEl.value;
   const monthB = monthBEl.value;
-  const metric = document.getElementById('analyticsMetric')?.value || 'population';
+  const metric = metricEl?.value || document.getElementById('analyticsMetric')?.value || 'population';
   const meta = ANALYTICS_METRICS[metric] || ANALYTICS_METRICS.population;
   const valueFor = month => rows
     .filter(d => String(d.gov || '').trim() === gov && normalizeMonth(d.month) === month)
