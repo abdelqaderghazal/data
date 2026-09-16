@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root{--ink:#0B5A7A;--ink-2:#084a66;--sand:#F0F7FA;--sand-2:#E0F0F5;--paper:#ffffff;--brass:#0D8BA8;--brass-light:#5BA3C0;--alert:#e74c3c;--good:#0B5A7A;--line:#c0d8e0;--ink-soft:#4a6a7a;--accent-blue:#0B5A7A;--accent-green:#0D8BA8;--syria-green:#0B5A7A;--syria-white:#ffffff;--syria-black:#052a3a;--syria-red:#0D8BA8;}
+  :root{--ink:#0b5573;--ink-2:#073c55;--sand:#f3f8fa;--sand-2:#e3eff3;--paper:#fff;--brass:#0b91ad;--brass-light:#8ed1df;--alert:#e74c3c;--good:#0b5573;--line:#c8dce3;--ink-soft:#58717e;--accent-blue:#0b5573;--accent-green:#0b91ad;--syria-green:#0b5573;--syria-white:#fff;--syria-black:#073c55;--syria-red:#0b91ad;--shadow-sm:0 3px 12px rgba(7,60,85,.07);--shadow-md:0 12px 32px rgba(7,60,85,.11);--radius-sm:10px;--radius-md:14px;--radius-lg:18px;--shadow-card:0 6px 22px rgba(11,90,122,.07);--shadow-hover:0 10px 30px rgba(11,90,122,.13);--chart-blue:#2563eb;--chart-cyan:#06b6d4;--chart-teal:#14b8a6;--chart-purple:#8b5cf6;--chart-ink:#0f172a;--chart-muted:#64748b;--chart-grid:rgba(100,116,139,.14);--brand-deep:#06384d;--brand-blue:#0b5a7a;--brand-cyan:#0d8ba8;--brand-mist:#eaf5f8;--brand-gold:#d3a85c;}
   *{box-sizing:border-box;}body{margin:0;background:var(--sand);color:var(--ink);font-family:'Cairo',sans-serif;}
   ::selection{background:#b8dce8;color:#052a3a;}
   .masthead{background:linear-gradient(135deg,#0B5A7A 0%,#084a66 50%,#052a3a 100%);color:var(--syria-white);padding:28px 28px 24px;position:relative;overflow:hidden;border-bottom:4px solid #0D8BA8;}
@@ -172,7 +172,6 @@
   /* Disabled buttons in read-only mode */
   body.readonly .btn-success{opacity:0.4;pointer-events:none;}
   body.readonly .btn-primary[id="refreshBtn"]{opacity:0.4;pointer-events:none;}
-  body.readonly #fileDropZone{opacity:0.4;pointer-events:none;}
   body.readonly .gsheet-input{opacity:0.6;pointer-events:none;}  .change-pw-section{background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:20px;text-align:right;}
   .change-pw-section h4{margin:0 0 12px;font-family:'Tajawal';font-size:14px;color:var(--ink);}
   .change-pw-section input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:center;letter-spacing:2px;margin-bottom:8px;direction:ltr;}
@@ -437,13 +436,6 @@
 
 
   /* ===== UNIFIED DESIGN SYSTEM ===== */
-  :root{
-    --radius-sm:10px;
-    --radius-md:14px;
-    --radius-lg:18px;
-    --shadow-card:0 6px 22px rgba(11,90,122,.07);
-    --shadow-hover:0 10px 30px rgba(11,90,122,.13);
-  }
   body{background:#f3f8fa;}
   .toolbar{position:static;background:transparent;border:0;box-shadow:none;}
   .toolbar-inner{max-width:1180px;margin:0 auto;padding:0;}
@@ -553,10 +545,6 @@
   .btn-sync-users:hover{background:#c8edf0;border-color:var(--brass);}
   .btn-sync-users:disabled{opacity:.65;cursor:wait;}
   /* ===== MODERN CHART VISUAL SYSTEM ===== */
-  :root{
-    --chart-blue:#2563eb;--chart-cyan:#06b6d4;--chart-teal:#14b8a6;--chart-purple:#8b5cf6;
-    --chart-ink:#0f172a;--chart-muted:#64748b;--chart-grid:rgba(100,116,139,.14);
-  }
   .chart-wrap,.analytics-card .chart-wrap,.modern-chart-card{
     position:relative;background:linear-gradient(145deg,#ffffff 0%,#f8fbff 100%);
     border:1px solid rgba(148,163,184,.22);border-radius:18px;
@@ -577,15 +565,13 @@
 </style>
 <base target="_blank">
 
-<!-- Google Maps JavaScript API is loaded on demand by initMapOnDemand().
-     Set GOOGLE_MAPS_API_KEY below, or save it in localStorage under googleMapsApiKey. -->
+<!-- Google Maps JavaScript API is loaded on demand; configure its key at runtime. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 
 @media(max-width:760px){.chart-wrap,.profile-card,.strat-axis-card,.comparison-card,.insight-card,.monthly-report-card{border-radius:14px;}.chart-wrap{padding:12px 10px;}}
 
 /* ===== FINAL BRAND + MAP EXPERIENCE ===== */
-:root{--brand-deep:#06384d;--brand-blue:#0b5a7a;--brand-cyan:#0d8ba8;--brand-mist:#eaf5f8;--brand-gold:#d3a85c}
 body{letter-spacing:-.01em}
 .masthead{isolation:isolate;background:radial-gradient(circle at 88% 12%,rgba(211,168,92,.18),transparent 22%),radial-gradient(circle at 8% 80%,rgba(91,163,192,.2),transparent 28%),linear-gradient(135deg,var(--brand-blue) 0%,var(--brand-deep) 72%)}
 .masthead::before{content:"";position:absolute;inset:auto -8% -58px;height:120px;background:rgba(255,255,255,.055);transform:rotate(-4deg);border-top:1px solid rgba(255,255,255,.12);z-index:-1}
@@ -761,7 +747,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <p class="sub" style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;color:#D4AF37;text-shadow:0 1px 2px rgba(0,0,0,0.3);margin:0 0 4px;line-height:1.4;">الجمهورية العربية السورية</p>
       <p class="sub" style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;color:var(--syria-white);text-shadow:0 2px 4px rgba(0,0,0,0.3);margin:0 0 4px;line-height:1.4;">وزارة الشؤون الاجتماعية والعمل / مديرية التخطيط والإحصاء</p>
       <h1 style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;margin:0 0 6px;line-height:1.4;color:var(--syria-white);text-shadow:0 2px 4px rgba(0,0,0,0.3);">سِجل المؤشرات التشغيلية وفق المحافظات</h1>
-      <span class="month-badge" id="mastheadBadge">🗓️ ارفع ملف CSV للبدء</span>
+      <span class="month-badge" id="mastheadBadge">🗓️ اتحديث Google Sheets للبدء</span>
     </div>
     <div class="masthead-actions">
       <button class="top-logout-btn" type="button" onclick="logout()" aria-label="تسجيل الخروج">🚪 <span>تسجيل الخروج</span></button>
@@ -841,7 +827,6 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     <span class="label">📁 مصدر البيانات:</span>
     <input type="text" class="gsheet-input" id="gsheetUrl" value="متصل بـ Google Sheets API" readonly style="background:#e8f5e9;color:#0B5A7A;font-weight:600;text-align:center;">
     <button class="btn btn-primary" onclick="loadFromSheet()" id="refreshBtn">🔄 تحديث من الرابط</button>
-    <button class="btn btn-success" onclick="showUploadModal()">📁 رفع ملف CSV يدوياً</button>
     <span class="status-badge status-loading" id="dataStatus">جاري التحميل التلقائي...</span>
   </div>
 </div>
@@ -877,8 +862,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     <p>1️⃣ <strong>خادم محلي:</strong> شغّل <code>python -m http.server 8000</code> في مجلد الملف ثم افتح <code>http://localhost:8000</code></p>
     <p>2️⃣ <strong>VS Code:</strong> انقر بزر الماوس الأيمن → "Open with Live Server"</p>
     <p>3️⃣ <strong>رفع على الإنترنت:</strong> ارفع الملف على GitHub Pages أو Netlify</p>
-    <p style="margin-top:8px;">أو <strong>ارفع ملف CSV يدوياً</strong> بالضغط على الزر أدناه:</p>
-    <button class="btn-fallback" onclick="showUploadModal()">📁 رفع ملف CSV يدوياً</button>
+    <p style="margin-top:8px;">عند فتح الملف محلياً، استخدم خادماً محلياً للسماح بالاتصال بـ Google Sheets.</p>
   </div>
 </div>
 
@@ -970,7 +954,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="strat-axes" id="stratAxesGrid">
         <div style="text-align:center;padding:40px;color:var(--ink-soft);grid-column:1/-1;">
           <div style="font-size:36px;margin-bottom:10px;">📂</div>
-          <div style="font-size:14px;">ارفع ملف CSV لعرض مؤشرات الخطة الاستراتيجية</div>
+          <div style="font-size:14px;">جارٍ تحميل بيانات الخطة الاستراتيجية من Google Sheets</div>
         </div>
       </div>
 
@@ -1026,7 +1010,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-disability">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-disability">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-disability"></canvas></div>
       <div class="ind-cards" id="cards-disability"></div>
     </div>
@@ -1039,7 +1023,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-social">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-social">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-social"></canvas></div>
       <div class="ind-cards" id="cards-social"></div>
     </div>
@@ -1052,7 +1036,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-ngo">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-ngo">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-ngo"></canvas></div>
       <div class="ind-cards" id="cards-ngo"></div>
     </div>
@@ -1065,7 +1049,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-juvenile">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-juvenile">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-juvenile"></canvas></div>
       <div class="ind-cards" id="cards-juvenile"></div>
     </div>
@@ -1078,7 +1062,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-rural">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-rural">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-rural"></canvas></div>
       <div class="ind-cards" id="cards-rural"></div>
     </div>
@@ -1091,7 +1075,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-labor">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-labor">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-labor"></canvas></div>
       <div class="ind-cards" id="cards-labor"></div>
     </div>
@@ -1104,7 +1088,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-labor_market">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-labor_market">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-labor_market"></canvas></div>
       <div class="ind-cards" id="cards-labor_market"></div>
     </div>
@@ -1117,7 +1101,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-insurance">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-insurance">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-insurance"></canvas></div>
       <div class="ind-cards" id="cards-insurance"></div>
     </div>
@@ -1130,7 +1114,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-aid">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-aid">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-aid"></canvas></div>
       <div class="ind-cards" id="cards-aid"></div>
     </div>
@@ -1143,7 +1127,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-camps">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-camps">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-camps"></canvas></div>
       <div class="ind-cards" id="cards-camps"></div>
     </div>
@@ -1156,7 +1140,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-platform">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-platform">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-platform"></canvas></div>
       <div class="ind-cards" id="cards-platform"></div>
     </div>
@@ -1169,7 +1153,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       <div class="chev">⌄</div>
     </div>
     <div class="cat-body">
-      <p class="cat-note" id="note-demographics">💡 ارفع ملف CSV لعرض البيانات</p>
+      <p class="cat-note" id="note-demographics">💡 اتحديث Google Sheets لعرض البيانات</p>
       <div class="chart-wrap"><canvas id="chart-demographics"></canvas></div>
       <div class="ind-cards" id="cards-demographics"></div>
     </div>
@@ -1256,39 +1240,11 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 </main>
 
 <footer>
-  <div class="line" id="footerNote">⚠️ ارفع ملف CSV لعرض البيانات</div>
+  <div class="line" id="footerNote">⚠️ جارٍ تحميل البيانات من Google Sheets</div>
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-    <div>هذه اللوحة تفاعلية بالكامل: استخدم أزرار المحافظات والأشهر أعلاه للتصفية، أو ارفع ملف CSV مباشرة.</div>
+    <div>هذه اللوحة تفاعلية بالكامل: استخدم أزرار المحافظات والأشهر أعلاه للتصفية. تُحدّث البيانات من Google Sheets.</div>
   </div>
 </footer>
-
-<div class="modal-overlay" id="uploadModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>📁 رفع ملف CSV</h3>
-      <button class="modal-close" onclick="closeUploadModal()">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="help-box">
-        <strong>كيفية الاستخدام:</strong><br>
-        1. اضغط على المنطقة أدناه لاختيار ملف من جهازك.<br>
-        2. أو اسحب الملف وأفلته في المنطقة.<br>
-        3. يمكنك أيضاً نسخ البيانات من Google Sheets أو Excel ولصقها في المربع أسفل.<br>
-        <strong>الصيغ المدعومة:</strong> CSV (فاصلة إنجليزية/عربية)، TSV (تاب)، Excel CSV
-      </div>
-      <div class="file-drop-zone" id="fileDropZone" onclick="document.getElementById('csvFileInput').click()">
-        <div style="font-size:40px;margin-bottom:10px;">📂</div>
-        <div style="font-weight:700;font-size:15px;">اضغط هنا أو اسحب ملف CSV</div>
-        <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">CSV / TSV / Excel CSV — يدعم الفاصلة الإنجليزية والعربية والتاب</div>
-      </div>
-      <input type="file" id="csvFileInput" accept=".csv,.tsv,.txt" style="display:none;" onchange="handleCSVUpload(this)">
-      <hr style="border:none;border-top:1px solid var(--line);margin:20px 0;">
-      <p style="font-weight:600;margin-bottom:8px;">✂️ أو الصق البيانات مباشرة:</p>
-      <textarea id="csvPasteArea" placeholder="انسخ البيانات من Google Sheets والصقها هنا..." rows="6" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;direction:ltr;resize:vertical;"></textarea>
-      <button class="btn btn-primary" onclick="handleCSVPaste()" style="margin-top:10px;">📋 تحليل البيانات الملصقة</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // =====================
@@ -1296,25 +1252,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 // =====================
 const COLUMN_MAP_INV = {};
 // =====================
-// INLINE CSV DATA (works on file:// without internet)
-// =====================
-const INLINE_CSV_DATA = `المحافظة,الشهر,السنة,عدد السكان,ذكور,إناث,السكان دون 15 سنة,السكان 15-60 سنة,السكان 60+ سنة,حجم قوة العمل (مليون),المشتغلون,المتعطلون,معدل البطالة العام,معدل بطالة الذكور,معدل بطالة الاناث,معدل بطالة الشباب,معدل المشاركة في النشاط الاقتصادي / ذكور,معدل المشاركة في النشاط الاقتصادي / إناث,نسبة العمال في القطاع الخاص غير المنظم,معدل زواج القاصرات حسب المحافظات,%معدل عمل الأطفال,معدل اكمال الدراسة في مرحلة التعليم الأساسيي,نسبة النساء المعيلات,%تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا ),%تقديرات الفقر وفق الأمن الغذائي (الاسر ذات الهشاشة),%تقديرات الفقر - الأمن الغذائي (الاسر المعدومة ),دور رعاية كبار السن,عدد المستفيدين من خدمات دور رعاية المسنين,عدد  معاهد رعاية وتأهيل الأشخاص ذوي الاعاقة,عدد الطلاب المسجلين في المعاهد الخاصة بذوي الاعاقة,عدد المستفيدين من توزيع المعينات الحركية,المستفيدين  من المعونة النقدية لأسر الأشخاص من ذوي  الإعاقة,عدد الحاصلين الجدد على بطاقة الاشخاص ذوي الاعاقة,عدد دور رعاية الايتام,المستفيدين من الخدمات (كفالة داخلية ),المستفيدين من الخدمات (كفالة خارجية),عدد مراكز رعاية المتسولين,دور رعاية المتسولين في الخدمة,عدد النزلاء في مراكز التسول,معاهد الاحداث/ مراكز الملاحظة,عدد معاهد الاحداث في الخدمة,عدد النزلاء من الاحداث,المستفيدين من دار لحن الحياة,عدد مراكز التأهيل المهني,عدد المراكز في الخدمة الفعلية,عدد المستفيدين من التأهيل,عدد المسجلين على منصة سوق العمل(2024- 2025),عدد المنشآت المسجلة في المنصة,عدد فرص العمل على المنصة,عدد فرص التدريب على المنصة,عدد مراكز التنمية الريفية خارج الخدمة,مراكز التنمية في الخدمة,عدد وحدات الصناعات الريفية خارج الخدمة,عدد وحدات الصناعة في الخدمة,مستفيدو مراكز التنمية الريفية,مستفيدو وحدات الصناعات الريفية,اجمالي عدد المنظمات غير الحكومية,عدد المنظمات غير الحكومية المسحوب ترخيصها,عدد المنظمات غير الحكومية المشهرة,عدد المساعدات  (سلة غذائية),عدد المساعدات عينية (ادوية - عمليات- منظفات),اعانات مالية,عدد المراكز المجتمعية,مساحات امنة للنساء,عدد المخيمات,عدد الاسر المقيمة في المخيمات,عدد المسجلين في التأمينات الاجتماعية/ قطاع عام,عدد المسجلين في التأمينات الاجتماعية / قطاع خاص,اجمالي عدد المسجلين القائمين على راس عملهم,عدد المسجلين  الجدد من خلال الزيارات التفتيشية,عدد المتقاعدين المستفيدين,عدد المستفيدين من تعويضات إصابات العمل,قرارات ضم الخدمة,عدد المنشآت التي تم اشراكها بالتامينات, منح تراخيص العمل  للعاملين غير السوريين,تجديد تراخيص العمل  للعاملين غير السوريين,عدد مكاتب التشغيل المرخصة  لمزاولة مهنة استقدام العاملات غير السوريات,العاملات المنزليات غير السوريات (نم منحهن ترخيص العمل ),عدد المكاتب المرخصة لتشغيل العمال المنزليين السوريين,مكاتب مرخصة لمزاولة مهنة تشغيل خاص للعمال السوريين,عدد الزيارات التفتيشية على المنشأت (صناعي – زراعي ),زيارات تفتيشية على المنشآت (صناعي),زيارات تفتيشية على المنشآت (زراعي),المخالفات الناتجة عن الزيارات,مشاريع الصكوك القانونية الجديدة,مشاريع الصكوك القانونية  قيد المراجعة والتحديث,أهم ثلاث إنجازات,أهم ثلاث توصيات,الاحتياجات الرئيسية,التقرير الشهرية
-دمشق,كانون الثاني,2025,2500000,1280000,1220000,875000,1375000,250000,1.25,950000,300000,24.0,18.5,32.0,28.5,65.2,18.5,42.0,12.5,8.2,78.5,22.0,35.0,28.0,37.0,8,450,12,320,85,120,950,6,280,150,45,5,180,3,2,45,120,4,3,85,8500,120,350,280,2,2,3,2,450,280,85,15,25,3200,850,420,6,12,3,150,450000,280000,730000,12500,95000,4500,850,320,45,120,8,5,12,8,450,280,170,85,25,15,تطوير مركز التأهيل المهني وتوسيع قاعدة المستفيدين,تعزيز الشراكة مع المنظمات المحلية لخدمة الأيتام,زيادة عدد مراكز رعاية الأشخاص ذوي الإعاقة,https://docs.google.com/document/d/example1
-ريف دمشق,كانون الثاني,2025,2800000,1430000,1370000,980000,1540000,280000,1.4,1050000,350000,25.0,19.2,33.5,29.8,64.8,17.2,45.0,13.8,9.5,76.0,24.5,32.0,30.0,38.0,7,380,10,280,72,105,820,5,250,120,38,4,155,2,2,38,95,3,3,72,7200,95,280,220,3,2,4,3,380,220,72,12,22,2800,720,380,5,10,2,120,380000,250000,630000,11200,82000,3800,720,280,38,95,6,4,10,6,380,220,155,72,22,12,إنشاء مركز جديد للتنمية الريفية في منطقة الزبداني,توسيع برنامج الكفالة الخارجية للأيتام,دعم مشاريع التأهيل المهني للشباب,https://docs.google.com/document/d/example2
-حلب,كانون الثاني,2025,3200000,1640000,1560000,1120000,1760000,320000,1.6,1180000,420000,26.2,20.5,35.0,31.2,63.5,15.8,48.0,15.2,11.0,74.5,26.8,30.0,32.0,38.0,9,520,14,380,95,140,1100,7,320,180,52,6,210,4,3,52,145,5,4,110,9800,145,420,340,4,3,5,4,520,340,110,18,32,3800,980,520,7,14,3,180,420000,320000,740000,14500,98000,5200,980,420,52,145,10,7,15,10,520,340,210,110,32,18,إعادة تأهيل مركز رعاية الأحداث بعد الصيانة,توسيع برنامج المساعدات الغذائية للأسر المتضررة,تطوير البنية التحتية لمراكز التنمية الريفية,https://docs.google.com/document/d/example3
-حمص,كانون الثاني,2025,1900000,970000,930000,665000,1045000,190000,0.95,720000,230000,24.2,18.8,32.5,28.8,65.0,18.0,43.0,13.0,8.8,77.5,23.2,34.0,29.0,37.0,6,340,8,240,65,95,720,4,210,110,32,3,130,2,1,32,85,3,2,65,6500,85,250,200,2,2,3,2,340,200,65,10,18,2200,650,340,4,8,2,95,340000,220000,560000,9500,72000,3400,650,250,32,85,5,3,9,5,340,200,130,65,18,10,تطوير خدمات رعاية المسنين في دور الإيواء,تعزيز برامج التوعية بمخاطر عمل الأطفال,دعم مشاريع التشغيل الذاتي للنساء المعيلات,https://docs.google.com/document/d/example4
-حماه,كانون الثاني,2025,1600000,820000,780000,560000,880000,160000,0.8,620000,180000,22.5,17.5,30.0,26.5,66.5,19.5,40.0,11.5,7.5,79.0,21.5,36.0,27.0,37.0,5,280,7,200,55,80,620,4,180,95,28,3,110,2,1,28,75,3,2,55,5500,75,210,170,2,1,2,2,280,170,55,8,15,1800,550,280,3,6,2,80,280000,190000,470000,8200,62000,2800,550,210,28,75,4,3,7,4,280,170,110,55,15,8,توسيع مراكز التأهيل المهني في المناطق الريفية,تطوير برامج الكفالة الداخلية للأيتام,زيادة عدد فرص التدريب المهني للشباب,https://docs.google.com/document/d/example5
-اللاذقية,كانون الثاني,2025,1200000,615000,585000,420000,660000,120000,0.6,480000,120000,20.0,15.5,28.0,24.5,68.0,21.0,38.0,10.5,6.5,80.5,20.0,38.0,26.0,36.0,4,220,6,160,42,65,480,3,140,75,22,2,85,1,1,22,60,2,2,42,4200,60,160,130,1,1,2,1,220,130,42,6,12,1400,420,220,3,5,1,65,220000,150000,370000,6500,48000,2200,420,160,22,60,3,2,6,3,220,130,85,42,12,6,تطوير السياحة الاجتماعية المستدامة,تعزيز برامج التوعية البيئية للمجتمعات الساحلية,دعم مشاريع الصناعات الريفية التقليدية,https://docs.google.com/document/d/example6
-طرطوس,كانون الثاني,2025,950000,485000,465000,332500,522500,95000,0.475,380000,95000,20.0,15.5,27.5,24.2,68.2,21.2,37.5,10.2,6.2,81.0,19.8,39.0,25.5,35.5,3,180,5,130,35,55,380,2,110,60,18,2,70,1,1,18,50,2,1,35,3500,50,130,105,1,1,2,1,180,105,35,5,10,1100,350,180,2,4,1,55,180000,120000,300000,5200,38000,1800,350,130,18,50,2,2,5,2,180,105,70,35,10,5,تطوير مراكز التدريب البحري للشباب,تعزيز برامج الأمن الغذائي للمجتمعات الساحلية,دعم مشاريع الاستزراع السمكي التعاوني,https://docs.google.com/document/d/example7
-السويداء,كانون الثاني,2025,420000,215000,205000,147000,231000,42000,0.21,168000,42000,20.0,15.5,27.0,24.0,68.5,21.5,36.0,9.8,5.8,82.0,19.5,40.0,25.0,35.0,2,85,3,60,18,28,168,1,50,28,10,1,32,1,0,10,22,1,1,18,1680,22,60,50,1,1,1,1,85,50,18,2,5,500,168,85,1,2,1,28,85000,55000,140000,2800,16800,850,168,60,10,22,1,1,2,1,85,50,32,18,5,2,تطوير السياحة الريفية والبيئية,تعزيز برامج الحفاظ على التراث الثقافي,دعم مشاريع الزراعة العضوية التعاونية,https://docs.google.com/document/d/example8
-درعا,كانون الثاني,2025,1100000,565000,535000,385000,605000,110000,0.55,440000,110000,20.0,15.5,27.5,24.2,68.0,21.0,37.5,10.5,6.5,81.0,19.8,38.0,25.5,36.5,3,200,5,140,38,58,440,2,130,68,20,2,78,1,1,20,55,2,1,38,3800,55,140,115,1,1,2,1,200,115,38,5,10,1200,380,200,2,4,1,58,200000,130000,330000,5500,44000,2000,380,140,20,55,2,2,5,2,200,115,78,38,10,5,إعادة تأهيل البنية التحتية للمراكز الاجتماعية,توسيع برامج التوعية الصحية للمجتمعات الريفية,دعم مشاريع الزراعة المستدامة والمروية,https://docs.google.com/document/d/example9
-القنيطرة,كانون الثاني,2025,110000,56500,53500,38500,60500,11000,0.055,44000,11000,20.0,15.5,27.0,24.0,68.5,21.5,36.0,9.5,5.5,82.5,19.5,40.0,25.0,35.0,1,25,1,18,5,8,44,1,15,8,3,1,12,1,0,3,8,1,0,5,440,8,18,15,1,0,1,0,25,15,5,1,2,150,44,25,1,1,0,8,25000,16000,41000,850,4400,250,44,18,3,8,1,0,1,0,25,15,12,5,2,1,تطوير السياحة البيئية في المنطقة المحررة,تعزيز برامج التوعية بمخاطر الألغام,دعم مشاريع الزراعة المروية للمزارعين العائدين,https://docs.google.com/document/d/example10
-ادلب,كانون الثاني,2025,1800000,920000,880000,630000,990000,180000,0.9,720000,180000,20.0,15.5,27.5,24.2,68.0,21.0,37.5,10.5,6.5,81.0,19.8,38.0,25.5,36.5,4,280,6,200,52,80,720,3,180,95,28,3,110,2,1,28,75,3,2,52,5200,75,200,165,2,1,2,1,280,165,52,6,12,1800,520,280,3,5,1,80,280000,180000,460000,7200,72000,2800,520,200,28,75,3,2,6,3,280,165,110,52,12,6,تطوير مراكز التأهيل المهني للشباب العائدين,توسيع برامج المساعدات الإنسانية للنازحين,دعم مشاريع الإعمار المجتمعي التعاوني,https://docs.google.com/document/d/example11
-الرقة,كانون الثاني,2025,950000,485000,465000,332500,522500,95000,0.475,380000,95000,20.0,15.5,27.5,24.2,68.2,21.2,37.5,10.2,6.2,81.0,19.8,39.0,25.5,35.5,3,180,5,130,35,55,380,2,110,60,18,2,70,1,1,18,50,2,1,35,3500,50,130,105,1,1,2,1,180,105,35,5,10,1100,350,180,2,4,1,55,180000,120000,300000,5200,38000,1800,350,130,18,50,2,2,5,2,180,105,70,35,10,5,إعادة تأهيل المراكز الاجتماعية المتضررة,توسيع برامج التوعية بمخاطر الألغام والمخلفات الحربية,دعم مشاريع الزراعة المروية والتعاونية,https://docs.google.com/document/d/example12
-دير الزور,كانون الثاني,2025,1400000,715000,685000,490000,770000,140000,0.7,560000,140000,20.0,15.5,27.5,24.2,68.0,21.0,37.5,10.5,6.5,81.0,19.8,38.0,25.5,36.5,4,220,6,160,42,65,560,3,140,75,22,2,85,1,1,22,60,2,2,42,4200,60,160,130,2,1,2,1,220,130,42,6,12,1400,420,220,3,5,1,65,220000,150000,370000,6500,56000,2200,420,160,22,60,3,2,6,3,220,130,85,42,12,6,تطوير مراكز التأهيل المهني للشباب,توسيع برامج المساعدات الإنسانية للمجتمعات المتضررة,دعم مشاريع الزراعة المروية والتنمية الريفية,https://docs.google.com/document/d/example13
-الحسكة,كانون الثاني,2025,1500000,765000,735000,525000,825000,150000,0.75,600000,150000,20.0,15.5,27.5,24.2,68.0,21.0,37.5,10.5,6.5,81.0,19.8,38.0,25.5,36.5,4,240,6,170,45,70,600,3,150,80,24,2,90,1,1,24,65,2,2,45,4500,65,170,140,2,1,2,1,240,140,45,6,12,1500,450,240,3,5,1,70,240000,160000,400000,7000,60000,2400,450,170,24,65,3,2,6,3,240,140,90,45,12,6,تطوير مراكز التنمية الريفية في المناطق الحدودية,تعزيز برامج التوعية بالحقوق الاجتماعية,دعم مشاريع الزراعة المروية والاستزراع السمكي,https://docs.google.com/document/d/example14`;
-
-// =====================
+// Google Sheets is the sole data source.
 // GOOGLE SHEETS API CONFIG
 // =====================
 const SHEETS_CONFIG = {
@@ -1355,7 +1293,7 @@ const COLUMN_MAP = {
   "نسبة النساء المعيلات": "female_breadwinners",
 
   // === NEW: Poverty ===
-  // Exact names from user's CSV file (% at beginning)
+  // Exact names from the connected Google Sheet (% at beginning)
   "%تقديرات الفقر وفق الأمن الغذائي ( الاسر الأمنة غذائيا )": "food_secure_pct",
   "%تقديرات الفقر وفق الأمن الغذائي (الاسر ذات الهشاشة)": "food_vulnerable_pct",
   "%تقديرات الفقر - الأمن الغذائي (الاسر المعدومة )": "food_insecure_pct",
@@ -1539,7 +1477,7 @@ let charts = {};
 let currentRankingMode = 'absolute'; // 'absolute' | 'perCapita' | 'coverage' | 'activityCount'
 const MONTHS_LIST = ["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
 const MONTH_ALIASES = {
-  "كانون الثاني":"كانون الثاني", "يناير":"كانون الثاني", "يناير":"كانون الثاني", "january":"كانون الثاني", "jan":"كانون الثاني",
+  "كانون الثاني":"كانون الثاني", "يناير":"كانون الثاني", "january":"كانون الثاني", "jan":"كانون الثاني",
   "شباط":"شباط", "فبراير":"شباط", "فبرابر":"شباط", "february":"شباط", "feb":"شباط",
   "آذار":"آذار", "اذار":"آذار", "مارس":"آذار", "march":"آذار", "mar":"آذار",
   "نيسان":"نيسان", "ابريل":"نيسان", "أبريل":"نيسان", "april":"نيسان", "apr":"نيسان",
@@ -1549,7 +1487,7 @@ const MONTH_ALIASES = {
   "آب":"آب", "اب":"آب", "أغسطس":"آب", "اغسطس":"آب", "august":"آب", "aug":"آب",
   "أيلول":"أيلول", "ايلول":"أيلول", "سبتمبر":"أيلول", "september":"أيلول", "sep":"أيلول", "sept":"أيلول",
   "تشرين الأول":"تشرين الأول", "تشرين الاول":"تشرين الأول", "أكتوبر":"تشرين الأول", "اكتوبر":"تشرين الأول", "october":"تشرين الأول", "oct":"تشرين الأول",
-  "تشرين الثاني":"تشرين الثاني", "تشرين الثاني":"تشرين الثاني", "نوفمبر":"تشرين الثاني", "november":"تشرين الثاني", "nov":"تشرين الثاني",
+  "تشرين الثاني":"تشرين الثاني", "نوفمبر":"تشرين الثاني", "november":"تشرين الثاني", "nov":"تشرين الثاني",
   "كانون الأول":"كانون الأول", "كانون الاول":"كانون الأول", "ديسمبر":"كانون الأول", "december":"كانون الأول", "dec":"كانون الأول"
 };
 function normalizeMonth(value){
@@ -3033,7 +2971,7 @@ function renderInsights(){
   const summary = document.getElementById('insightsSummaryText');
 
   if(arr.length === 0){
-    content.innerHTML = '<p style="text-align:center;color:var(--ink-soft);padding:20px;">💡 ارفع ملف CSV لعرض التحليلات والمقارنات</p>';
+    content.innerHTML = '<p style="text-align:center;color:var(--ink-soft);padding:20px;">💡 اتحديث Google Sheets لعرض التحليلات والمقارنات</p>';
     summary.textContent = 'لا توجد بيانات للتحليل';
     return;
   }
@@ -3873,23 +3811,6 @@ function setRankingMode(mode){
 // =====================
 // FILE HANDLING
 // =====================
-function handleCSVUpload(input){
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){ 
-    processCSVData(e.target.result); 
-    closeUploadModal(); 
-  };
-  reader.readAsText(file);
-}
-
-function handleCSVPaste(){
-  const csvText = document.getElementById('csvPasteArea').value;
-  if(!csvText.trim()){ alert('الرجاء لصق البيانات أولاُ'); return; }
-  processCSVData(csvText);
-  closeUploadModal();
-}
 
 // Google Sheets helpers
 function normalizeGoogleSheetUrl(rawUrl){
@@ -3994,53 +3915,10 @@ async function loadFromSheet(){
     statusEl.textContent = msg;
     statusEl.className = 'status-badge status-error';
 
-    // fallback to inline data immediately
-    if(typeof INLINE_CSV_DATA !== 'undefined' && INLINE_CSV_DATA){
-      console.log('استخدام البيانات المحلية كاحتياط...');
-      processCSVData(INLINE_CSV_DATA);
-      statusEl.textContent = '⚠️ تم التحميل من البيانات المحلية (لا يوجد إنترنت)';
-      statusEl.className = 'status-badge status-loading';
-    }
   } finally {
     if(refreshBtn) refreshBtn.disabled = false;
   }
 }
-
-// =====================
-// MODALS
-// =====================
-function showUploadModal(){ 
-  document.getElementById('uploadModal').classList.add('open'); 
-}
-function closeUploadModal(){ 
-  document.getElementById('uploadModal').classList.remove('open'); 
-}
-
-window.onclick = function(event){ 
-  if(event.target.classList.contains('modal-overlay')) 
-    event.target.classList.remove('open'); 
-}
-
-// Drag and drop
-const dropZone = document.getElementById('fileDropZone');
-if(dropZone){
-  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-  dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault(); 
-    dropZone.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if(files.length > 0){ 
-      const reader = new FileReader(); 
-      reader.onload = function(ev){ 
-        processCSVData(ev.target.result); 
-        closeUploadModal(); 
-      }; 
-      reader.readAsText(files[0]); 
-    }
-  });
-}
-
 
 // =====================
 // MAP - Google Maps
@@ -4051,12 +3929,36 @@ let mapInfoWindow = null;
 let googleMapsLoadPromise = null;
 let placesAutocomplete = null;
 let mapHeatLayers = {};
-// ضع مفتاح Google Maps JavaScript API هنا، أو احفظه في localStorage باسم googleMapsApiKey.
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAGI6yqE0GfOZUDwtyN1JdHz2YZZjZgB5U';
-
+// Google Maps requires a project-specific key configured at runtime.
+// The key is intentionally not embedded in this public HTML file.
 function getGoogleMapsApiKey(){
   const fromUrl = new URLSearchParams(location.search).get('googleMapsKey');
-  return (fromUrl || GOOGLE_MAPS_API_KEY || localStorage.getItem('googleMapsApiKey') || '').trim();
+  const fromStorage = localStorage.getItem('googleMapsApiKey');
+  return (fromUrl || fromStorage || '').trim();
+}
+
+function configureGoogleMapsKey(){
+  const current = localStorage.getItem('googleMapsApiKey') || '';
+  const key = window.prompt('أدخل مفتاح Google Maps JavaScript API (سيُحفظ محلياً في هذا المتصفح):', current);
+  if(key === null) return;
+  const cleanKey = key.trim();
+  if(cleanKey) localStorage.setItem('googleMapsApiKey', cleanKey);
+  else localStorage.removeItem('googleMapsApiKey');
+  googleMapsLoadPromise = null;
+  const mapEl = document.getElementById('govMap');
+  if(mapEl) mapEl.innerHTML = '';
+  initMapOnDemand();
+}
+
+function showMapUnavailable(message){
+  const mapEl = document.getElementById('govMap');
+  if(!mapEl || mapEl.querySelector('.map-unavailable')) return;
+  mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#536b75;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:linear-gradient(145deg,#e9f5f7,#f9fcfd);border-radius:0 0 18px 18px;text-align:center;padding:24px;">
+    <div style="font-size:40px;">🗺️</div>
+    <div style="font-weight:800;color:#0B5A7A;">الخريطة تحتاج إعداداً لمرة واحدة</div>
+    <div style="font-size:12px;max-width:560px;line-height:1.9;">${message || 'أدخل مفتاح Google Maps JavaScript API المخصص لهذا النطاق. لن يتم تضمين المفتاح داخل الملف.'}</div>
+    <button type="button" class="btn btn-primary" onclick="configureGoogleMapsKey()">إعداد مفتاح الخريطة</button>
+  </div>`;
 }
 
 // Google calls this global handler when the key, billing, API, or referrer
@@ -4522,9 +4424,9 @@ function initMapOnDemand(){
     else updateMapMarkers();
   }).catch(err => {
     console.warn('Google Maps unavailable:', err);
-    if(!mapEl.querySelector('.map-unavailable')){
-      mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;text-align:center;padding:20px;"><div style="font-size:36px;">🗺️</div><div>تعذّر تحميل Google Maps</div><div style="font-size:12px;max-width:520px;line-height:1.8;">${err.message.includes('مفتاح') ? err.message + '. تحقق من GOOGLE_MAPS_API_KEY أو localStorage باسم googleMapsApiKey.' : err.message + '. تحقق من تفعيل Maps JavaScript API وقيود النطاق في Google Cloud.'}</div></div>`;
-    }
+    showMapUnavailable(err.message.includes('مفتاح')
+      ? 'لم يتم ضبط مفتاح Google Maps API. أدخله من الزر أدناه أو احفظه في localStorage باسم googleMapsApiKey.'
+      : `${err.message}. تحقق من تفعيل Maps JavaScript API والفوترة وقيود النطاق في Google Cloud.`);
   });
 }
 
@@ -5320,108 +5222,6 @@ function checkFileProtocol(){
   return false;
 }
 
-function generateSampleData(){
-  // Generate minimal sample data so the dashboard shows something
-  const sample = [];
-  const months = ["كانون الثاني","شباط","آذار"];
-  ALL_GOVS.forEach((gov, i) => {
-    months.forEach(m => {
-      sample.push({
-        gov: gov,
-        month: m,
-        year: 2025,
-        population: 500000 + i * 50000,
-        males: 250000 + i * 25000,
-        females: 250000 + i * 25000,
-        disabled_cards: Math.floor(Math.random() * 500),
-        elderly_homes: Math.floor(Math.random() * 10),
-        elderly_benef: Math.floor(Math.random() * 200),
-        orphan_homes: Math.floor(Math.random() * 5),
-        sponsor_internal: Math.floor(Math.random() * 100),
-        sponsor_external: Math.floor(Math.random() * 50),
-        ngo_active: Math.floor(Math.random() * 20),
-        ngo_total: Math.floor(Math.random() * 50),
-        juvenile_inst: Math.floor(Math.random() * 3),
-        juvenile_inst_active: Math.floor(Math.random() * 2),
-        juvenile_inmates: Math.floor(Math.random() * 30),
-        rural_dev_active: Math.floor(Math.random() * 10),
-        rural_dev_benef: Math.floor(Math.random() * 500),
-        rural_ind_active: Math.floor(Math.random() * 8),
-        rural_ind_benef: Math.floor(Math.random() * 300),
-        insp_total: Math.floor(Math.random() * 100),
-        violations: Math.floor(Math.random() * 20),
-        work_permits_new: Math.floor(Math.random() * 50),
-        work_permits_renew: Math.floor(Math.random() * 80),
-        employed: Math.floor(Math.random() * 200000),
-        unemployed: Math.floor(Math.random() * 50000),
-        unemployment_rate: (5 + Math.random() * 20).toFixed(1),
-        insurance_public: Math.floor(Math.random() * 50000),
-        insurance_private: Math.floor(Math.random() * 30000),
-        insurance_total: Math.floor(Math.random() * 80000),
-        food_baskets: Math.floor(Math.random() * 1000),
-        cash_assistance: Math.floor(Math.random() * 500),
-        in_kind_aid: Math.floor(Math.random() * 300),
-        camps_count: Math.floor(Math.random() * 5),
-        camp_families: Math.floor(Math.random() * 200),
-        return_convoys: Math.floor(Math.random() * 10),
-        current_persons: Math.floor(Math.random() * 500),
-        returned_by_convoys: Math.floor(Math.random() * 300),
-        evacuated_camps: Math.floor(Math.random() * 5),
-        platform_registered: Math.floor(Math.random() * 1000),
-        platform_establishments: Math.floor(Math.random() * 100),
-        platform_jobs: Math.floor(Math.random() * 200),
-        platform_training: Math.floor(Math.random() * 150),
-        vocational_centers: Math.floor(Math.random() * 5),
-        vocational_benef: Math.floor(Math.random() * 200),
-        pop_under15: Math.floor(Math.random() * 200000),
-        pop_15_60: Math.floor(Math.random() * 250000),
-        pop_over60: Math.floor(Math.random() * 50000),
-        labor_force: (0.5 + Math.random() * 0.5).toFixed(2),
-        male_unemployment: (3 + Math.random() * 15).toFixed(1),
-        female_unemployment: (8 + Math.random() * 25).toFixed(1),
-        youth_unemployment: (10 + Math.random() * 30).toFixed(1),
-        male_participation: (40 + Math.random() * 30).toFixed(1),
-        female_participation: (10 + Math.random() * 20).toFixed(1),
-        unorganized_workers: (30 + Math.random() * 40).toFixed(1),
-        child_marriage_rate: (5 + Math.random() * 15).toFixed(1),
-        child_labor_rate: (2 + Math.random() * 10).toFixed(1),
-        basic_edu_completion: (60 + Math.random() * 30).toFixed(1),
-        female_breadwinners: (10 + Math.random() * 20).toFixed(1),
-        food_secure_pct: (30 + Math.random() * 40).toFixed(1),
-        food_vulnerable_pct: (20 + Math.random() * 30).toFixed(1),
-        food_insecure_pct: (5 + Math.random() * 25).toFixed(1),
-        achievements: "إنجاز تجريبي",
-        recommendations: "توصية تجريبية",
-        needs: "احتياج تجريبي",
-        monthly_report: "تقرير تجريبي"
-      });
-    });
-  });
-  return sample;
-}
-
-function loadSampleData(){
-  const sample = generateSampleData();
-  ALL_DATA = sample;
-  selectedMonths = new Set([...new Set(ALL_DATA.map(d => d.month))]);
-  selectedMonthChips.clear();
-
-  const statusEl = document.getElementById('dataStatus');
-  if(statusEl){
-    statusEl.textContent = `بيانات تجريبية: ${sample.length} سجل`;
-    statusEl.className = 'status-badge status-ok';
-  }
-
-  syncMonthChipsWithData();
-  renderAll();
-  updateLastUpdatedDisplay();
-
-  showDiagnostic(
-    '✅ تم تحميل <strong>بيانات تجريبية</strong> لأغراض العرض. هذه البيانات وهمية — ارفع ملف CSV حقيقي للحصول على نتائج دقيقة.',
-    '<button class="btn-fallback" onclick="showUploadModal()">📁 رفع ملف CSV حقيقي</button>'
-  );
-}
-
 // =====================
 // OFFLINE SUPPORT & LAST UPDATED
 // =====================
@@ -5609,8 +5409,8 @@ loadFromSheet = async function(){
         statusEl.className = 'status-badge status-error';
       }
       showDiagnostic(
-        '❌ لا يوجد إنترنت ولا توجد بيانات محفوظة محلياً.<br>يرجى الاتصال بالإنترنت أو رفع ملف CSV يدوياً.',
-        '<button class="btn-fallback" onclick="showUploadModal()">📁 رفع ملف CSV</button>'
+        '❌ لا يوجد إنترنت ولا توجد بيانات محفوظة محلياً.<br>يرجى الاتصال بالإنترنت أو تحديث Google Sheets يدوياً.',
+        '<button class="btn-fallback" >📁 تحديث Google Sheets</button>'
       );
     }
     return;
@@ -5636,29 +5436,21 @@ function autoLoadOnStartup(){
     return;
   }
 
-  // 2. Fall back to inline CSV data built into the file
+  // 2. No local copy: request the connected Google Sheet.
   if(statusEl){
-    statusEl.textContent = '⏳ جاري تحميل البيانات المضمنة...';
+    statusEl.textContent = '⏳ جاري تحميل البيانات من Google Sheets...';
     statusEl.className = 'status-badge status-loading';
   }
-  const success = processCSVData(INLINE_CSV_DATA);
-  if(success){
-    saveDataToLocalStorage();
-    if(statusEl){
-      statusEl.textContent = '✅ تم تحميل البيانات المضمنة';
-      statusEl.className = 'status-badge status-ok';
-    }
-    return;
-  }
+  loadFromSheet();
 
-  // 3. Nothing worked — prompt user to upload
+  // 3. If the request fails, show a clear empty-state message.
   if(statusEl){
-    statusEl.textContent = '⚠️ لا توجد بيانات — ارفع ملف CSV';
+    statusEl.textContent = '⚠️ لا توجد بيانات — اتحديث Google Sheets';
     statusEl.className = 'status-badge status-error';
   }
   showDiagnostic(
-    'ℹ️ لم يتم العثور على بيانات. ارفع ملف CSV أو اضغط زر التحديث لجلب البيانات من الرابط.',
-    '<button class="btn-fallback" onclick="showUploadModal()">📁 رفع ملف CSV</button> <button class="btn-fallback" onclick="loadSampleData()" style="background:linear-gradient(135deg,#1565c0,#0d47a1);margin-inline-start:8px;">🔬 بيانات تجريبية</button>'
+    'ℹ️ لم يتم العثور على بيانات. اتحديث Google Sheets أو اضغط زر التحديث لجلب البيانات من الرابط.',
+    '<button class="btn-fallback" onclick="loadFromSheet()">🔄 تحديث Google Sheets</button>'
   );
 }
 
@@ -5936,7 +5728,7 @@ function renderStrategicCompass(){
     if(data.length === 0){
       grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--ink-soft);grid-column:1/-1;">
         <div style="font-size:36px;margin-bottom:10px;">📂</div>
-        <div style="font-size:14px;">ارفع ملف CSV لعرض مؤشرات الخطة الاستراتيجية</div>
+        <div style="font-size:14px;">جارٍ تحميل بيانات الخطة الاستراتيجية من Google Sheets</div>
       </div>`;
     } else {
       grid.innerHTML = Object.keys(targets).map(k => {
@@ -6179,7 +5971,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   .gov-selector-chip.active{background:#0B5A7A;color:#fff;border-color:#0B5A7A;}
 
   /* ===== VISUAL POLISH OVERRIDES ===== */
-  :root{--ink:#0b5573;--ink-2:#073c55;--sand:#f3f8fa;--sand-2:#e3eff3;--paper:#fff;--brass:#0b91ad;--brass-light:#8ed1df;--line:#c8dce3;--ink-soft:#58717e;--shadow-sm:0 3px 12px rgba(7,60,85,.07);--shadow-md:0 12px 32px rgba(7,60,85,.11)}
   html{scroll-behavior:smooth}
   body{background:linear-gradient(180deg,#eef6f8 0%,#f7fbfc 42%,#eef6f8 100%);font-size:14px;line-height:1.7}
   button,input,select{font:inherit}:focus-visible{outline:3px solid rgba(13,139,168,.35);outline-offset:2px}
