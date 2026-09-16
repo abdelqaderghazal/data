@@ -2017,7 +2017,7 @@ const CHART_INDICATORS = {
   insp_total:[['insp_total','إجمالي الزيارات'],['violations','مخالفات'],['new_workers_insp','عمال جدد'],['work_permits_new','تراخيص جديدة'],['work_permits_renew','تجديد تراخيص'],['legal_docs_new','صكوك جديدة'],['legal_docs_review','صكوك قيد المراجعة']],
   employed:[['labor_force','حجم قوة العمل'],['employed','المشتغلون'],['unemployed','المتعطلون'],['unemployment_rate','معدل البطالة %'],['male_unemployment','بطالة الذكور %'],['female_unemployment','بطالة الإناث %'],['youth_unemployment','بطالة الشباب %']],
   insurance_total:[['insurance_public','قطاع عام'],['insurance_private','قطاع خاص'],['insurance_total','إجمالي المسجّلين'],['pensioners','متقاعدون'],['work_injury_comp','تعويضات إصابات'],['injury_beneficiaries','مستفيدو إصابات']],
-  food_baskets:[['food_baskets','سلل غذائية'],['in_kind_aid','مساعدات عينية'],['cash_assistance','إعانات مالية'],['unhcr_centers','مراكز UNHCR'],['unfpa_safe_spaces','مساحات آمنة']],
+  food_baskets:[['food_baskets','سلل غذائية'],['in_kind_aid','مساعدات عينية'],['cash_assistance','إعانات مالية'],['unhcr_centers','المراكز المجتمعية'],['unfpa_safe_spaces','مساحات آمنة']],
   platform_registered:[['platform_registered','مسجّلون على المنصة'],['platform_establishments','المنشآت المسجّلة'],['platform_jobs','فرص العمل'],['platform_training','فرص التدريب'],['vocational_centers','مراكز التأهيل'],['vocational_benef','مستفيدو التأهيل']],
   population:[['population','السكان'],['males','الذكور'],['females','الإناث'],['pop_under15','دون 15 سنة'],['pop_15_60','15-60 سنة'],['pop_over60','60+ سنة']],
   camps_count:[['camps_count','عدد المخيمات'],['camp_families','الأسر المقيمة'],['returnees','عدد العائدين'],['return_convoys','قوافل العودة'],['current_persons','عدد الأفراد الحالي'],['returned_by_convoys','العائدة بالقوافل'],['evacuated_camps','المخيمات المفرغة']]
@@ -2259,7 +2259,7 @@ function renderSingleGovChart(canvasId, arr, categoryField){
       {key:'food_baskets', label:'سلل غذائية'},
       {key:'in_kind_aid', label:'مساعدات عينية'},
       {key:'cash_assistance', label:'إعانات مالية'},
-      {key:'unhcr_centers', label:'مراكز UNHCR'},
+      {key:'unhcr_centers', label:'المراكز المجتمعية'},
       {key:'unfpa_safe_spaces', label:'مساحات آمنة'}
     ],
     'platform_registered': [
@@ -2662,8 +2662,8 @@ function renderCategory(cat){
       {em:'🍞',n:sum('food_baskets',arr),t:'سلل غذائية موزّعة'},
       {em:'💊',n:sum('in_kind_aid',arr),t:'مساعدات عينية (أدوية/عمليات)'},
       {em:'💵',n:sum('cash_assistance',arr),t:'إعانات مالية'},
-      {em:'🏠',n:sum('unhcr_centers',arr),t:'المراكز المجتمعية (UNHCR)'},
-      {em:'🛡️',n:sum('unfpa_safe_spaces',arr),t:'مساحات آمنة للنساء (UNFPA)'}
+      {em:'🏠',n:sum('unhcr_centers',arr),t:'المراكز المجتمعية'},
+      {em:'🛡️',n:sum('unfpa_safe_spaces',arr),t:'مساحات آمنة للنساء'}
     ]);
     const food = sum('food_baskets', arr);
     const inkind = sum('in_kind_aid', arr);
