@@ -4038,12 +4038,13 @@ let mapInfoWindow = null;
 let googleMapsLoadPromise = null;
 let placesAutocomplete = null;
 let mapHeatLayers = {};
-// Google Maps requires a project-specific key configured at runtime.
-// The key is intentionally not embedded in this public HTML file.
+// Google Maps JavaScript API configuration.
+// Restrict this key in Google Cloud by HTTP referrer and enabled APIs.
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAGI6yqE0GfOZUDwtyN1JdHz2YZZjZgB5U';
 function getGoogleMapsApiKey(){
   const fromUrl = new URLSearchParams(location.search).get('googleMapsKey');
   const fromStorage = localStorage.getItem('googleMapsApiKey');
-  return (fromUrl || fromStorage || '').trim();
+  return (fromUrl || fromStorage || GOOGLE_MAPS_API_KEY || '').trim();
 }
 
 function configureGoogleMapsKey(){
