@@ -379,6 +379,19 @@
   .analytics-controls label{font-family:'Tajawal',sans-serif;font-weight:700;color:var(--ink);font-size:13px;}
   .analytics-controls select{border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);padding:8px 12px;font-family:'Cairo',sans-serif;font-size:13px;min-width:230px;}
   .analytics-note{font-size:12px;color:var(--ink-soft);}
+  .month-comparison-panel{background:linear-gradient(135deg,#f0f8fa,#fff);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
+  .month-comparison-title{font-family:'Tajawal',sans-serif;font-weight:800;color:var(--ink);font-size:15px;margin-bottom:10px;}
+  .month-comparison-controls{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:10px;}
+  .month-comparison-controls label{display:grid;gap:5px;color:var(--ink-soft);font-size:11px;font-weight:700;}
+  .month-comparison-controls select{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:8px 10px;font-family:'Cairo',sans-serif;font-size:12px;}
+  .month-comparison-result{margin-top:12px;}
+  .month-comparison-empty{padding:12px;border-radius:9px;background:var(--sand);color:var(--ink-soft);font-size:12px;text-align:center;}
+  .month-comparison-cards{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:10px;}
+  .month-comparison-card{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:11px;text-align:center;}
+  .month-comparison-card .label{color:var(--ink-soft);font-size:11px;display:block;margin-bottom:4px;}
+  .month-comparison-card .value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
+  .month-comparison-card .sub{display:block;color:var(--ink-soft);font-size:10px;margin-top:3px;}
+  .month-comparison-card.delta-positive .value{color:#2e7d32}.month-comparison-card.delta-negative .value{color:#b3261e}
   .analytics-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
   .analytics-kpi{border:1px solid var(--line);border-radius:10px;background:#fff;padding:12px;text-align:center;}
   .analytics-kpi .ak-value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
@@ -390,7 +403,7 @@
   .analytics-card h3{font-family:'Tajawal',sans-serif;font-size:15px;color:var(--ink);margin:0 0 8px;}
   .analytics-card .chart-wrap{margin:0;min-height:260px;background:var(--sand);}
   .analytics-narrative{font-size:13px;color:var(--ink-soft);line-height:1.9;background:var(--sand);border-inline-start:3px solid #0D8BA8;padding:12px 14px;border-radius:6px;}
-  @media(max-width:760px){.analytics-grid{grid-template-columns:1fr;}.analytics-body{padding:16px;}.analytics-head{padding:16px;}.analytics-controls{align-items:stretch;flex-direction:column;}.analytics-controls select{width:100%;}}
+  @media(max-width:760px){.analytics-grid{grid-template-columns:1fr;}.analytics-body{padding:16px;}.analytics-head{padding:16px;}.analytics-controls{align-items:stretch;flex-direction:column;}.analytics-controls select{width:100%;}.month-comparison-controls,.month-comparison-cards{grid-template-columns:1fr;}}
 
 /* ===== LOCAL USERS / ROLES / AUDIT LOGS ===== */
 .auth-methods{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line);}
@@ -1198,6 +1211,15 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
           <option value="ngo_new_pct_2025">المنظمات المشهرة 2025</option>
         </select>
         <span class="analytics-note">تتبع الرسوم فلاتر المحافظة والشهر المحددة في أعلى اللوحة.</span>
+      </div>
+      <div class="month-comparison-panel" id="monthComparisonPanel">
+        <div class="month-comparison-title">📅 مقارنة الأشهر داخل المحافظة نفسها</div>
+        <div class="month-comparison-controls">
+          <label>المحافظة<select id="comparisonGov" onchange="renderMonthComparison()"></select></label>
+          <label>الشهر الأول<select id="comparisonMonthA" onchange="renderMonthComparison()"></select></label>
+          <label>الشهر الثاني<select id="comparisonMonthB" onchange="renderMonthComparison()"></select></label>
+        </div>
+        <div id="monthComparisonResult" class="month-comparison-result"></div>
       </div>
       <div class="analytics-kpis" id="analyticsKpis"></div>
       <div class="analytics-grid">
@@ -2891,10 +2913,57 @@ function toggleInsights(headEl){
   }
 }
 
+function renderMonthComparison(){
+  const govEl = document.getElementById('comparisonGov');
+  const monthAEl = document.getElementById('comparisonMonthA');
+  const monthBEl = document.getElementById('comparisonMonthB');
+  const resultEl = document.getElementById('monthComparisonResult');
+  if(!govEl || !monthAEl || !monthBEl || !resultEl) return;
+
+  const rows = Array.isArray(ALL_DATA) ? ALL_DATA : [];
+  const govs = ALL_GOVS.filter(g => rows.some(d => String(d.gov || '').trim() === g));
+  const months = MONTHS_LIST.filter(m => rows.some(d => normalizeMonth(d.month) === m));
+  const preserve = {gov:govEl.value, a:monthAEl.value, b:monthBEl.value};
+  govEl.innerHTML = govs.map(g => `<option value="${g}">${g}</option>`).join('');
+  monthAEl.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
+  monthBEl.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
+  if(govs.includes(preserve.gov)) govEl.value = preserve.gov;
+  if(months.includes(preserve.a)) monthAEl.value = preserve.a;
+  if(months.includes(preserve.b)) monthBEl.value = preserve.b;
+  if(!monthAEl.value && months[0]) monthAEl.value = months[0];
+  if(!monthBEl.value && months[1]) monthBEl.value = months[1];
+  if(!monthBEl.value && months[0]) monthBEl.value = months[0];
+
+  const gov = govEl.value;
+  const monthA = monthAEl.value;
+  const monthB = monthBEl.value;
+  const metric = document.getElementById('analyticsMetric')?.value || 'population';
+  const meta = ANALYTICS_METRICS[metric] || ANALYTICS_METRICS.population;
+  const valueFor = month => rows
+    .filter(d => String(d.gov || '').trim() === gov && normalizeMonth(d.month) === month)
+    .reduce((sum, d) => sum + (Number(d[metric]) || 0), 0);
+  if(!gov || !monthA || !monthB){
+    resultEl.innerHTML = '<div class="month-comparison-empty">لا توجد بيانات كافية لإجراء المقارنة.</div>';
+    return;
+  }
+  const valueA = valueFor(monthA);
+  const valueB = valueFor(monthB);
+  const delta = valueB - valueA;
+  const pct = valueA === 0 ? (valueB === 0 ? 0 : null) : (delta / Math.abs(valueA)) * 100;
+  const deltaClass = delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : '';
+  const deltaText = pct === null ? 'من صفر إلى قيمة جديدة' : `${delta >= 0 ? '+' : ''}${fmt(delta)} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)`;
+  resultEl.innerHTML = `<div class="month-comparison-cards">
+    <div class="month-comparison-card"><span class="label">${monthA}</span><span class="value">${fmt(valueA)}</span><span class="sub">${meta.label} — ${gov}</span></div>
+    <div class="month-comparison-card"><span class="label">${monthB}</span><span class="value">${fmt(valueB)}</span><span class="sub">${meta.label} — ${gov}</span></div>
+    <div class="month-comparison-card ${deltaClass}"><span class="label">التغير</span><span class="value">${deltaText}</span><span class="sub">${meta.unit}</span></div>
+  </div>`;
+}
+
 
 function renderAdvancedAnalytics(){
   const section = document.getElementById('advancedAnalyticsSection');
   if(!section || !section.classList.contains('open')) return;
+  renderMonthComparison();
   const arr = filtered();
   const metricEl = document.getElementById('analyticsMetric');
   const metric = metricEl?.value || 'population';
