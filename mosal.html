@@ -2935,7 +2935,7 @@ function updateFooterNote(){
   const missingGovs = allGovs.filter(g => !presentGovs.has(g));
   const note = missingGovs.length > 0 
     ? `⚠️ ملاحظة على جودة البيانات: ${missingGovs.length} محافظة لم ترفع بياناتها (${missingGovs.join('، ')}). مصدر البيانات: نموذج «مؤشرات تشغيلية إجمالية وفق المحافظات».`
-    : `✅ جميع المحافظات الـ 14 رفعت بياناتها. مصدر البيانات: نموذج «مؤشرات تشغيلية إجمالية وفق المحافظات».`;
+    : `هذا اي تسريب أو إفشاء لمحتوى هذا التقرير يُعد مخالفة جسيمة تستوجب المساءلة القانونية والإدارية وفق الأنظمة واللوائح المعمول بها`;
   document.getElementById('footerNote').textContent = note;
 }
 
