@@ -2878,6 +2878,20 @@ function toggleMonthComparison(headEl){
   if(section.classList.contains('open')) renderMonthComparison();
 }
 
+function getAllComparisonMetrics(rows){
+  const keys = new Set();
+  rows.forEach(row => Object.keys(row || {}).forEach(key => {
+    if(['gov','month','year'].includes(key)) return;
+    const value = row[key];
+    if(value !== null && value !== '' && Number.isFinite(Number(value))) keys.add(key);
+  }));
+  return [...keys].map(key => ({
+    key,
+    label: COLUMN_MAP_INV[key] || ANALYTICS_METRICS[key]?.label || key,
+    unit: ANALYTICS_METRICS[key]?.unit || 'قيمة'
+  })).sort((a, b) => a.label.localeCompare(b.label, 'ar'));
+}
+
 const ANALYTICS_METRICS = {
   population: {label:'إجمالي السكان', unit:'نسمة'},
   employed: {label:'المشتغلون', unit:'مشتغل'},
@@ -2945,9 +2959,10 @@ function renderMonthComparison(){
   const govs = ALL_GOVS.filter(g => rows.some(d => String(d.gov || '').trim() === g));
   const months = MONTHS_LIST.filter(m => rows.some(d => normalizeMonth(d.month) === m));
   const preserve = {metric:metricEl?.value, gov:govEl.value, a:monthAEl.value, b:monthBEl.value};
+  const comparisonMetrics = getAllComparisonMetrics(rows);
   if(metricEl){
-    metricEl.innerHTML = Object.entries(ANALYTICS_METRICS).map(([key, meta]) => `<option value="${key}">${meta.label}</option>`).join('');
-    if(preserve.metric && ANALYTICS_METRICS[preserve.metric]) metricEl.value = preserve.metric;
+    metricEl.innerHTML = comparisonMetrics.map(meta => `<option value="${meta.key}">${meta.label}</option>`).join('');
+    if(preserve.metric && comparisonMetrics.some(meta => meta.key === preserve.metric)) metricEl.value = preserve.metric;
   }
   govEl.innerHTML = govs.map(g => `<option value="${g}">${g}</option>`).join('');
   monthAEl.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
@@ -2963,7 +2978,7 @@ function renderMonthComparison(){
   const monthA = monthAEl.value;
   const monthB = monthBEl.value;
   const metric = metricEl?.value || document.getElementById('analyticsMetric')?.value || 'population';
-  const meta = ANALYTICS_METRICS[metric] || ANALYTICS_METRICS.population;
+  const meta = comparisonMetrics.find(item => item.key === metric) || {label:metric, unit:'قيمة'};
   const valueFor = month => rows
     .filter(d => String(d.gov || '').trim() === gov && normalizeMonth(d.month) === month)
     .reduce((sum, d) => sum + (Number(d[metric]) || 0), 0);
