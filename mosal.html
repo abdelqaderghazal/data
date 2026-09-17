@@ -384,6 +384,9 @@
   .month-comparison-controls{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;}
   .month-comparison-controls label{display:grid;gap:5px;color:var(--ink-soft);font-size:11px;font-weight:700;}
   .month-comparison-controls select{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:8px 10px;font-family:'Cairo',sans-serif;font-size:12px;}
+  .month-comparison-controls select[multiple]{min-height:42px;max-height:150px;overflow-y:auto;}
+  .month-comparison-controls select[multiple] option{padding:5px 8px;}
+  .month-comparison-hint{font-size:11px;color:var(--ink-soft);margin-top:8px;}
   .month-comparison-result{margin-top:12px;}
   .month-comparison-empty{padding:12px;border-radius:9px;background:var(--sand);color:var(--ink-soft);font-size:12px;text-align:center;}
   .month-comparison-cards{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:10px;}
@@ -1180,13 +1183,14 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="cat-body month-comparison-body" id="monthComparisonBody">
       <div class="month-comparison-panel" id="monthComparisonPanel">
-        <div class="month-comparison-title">📊 اختر المحافظة والمؤشر والشهرين للمقارنة</div>
+        <div class="month-comparison-title">📊 اختر المحافظة والمؤشرات والشهرين للمقارنة</div>
         <div class="month-comparison-controls">
-          <label>المؤشر<select id="comparisonMetric" onchange="renderMonthComparison()"></select></label>
+          <label>المؤشرات<select id="comparisonMetric" multiple size="1" onchange="renderMonthComparison()" aria-label="اختيار مؤشرات متعددة"></select></label>
           <label>المحافظة<select id="comparisonGov" onchange="renderMonthComparison()"></select></label>
           <label>الشهر الأول<select id="comparisonMonthA" onchange="renderMonthComparison()"></select></label>
           <label>الشهر الثاني<select id="comparisonMonthB" onchange="renderMonthComparison()"></select></label>
         </div>
+        <div class="month-comparison-hint">يمكن اختيار أكثر من مؤشر بالضغط على Ctrl (أو Cmd في أجهزة Mac) أثناء الاختيار.</div>
         <div id="monthComparisonResult" class="month-comparison-result"></div>
       </div>
     </div>
@@ -2958,11 +2962,21 @@ function renderMonthComparison(){
   const rows = Array.isArray(ALL_DATA) ? ALL_DATA : [];
   const govs = ALL_GOVS.filter(g => rows.some(d => String(d.gov || '').trim() === g));
   const months = MONTHS_LIST.filter(m => rows.some(d => normalizeMonth(d.month) === m));
-  const preserve = {metric:metricEl?.value, gov:govEl.value, a:monthAEl.value, b:monthBEl.value};
+  const preserve = {
+    metrics: metricEl ? [...metricEl.selectedOptions].map(option => option.value) : [],
+    gov:govEl.value,
+    a:monthAEl.value,
+    b:monthBEl.value
+  };
   const comparisonMetrics = getAllComparisonMetrics(rows);
   if(metricEl){
     metricEl.innerHTML = comparisonMetrics.map(meta => `<option value="${meta.key}">${meta.label}</option>`).join('');
-    if(preserve.metric && comparisonMetrics.some(meta => meta.key === preserve.metric)) metricEl.value = preserve.metric;
+    const preservedMetrics = preserve.metrics.filter(key => comparisonMetrics.some(meta => meta.key === key));
+    if(preservedMetrics.length){
+      [...metricEl.options].forEach(option => { option.selected = preservedMetrics.includes(option.value); });
+    } else if(comparisonMetrics.length){
+      metricEl.options[0].selected = true;
+    }
   }
   govEl.innerHTML = govs.map(g => `<option value="${g}">${g}</option>`).join('');
   monthAEl.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
@@ -2977,26 +2991,32 @@ function renderMonthComparison(){
   const gov = govEl.value;
   const monthA = monthAEl.value;
   const monthB = monthBEl.value;
-  const metric = metricEl?.value || document.getElementById('analyticsMetric')?.value || 'population';
-  const meta = comparisonMetrics.find(item => item.key === metric) || {label:metric, unit:'قيمة'};
-  const valueFor = month => rows
-    .filter(d => String(d.gov || '').trim() === gov && normalizeMonth(d.month) === month)
-    .reduce((sum, d) => sum + (Number(d[metric]) || 0), 0);
+  const metrics = metricEl ? [...metricEl.selectedOptions].map(option => option.value) : [];
   if(!gov || !monthA || !monthB){
     resultEl.innerHTML = '<div class="month-comparison-empty">لا توجد بيانات كافية لإجراء المقارنة.</div>';
     return;
   }
-  const valueA = valueFor(monthA);
-  const valueB = valueFor(monthB);
-  const delta = valueB - valueA;
-  const pct = valueA === 0 ? (valueB === 0 ? 0 : null) : (delta / Math.abs(valueA)) * 100;
-  const deltaClass = delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : '';
-  const deltaText = pct === null ? 'من صفر إلى قيمة جديدة' : `${delta >= 0 ? '+' : ''}${fmt(delta)} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)`;
-  resultEl.innerHTML = `<div class="month-comparison-cards">
-    <div class="month-comparison-card"><span class="label">${monthA}</span><span class="value">${fmt(valueA)}</span><span class="sub">${meta.label} — ${gov}</span></div>
-    <div class="month-comparison-card"><span class="label">${monthB}</span><span class="value">${fmt(valueB)}</span><span class="sub">${meta.label} — ${gov}</span></div>
-    <div class="month-comparison-card ${deltaClass}"><span class="label">التغير</span><span class="value">${deltaText}</span><span class="sub">${meta.unit}</span></div>
-  </div>`;
+  if(!metrics.length){
+    resultEl.innerHTML = '<div class="month-comparison-empty">اختر مؤشرًا واحدًا على الأقل لإجراء المقارنة.</div>';
+    return;
+  }
+  const valueFor = (month, metric) => rows
+    .filter(d => String(d.gov || '').trim() === gov && normalizeMonth(d.month) === month)
+    .reduce((sum, d) => sum + (Number(d[metric]) || 0), 0);
+  resultEl.innerHTML = metrics.map(metric => {
+    const meta = comparisonMetrics.find(item => item.key === metric) || {label:metric, unit:'قيمة'};
+    const valueA = valueFor(monthA, metric);
+    const valueB = valueFor(monthB, metric);
+    const delta = valueB - valueA;
+    const pct = valueA === 0 ? (valueB === 0 ? 0 : null) : (delta / Math.abs(valueA)) * 100;
+    const deltaClass = delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : '';
+    const deltaText = pct === null ? 'من صفر إلى قيمة جديدة' : `${delta >= 0 ? '+' : ''}${fmt(delta)} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)`;
+    return `<div class="month-comparison-cards">
+      <div class="month-comparison-card"><span class="label">${monthA}</span><span class="value">${fmt(valueA)}</span><span class="sub">${meta.label} — ${gov}</span></div>
+      <div class="month-comparison-card"><span class="label">${monthB}</span><span class="value">${fmt(valueB)}</span><span class="sub">${meta.label} — ${gov}</span></div>
+      <div class="month-comparison-card ${deltaClass}"><span class="label">التغير</span><span class="value">${deltaText}</span><span class="sub">${meta.unit}</span></div>
+    </div>`;
+  }).join('');
 }
 
 
