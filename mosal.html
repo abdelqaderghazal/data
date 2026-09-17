@@ -5395,7 +5395,19 @@ async function firebaseGoogleLogin(){
     enterDashboard();
   }catch(error){
     console.error('Firebase Google login failed:',error);
-    showLoginError('تعذر تسجيل الدخول بواسطة Google. تحقق من إعدادات Firebase والنطاق المسموح.');
+    const code=String(error?.code||'').replace('auth/','').replace('firestore/','');
+    const messages={
+      'operation-not-allowed':'تسجيل الدخول بواسطة Google غير مفعّل في Firebase Authentication.',
+      'unauthorized-domain':'هذا النطاق غير مضاف إلى Firebase > Authentication > Settings > Authorized domains.',
+      'popup-blocked':'المتصفح منع نافذة Google المنبثقة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.',
+      'popup-closed-by-user':'تم إغلاق نافذة Google قبل إكمال تسجيل الدخول.',
+      'network-request-failed':'تعذر الاتصال بخوادم Firebase. تحقق من الإنترنت.',
+      'permission-denied':'قواعد Firestore منعت حفظ طلب المستخدم. راجع Firestore Security Rules.',
+      'failed-precondition':'قاعدة Firestore غير مهيأة أو تحتاج إلى إنشاء قاعدة البيانات.',
+      'invalid-api-key':'مفتاح Firebase API غير صحيح أو لا يخص المشروع الحالي.'
+    };
+    const detail=messages[code]||error?.message||'خطأ غير معروف';
+    showLoginError(`❌ ${detail}${code?` (Firebase: ${code})`:''}`);
   }
 }
 async function renderFirebasePendingUsers(){
