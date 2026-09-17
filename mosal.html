@@ -3065,7 +3065,19 @@ function renderAdvancedAnalytics(){
   }
 
   if(narrative){
-    narrative.innerHTML = metrics.map(metric => {
+    const availableMonths = [...new Set(arr.map(row => normalizeMonth(row.month)).filter(Boolean))]
+      .sort((a,b) => analyticsMonthOrder(a) - analyticsMonthOrder(b));
+    const monthCount = availableMonths.length;
+    const monthLabel = monthCount === 1 ? 'شهر واحد' : monthCount === 2 ? 'شهرين' : `${monthCount} أشهر`;
+    const periodText = monthCount
+      ? `يعتمد هذا الملخص على <strong>${monthLabel}</strong> (${availableMonths.join('، ')}).`
+      : 'لا تتوفر أشهر محددة ضمن البيانات الحالية.';
+    const introText = monthCount === 1
+      ? `تحليل تلقائي لبيانات شهر واحد: ${periodText}`
+      : monthCount === 2
+        ? `تحليل تلقائي للمقارنة بين شهرين: ${periodText}`
+        : `تحليل تلقائي للفترة الزمنية: ${periodText}`;
+    narrative.innerHTML = `<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--line)">📅 ${introText}</div>` + metrics.map(metric => {
       const meta = availableMetrics.find(item => item.key === metric) || {label:metric, unit:'قيمة'};
       const govTotals = {};
       const monthTotals = {};
@@ -3085,7 +3097,8 @@ function renderAdvancedAnalytics(){
       const lowest = ranking[ranking.length - 1] || ['—', 0];
       const changeClass = change > 0.05 ? 'positive' : change < -0.05 ? 'negative' : 'neutral';
       const changeText = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(1)}%`;
-      return `<div style="margin-bottom:8px">يبلغ إجمالي <strong>${meta.label}</strong> <strong>${analyticsNumber(total)}</strong> ${meta.unit}. تسجل <strong>${highest[0]}</strong> أعلى قيمة (${analyticsNumber(highest[1])})، وأدنى قيمة <strong>${lowest[0]}</strong> (${analyticsNumber(lowest[1])}). التغير: <strong class="${changeClass}">${changeText}</strong>.</div>`;
+      const metricPeriod = months.length === 1 ? 'خلال الشهر المتاح' : months.length === 2 ? 'بين الشهرين المتاحين' : `عبر ${months.length} أشهر`;
+      return `<div style="margin-bottom:8px">${metricPeriod}، يبلغ إجمالي <strong>${meta.label}</strong> <strong>${analyticsNumber(total)}</strong> ${meta.unit}. تسجل <strong>${highest[0]}</strong> أعلى قيمة (${analyticsNumber(highest[1])})، وأدنى قيمة <strong>${lowest[0]}</strong> (${analyticsNumber(lowest[1])}). التغير بين أول وآخر شهر: <strong class="${changeClass}">${changeText}</strong>.</div>`;
     }).join('');
   }
 
