@@ -378,6 +378,8 @@
   .analytics-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--sand);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:16px;}
   .analytics-controls label{font-family:'Tajawal',sans-serif;font-weight:700;color:var(--ink);font-size:13px;}
   .analytics-controls select{border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);padding:8px 12px;font-family:'Cairo',sans-serif;font-size:13px;min-width:230px;}
+  .analytics-controls select[multiple]{min-height:42px;max-height:170px;overflow-y:auto;}
+  .analytics-controls select[multiple] option{padding:5px 8px;}
   .analytics-note{font-size:12px;color:var(--ink-soft);}
   .month-comparison-panel{background:linear-gradient(135deg,#f0f8fa,#fff);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
   .month-comparison-title{font-family:'Tajawal',sans-serif;font-weight:800;color:var(--ink);font-size:15px;margin-bottom:10px;}
@@ -1221,20 +1223,9 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     </div>
     <div class="analytics-body" id="advancedAnalyticsBody">
       <div class="analytics-controls">
-        <label for="analyticsMetric">المؤشر التحليلي</label>
-        <select id="analyticsMetric" onchange="renderAdvancedAnalytics()">
-          <option value="population">إجمالي السكان</option>
-          <option value="employed">المشتغلون</option>
-          <option value="disabled_cards">بطاقات الإعاقة الجديدة</option>
-          <option value="food_baskets">السلال الغذائية</option>
-          <option value="platform_jobs">فرص العمل على المنصة</option>
-          <option value="insurance_total">المسجلون القائمون على رأس عملهم</option>
-          <option value="camps_count">عدد المخيمات</option>
-          <option value="ngo_active">المنظمات المسحوب ترخيصها</option>
-          <option value="ngo_new_pct">المنظمات المشهرة (عام)</option>
-          <option value="ngo_new_pct_2025">المنظمات المشهرة 2025</option>
-        </select>
-        <span class="analytics-note">تتبع الرسوم فلاتر المحافظة والشهر المحددة في أعلى اللوحة.</span>
+        <label for="analyticsMetric">المؤشرات التحليلية</label>
+        <select id="analyticsMetric" multiple size="1" onchange="renderAdvancedAnalytics()" aria-label="اختيار مؤشرات تحليلية متعددة"></select>
+        <span class="analytics-note">يمكن اختيار أكثر من مؤشر باستخدام Ctrl أو Cmd. تتبع الرسوم فلاتر المحافظة والشهر المحددة في أعلى اللوحة.</span>
       </div>
       <div class="analytics-kpis" id="analyticsKpis"></div>
       <div class="analytics-grid">
@@ -3026,47 +3017,76 @@ function renderAdvancedAnalytics(){
   renderMonthComparison();
   const arr = filtered();
   const metricEl = document.getElementById('analyticsMetric');
-  const metric = metricEl?.value || 'population';
-  const meta = ANALYTICS_METRICS[metric] || ANALYTICS_METRICS.population;
   const kpis = document.getElementById('analyticsKpis');
   const narrative = document.getElementById('analyticsNarrative');
+  const availableMetrics = getAllComparisonMetrics(Array.isArray(ALL_DATA) ? ALL_DATA : []);
+  const previousMetrics = metricEl ? [...metricEl.selectedOptions].map(option => option.value) : [];
+  if(metricEl){
+    metricEl.innerHTML = availableMetrics.map(meta => `<option value="${meta.key}">${meta.label}</option>`).join('');
+    const selectedMetrics = previousMetrics.filter(key => availableMetrics.some(meta => meta.key === key));
+    const metricsToSelect = selectedMetrics.length ? selectedMetrics : (availableMetrics[0] ? [availableMetrics[0].key] : []);
+    [...metricEl.options].forEach(option => { option.selected = metricsToSelect.includes(option.value); });
+  }
+  const metrics = metricEl ? [...metricEl.selectedOptions].map(option => option.value) : [];
   if(!arr.length){
     if(kpis) kpis.innerHTML = '<div class="analytics-kpi"><div class="ak-value">—</div><div class="ak-label">لا توجد بيانات للتحليل</div></div>';
     if(narrative) narrative.textContent = 'لا توجد سجلات مطابقة للفلاتر الحالية.';
     return;
   }
-
-  const govTotals = {};
-  const monthTotals = {};
-  arr.forEach(row => {
-    const value = Number(row[metric]) || 0;
-    govTotals[row.gov] = (govTotals[row.gov] || 0) + value;
-    monthTotals[row.month] = (monthTotals[row.month] || 0) + value;
-  });
-  const ranking = Object.entries(govTotals).sort((a,b) => b[1] - a[1]);
-  const months = Object.keys(monthTotals).sort((a,b) => analyticsMonthOrder(a) - analyticsMonthOrder(b));
-  const values = months.map(m => monthTotals[m]);
-  const total = values.reduce((a,b) => a+b, 0);
-  const average = values.length ? total / values.length : 0;
-  const first = values[0] || 0;
-  const last = values[values.length - 1] || 0;
-  const change = first ? ((last - first) / first) * 100 : 0;
-  const highest = ranking[0] || ['—', 0];
-  const lowest = ranking[ranking.length - 1] || ['—', 0];
-  const changeClass = change > 0.05 ? 'positive' : change < -0.05 ? 'negative' : 'neutral';
-  const changeText = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(1)}%`;
+  if(!metrics.length){
+    if(kpis) kpis.innerHTML = '<div class="analytics-kpi"><div class="ak-value">—</div><div class="ak-label">اختر مؤشرًا واحدًا على الأقل</div></div>';
+    if(narrative) narrative.textContent = 'اختر مؤشرًا واحدًا على الأقل لعرض التحليل.';
+    return;
+  }
 
   if(kpis){
-    kpis.innerHTML = [
-      ['الإجمالي', analyticsNumber(total), meta.unit, 'neutral'],
-      ['المتوسط الشهري', analyticsNumber(average), meta.unit, 'neutral'],
-      ['أعلى محافظة', `${highest[0]} — ${analyticsNumber(highest[1])}`, '', 'neutral'],
-      ['التغير بين أول وآخر شهر', changeText, '', changeClass]
-    ].map(([label,value,unit,klass]) => `<div class="analytics-kpi"><div class="ak-value">${value}</div><div class="ak-label">${label}${unit ? ` (${unit})` : ''}</div><div class="ak-change ${klass}">${label === 'التغير بين أول وآخر شهر' ? (change >= 0 ? 'تحسن' : 'انخفاض') : 'حسب الفلاتر الحالية'}</div></div>`).join('');
+    kpis.innerHTML = metrics.map(metric => {
+      const meta = availableMetrics.find(item => item.key === metric) || {label:metric, unit:'قيمة'};
+      const govTotals = {};
+      const monthTotals = {};
+      arr.forEach(row => {
+        const value = Number(row[metric]) || 0;
+        govTotals[row.gov] = (govTotals[row.gov] || 0) + value;
+        monthTotals[normalizeMonth(row.month)] = (monthTotals[normalizeMonth(row.month)] || 0) + value;
+      });
+      const ranking = Object.entries(govTotals).sort((a,b) => b[1] - a[1]);
+      const months = Object.keys(monthTotals).sort((a,b) => analyticsMonthOrder(a) - analyticsMonthOrder(b));
+      const values = months.map(m => monthTotals[m]);
+      const total = values.reduce((a,b) => a+b, 0);
+      const average = values.length ? total / values.length : 0;
+      const first = values[0] || 0;
+      const last = values[values.length - 1] || 0;
+      const change = first ? ((last - first) / Math.abs(first)) * 100 : 0;
+      const highest = ranking[0] || ['—', 0];
+      const changeClass = change > 0.05 ? 'positive' : change < -0.05 ? 'negative' : 'neutral';
+      const changeText = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(1)}%`;
+      return `<div class="analytics-kpi" style="border-top:3px solid ${PALETTE[metrics.indexOf(metric) % PALETTE.length]}"><div class="ak-value">${analyticsNumber(total)}</div><div class="ak-label">${meta.label} (${meta.unit})</div><div class="ak-change ${changeClass}">${changeText} · ${highest[0]}</div></div>`;
+    }).join('');
   }
 
   if(narrative){
-    narrative.innerHTML = `يبلغ إجمالي <strong>${meta.label}</strong> ضمن الفلاتر الحالية <strong>${analyticsNumber(total)}</strong> ${meta.unit}. تسجل <strong>${highest[0]}</strong> أعلى قيمة بإجمالي ${analyticsNumber(highest[1])}، بينما تسجل <strong>${lowest[0]}</strong> أدنى قيمة بإجمالي ${analyticsNumber(lowest[1])}. وقد تغير المؤشر بنسبة <strong class="${changeClass}">${changeText}</strong> بين أول وآخر شهر متاح.`;
+    narrative.innerHTML = metrics.map(metric => {
+      const meta = availableMetrics.find(item => item.key === metric) || {label:metric, unit:'قيمة'};
+      const govTotals = {};
+      const monthTotals = {};
+      arr.forEach(row => {
+        const value = Number(row[metric]) || 0;
+        govTotals[row.gov] = (govTotals[row.gov] || 0) + value;
+        monthTotals[normalizeMonth(row.month)] = (monthTotals[normalizeMonth(row.month)] || 0) + value;
+      });
+      const ranking = Object.entries(govTotals).sort((a,b) => b[1] - a[1]);
+      const months = Object.keys(monthTotals).sort((a,b) => analyticsMonthOrder(a) - analyticsMonthOrder(b));
+      const values = months.map(m => monthTotals[m]);
+      const total = values.reduce((a,b) => a+b, 0);
+      const first = values[0] || 0;
+      const last = values[values.length - 1] || 0;
+      const change = first ? ((last - first) / Math.abs(first)) * 100 : 0;
+      const highest = ranking[0] || ['—', 0];
+      const lowest = ranking[ranking.length - 1] || ['—', 0];
+      const changeClass = change > 0.05 ? 'positive' : change < -0.05 ? 'negative' : 'neutral';
+      const changeText = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(1)}%`;
+      return `<div style="margin-bottom:8px">يبلغ إجمالي <strong>${meta.label}</strong> <strong>${analyticsNumber(total)}</strong> ${meta.unit}. تسجل <strong>${highest[0]}</strong> أعلى قيمة (${analyticsNumber(highest[1])})، وأدنى قيمة <strong>${lowest[0]}</strong> (${analyticsNumber(lowest[1])}). التغير: <strong class="${changeClass}">${changeText}</strong>.</div>`;
+    }).join('');
   }
 
   const rankingCanvas = document.getElementById('analyticsRankingChart');
@@ -3074,15 +3094,28 @@ function renderAdvancedAnalytics(){
   if(typeof Chart === 'undefined' || !rankingCanvas || !trendCanvas) return;
   if(charts.analyticsRanking) charts.analyticsRanking.destroy();
   if(charts.analyticsTrend) charts.analyticsTrend.destroy();
+  const metricData = metrics.map(metric => {
+    const meta = availableMetrics.find(item => item.key === metric) || {label:metric, unit:'قيمة'};
+    const govTotals = {};
+    const monthTotals = {};
+    arr.forEach(row => {
+      const value = Number(row[metric]) || 0;
+      govTotals[row.gov] = (govTotals[row.gov] || 0) + value;
+      monthTotals[normalizeMonth(row.month)] = (monthTotals[normalizeMonth(row.month)] || 0) + value;
+    });
+    return {metric, meta, govTotals, monthTotals};
+  });
+  const rankingLabels = [...new Set(metricData.flatMap(item => Object.keys(item.govTotals)))];
+  const months = [...new Set(metricData.flatMap(item => Object.keys(item.monthTotals)))].sort((a,b) => analyticsMonthOrder(a) - analyticsMonthOrder(b));
   charts.analyticsRanking = new Chart(rankingCanvas.getContext('2d'), {
     type:'bar',
-    data:{labels:ranking.map(x=>x[0]), datasets:[{label:meta.label, data:ranking.map(x=>x[1]), backgroundColor:ranking.map((_,i)=>PALETTE[i % PALETTE.length]), borderColor:'rgba(255,255,255,.75)', borderWidth:1, hoverBackgroundColor:'#0D8BA8', borderRadius:10, barPercentage:.68, categoryPercentage:.78}]},
-    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y', animation:{duration:900,easing:'easeOutQuart'}, interaction:{intersect:false,mode:'nearest'}, plugins:{legend:{display:false}, tooltip:{rtl:true,padding:12,cornerRadius:10,displayColors:false,callbacks:{label:ctx=>`${analyticsNumber(ctx.raw)} ${meta.unit}`}}}, scales:{x:{beginAtZero:true,grid:{color:'rgba(128,160,172,.16)',drawBorder:false},ticks:{callback:v=>analyticsNumber(v)}},y:{grid:{display:false},ticks:{font:{family:'Cairo',weight:'600'}}}}}
+    data:{labels:rankingLabels, datasets:metricData.map((item,index)=>({label:item.meta.label, data:rankingLabels.map(gov=>item.govTotals[gov] || 0), backgroundColor:PALETTE[index % PALETTE.length], borderColor:'rgba(255,255,255,.75)', borderWidth:1, borderRadius:7, barPercentage:.68, categoryPercentage:.78}))},
+    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y', animation:{duration:900,easing:'easeOutQuart'}, interaction:{intersect:false,mode:'nearest'}, plugins:{legend:{display:true,rtl:true,position:'bottom'}, tooltip:{rtl:true,padding:12,cornerRadius:10,displayColors:true,callbacks:{label:ctx=>`${analyticsNumber(ctx.raw)} ${metricData[ctx.datasetIndex].meta.unit}`}}}, scales:{x:{beginAtZero:true,grid:{color:'rgba(128,160,172,.16)',drawBorder:false},ticks:{callback:v=>analyticsNumber(v)}},y:{grid:{display:false},ticks:{font:{family:'Cairo',weight:'600'}}}}}
   });
   charts.analyticsTrend = new Chart(trendCanvas.getContext('2d'), {
     type:'line',
-    data:{labels:months, datasets:[{label:meta.label, data:values, borderColor:'#2563EB', backgroundColor:'rgba(37,99,235,.14)', fill:true, tension:.42, borderWidth:3, pointRadius:4, pointHoverRadius:7, pointBorderWidth:2, pointBorderColor:'#fff', pointBackgroundColor:'#06B6D4'}]},
-    options:{responsive:true, maintainAspectRatio:false, animation:{duration:1000,easing:'easeOutQuart'},interaction:{intersect:false,mode:'index'},plugins:{legend:{display:false},tooltip:{rtl:true,padding:12,cornerRadius:10,displayColors:false,callbacks:{label:ctx=>`${analyticsNumber(ctx.raw)} ${meta.unit}`}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(128,160,172,.16)',drawBorder:false},ticks:{callback:v=>analyticsNumber(v)}},x:{grid:{display:false},ticks:{font:{family:'Cairo',weight:'600'}}}}}
+    data:{labels:months, datasets:metricData.map((item,index)=>({label:item.meta.label, data:months.map(month=>item.monthTotals[month] || 0), borderColor:PALETTE[index % PALETTE.length], backgroundColor:'transparent', fill:false, tension:.42, borderWidth:3, pointRadius:4, pointHoverRadius:7, pointBorderWidth:2, pointBorderColor:'#fff', pointBackgroundColor:PALETTE[index % PALETTE.length]}))},
+    options:{responsive:true, maintainAspectRatio:false, animation:{duration:1000,easing:'easeOutQuart'},interaction:{intersect:false,mode:'index'},plugins:{legend:{display:true,rtl:true,position:'bottom'},tooltip:{rtl:true,padding:12,cornerRadius:10,displayColors:true,callbacks:{label:ctx=>`${analyticsNumber(ctx.raw)} ${metricData[ctx.datasetIndex].meta.unit}`}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(128,160,172,.16)',drawBorder:false},ticks:{callback:v=>analyticsNumber(v)}},x:{grid:{display:false},ticks:{font:{family:'Cairo',weight:'600'}}}}}
   });
 }
 
