@@ -650,10 +650,10 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 
     <div class="auth-methods">
       <div class="auth-divider"><span>أو</span></div>
-      <div id="googleSignIn" style="display:none"></div>
+      <div id="googleSignIn"></div>
       <button type="button" class="btn-login" id="firebaseGoogleLogin" onclick="firebaseGoogleLogin()" style="display:none;background:#fff;color:#0B5A7A;border:1px solid #c8dce3;margin-top:10px;">🔵 الدخول بحساب Google</button>
       <div class="auth-hint" id="googleHint">
-        سجّل الدخول بحساب Google. الحساب الجديد يصبح «مطلعاً» بانتظار موافقة المدير أو رفضه.
+        سجّل الدخول بحساب Google، وسيحتاج الحساب الجديد إلى موافقة المالك.
       </div>
     </div>
   </div>
@@ -707,7 +707,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       </div>
       <div class="admin-form" style="margin-top:18px;border-top:1px dashed var(--line);padding-top:16px;">
         <h4 style="margin:0 0 8px;font-family:Tajawal;color:var(--ink);">⏳ طلبات Google بانتظار الموافقة</h4>
-        <div id="firebasePendingUsers"><div class="small-note">جاري تحميل طلبات Google...</div></div>
+        <div id="firebasePendingUsers"><div class="small-note">لا توجد طلبات معلقة أو لم يتم ضبط Firebase بعد.</div></div>
       </div>
     </div>
 
@@ -4634,13 +4634,12 @@ let currentUser = null;
 let authDbPromise = null;
 // Firebase setup: replace these placeholders with the Web App config from Firebase Console.
 const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyD-GBxVB7sRur7XiHRGU2tQ-ZqQH9iZrm4',
-  authDomain: 'mosal-c9406.firebaseapp.com',
-  projectId: 'mosal-c9406',
-  storageBucket: 'mosal-c9406.firebasestorage.app',
-  messagingSenderId: '263943819058',
-  appId: '1:263943819058:web:4e045666843e61ec03912b',
-  measurementId: 'G-PM2CGBXBZY'
+  apiKey: 'ضع_Firebase_API_Key_هنا',
+  authDomain: 'ضع_معرف_المشروع.firebaseapp.com',
+  projectId: 'ضع_معرف_المشروع_هنا',
+  storageBucket: 'ضع_معرف_المشروع.firebasestorage.app',
+  messagingSenderId: 'ضع_Sender_ID_هنا',
+  appId: 'ضع_App_ID_هنا'
 };
 // Set this to the owner's Google email. This account is approved as admin automatically.
 const FIREBASE_OWNER_EMAIL = 'abodekazal@gmail.com';
@@ -4697,34 +4696,6 @@ async function getUserById(id){
 async function checkCurrentSession(){
   if(!currentUser) return true;
   try{
-    if(currentUser.provider==='firebase'){
-      if(!firebaseReady || !firebaseAuth || !firebaseDb || !firebaseAuth.currentUser) return true;
-      const account=firebaseAuth.currentUser;
-      const email=(account.email||currentUser.email||'').toLowerCase();
-      const isOwner=email===FIREBASE_OWNER_EMAIL.toLowerCase();
-      const snap=await firebaseDb.collection('users').doc(account.uid).get();
-      const profile=snap.exists?snap.data():null;
-      if(!isOwner && (!profile || profile.active!==true)){
-        stopSessionGuard();
-        await firebaseAuth.signOut().catch(()=>{});
-        alert('تم إخراج هذا المستخدم وتعطيل حسابه من قبل المدير.');
-        localStorage.removeItem(SESSION_KEY);
-        currentUser=null;
-        location.reload();
-        return false;
-      }
-      currentUser={
-        ...currentUser,
-        id:'fb-'+account.uid,
-        name:profile?.name||account.displayName||email,
-        email,
-        role:isOwner?'admin':(profile?.role||'viewer'),
-        active:true,
-        provider:'firebase',
-        firebaseUid:account.uid
-      };
-      return true;
-    }
     const fresh=await getUserById(currentUser.id);
     if(!fresh || fresh.active===false){
       stopSessionGuard();
@@ -5179,9 +5150,7 @@ async function renderUsers(){
       <td>
         <button class="btn btn-sm btn-primary" onclick="editUser('${u.id}')">تعديل</button>
         ${u.active===false
-          ? (u.provider==='google' && u.status==='pending'
-              ? `<button class="btn btn-sm btn-primary" onclick="approveGoogleUser('${u.id}')">✅ موافقة</button><button class="btn btn-sm btn-danger" onclick="rejectGoogleUser('${u.id}')">❌ رفض</button>`
-              : `<button class="btn btn-sm btn-primary" onclick="reactivateUser('${u.id}')">تفعيل</button>`)
+          ? `<button class="btn btn-sm btn-primary" onclick="reactivateUser('${u.id}')">تفعيل</button>`
           : `<button class="btn btn-sm btn-warning" onclick="forceLogoutUser('${u.id}')">إخراج المستخدم</button>`}
         ${canDelete?`<button class="btn btn-sm btn-danger" onclick="removeUser('${u.id}')">حذف</button>`:''}
       </td>
@@ -5309,23 +5278,6 @@ async function reactivateUser(id){
   showUserMsg(`✅ تم تفعيل المستخدم ${user.name}.`,`success`);
 }
 
-async function approveGoogleUser(id){
-  if(!currentUser || currentUser.role!=='admin') return;
-  const user=await getUserById(id);
-  if(!user || user.provider!=='google') return;
-  user.active=true; user.status='approved'; user.approvedAt=new Date().toISOString(); user.approvedBy=currentUser.email;
-  await putUser(user); await addAudit('google_user_approved',currentUser,`الموافقة على دخول Google: ${user.email}`); await renderUsers();
-  showUserMsg(`✅ تمت الموافقة على ${user.email}. يمكنه الدخول الآن.`,`success`);
-}
-async function rejectGoogleUser(id){
-  if(!currentUser || currentUser.role!=='admin') return;
-  const user=await getUserById(id);
-  if(!user || user.provider!=='google') return;
-  user.active=false; user.status='rejected'; user.rejectedAt=new Date().toISOString(); user.rejectedBy=currentUser.email;
-  await putUser(user); await addAudit('google_user_rejected',currentUser,`رفض طلب دخول Google: ${user.email}`); await renderUsers();
-  showUserMsg(`تم رفض طلب ${user.email}، ويمكن حذفه من الجدول إذا لزم الأمر.`,`success`);
-}
-
 async function removeUser(id){
   if(!confirm('هل تريد حذف هذا المستخدم؟')) return;
   const users=await getAllUsers(); const u=users.find(x=>x.id===id); if(!u) return;
@@ -5365,11 +5317,9 @@ function firebaseConfigured(){
 }
 function initFirebaseAuth(){
   const button=document.getElementById('firebaseGoogleLogin');
-  const legacyButton=document.getElementById('googleSignIn');
   const hint=document.getElementById('googleHint');
   if(!firebaseConfigured() || typeof firebase==='undefined'){
     if(button) button.style.display='none';
-    if(legacyButton) legacyButton.style.display='none';
     if(hint) hint.textContent='أكمل إعداد Firebase داخل الكود قبل النشر لتفعيل دخول Google والموافقة اليدوية.';
     return false;
   }
@@ -5377,8 +5327,7 @@ function initFirebaseAuth(){
     if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     firebaseAuth=firebase.auth(); firebaseDb=firebase.firestore(); firebaseReady=true;
     if(button) button.style.display='block';
-    if(legacyButton) legacyButton.style.display='none';
-    if(hint) hint.textContent='✅ Firebase مفعّل. الحسابات الجديدة تنتظر موافقة المدير قبل الدخول.';
+    if(hint) hint.textContent='الحسابات الجديدة تنتظر موافقة المالك قبل الدخول.';
     firebaseAuth.onAuthStateChanged(async account=>{
       if(!account || currentUser) return;
       try{
@@ -5394,14 +5343,12 @@ function initFirebaseAuth(){
     return true;
   }catch(error){
     console.error('Firebase initialization failed:',error);
-    if(button) button.style.display='none';
     if(hint) hint.textContent='تعذر تهيئة Firebase. تحقق من إعدادات المشروع.';
     return false;
   }
 }
 async function firebaseGoogleLogin(){
   if(!firebaseReady && !initFirebaseAuth()) return showLoginError('أكمل إعداد Firebase أولاً.');
-  if(!firebaseAuth || !firebaseDb) return showLoginError('تعذر الاتصال بخدمة Firebase. أعد تحميل الصفحة.');
   try{
     const provider=new firebase.auth.GoogleAuthProvider();
     const result=await firebaseAuth.signInWithPopup(provider);
@@ -5428,42 +5375,17 @@ async function firebaseGoogleLogin(){
     enterDashboard();
   }catch(error){
     console.error('Firebase Google login failed:',error);
-    const code=String(error?.code||'').replace('auth/','').replace('firestore/','');
-    const messages={
-      'operation-not-allowed':'تسجيل الدخول بواسطة Google غير مفعّل في Firebase Authentication.',
-      'unauthorized-domain':'هذا النطاق غير مضاف إلى Firebase > Authentication > Settings > Authorized domains.',
-      'popup-blocked':'المتصفح منع نافذة Google المنبثقة. اسمح بالنوافذ المنبثقة ثم أعد المحاولة.',
-      'popup-closed-by-user':'تم إغلاق نافذة Google قبل إكمال تسجيل الدخول.',
-      'network-request-failed':'تعذر الاتصال بخوادم Firebase. تحقق من الإنترنت.',
-      'permission-denied':'قواعد Firestore منعت حفظ طلب المستخدم. راجع Firestore Security Rules.',
-      'failed-precondition':'قاعدة Firestore غير مهيأة أو تحتاج إلى إنشاء قاعدة البيانات.',
-      'invalid-api-key':'مفتاح Firebase API غير صحيح أو لا يخص المشروع الحالي.'
-    };
-    const detail=messages[code]||error?.message||'خطأ غير معروف';
-    showLoginError(`❌ ${detail}${code?` (Firebase: ${code})`:''}`);
+    showLoginError('تعذر تسجيل الدخول بواسطة Google. تحقق من إعدادات Firebase والنطاق المسموح.');
   }
 }
 async function renderFirebasePendingUsers(){
   const box=document.getElementById('firebasePendingUsers');
-  if(!box) return;
-  if(!firebaseReady || !firebaseDb){
-    box.innerHTML='<div class="small-note" style="color:#c62828">❌ Firebase غير مهيأ. تحقق من إعدادات Firebase داخل الملف ثم أعد تحميل الصفحة.</div>';
-    return;
-  }
-  if(currentUser?.role!=='admin'){
-    box.innerHTML='<div class="small-note">لا يمكن عرض الطلبات إلا للمدير.</div>';
-    return;
-  }
+  if(!box || !firebaseReady || currentUser?.role!=='admin') return;
   try{
-    const snap=await firebaseDb.collection('users').get();
-    const pending=snap.docs.map(doc=>({id:doc.id,...doc.data()}))
-      .filter(user=>user.provider==='firebase' && user.active!==true && user.status==='pending');
-    box.innerHTML=pending.length ? pending.map(user=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)"><span><b>${escapeHtml(user.name||'—')}</b><br><small>${escapeHtml(user.email||'—')}</small></span><span style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="approveFirebaseUser('${user.id}')">✅ موافقة</button><button class="btn btn-danger btn-sm" onclick="rejectFirebaseUser('${user.id}')">❌ رفض</button></span></div>`).join('') : '<div class="small-note">لا توجد طلبات Google معلقة حاليًا.</div>';
-  }catch(error){
-    console.warn('Could not load Firebase pending users:',error);
-    const code=String(error?.code||'').replace('firestore/','');
-    box.innerHTML=`<div class="small-note" style="color:#c62828">❌ تعذر قراءة طلبات Firestore${code?` (${escapeHtml(code)})`:''}. راجع Firestore Rules وتأكد أن بريد المدير مضبوط.</div>`;
-  }
+    const snap=await firebaseDb.collection('users').where('active','==',false).get();
+    const pending=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
+    box.innerHTML=pending.length ? pending.map(user=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)"><span><b>${escapeHtml(user.name||'—')}</b><br><small>${escapeHtml(user.email||'—')}</small></span><button class="btn btn-primary btn-sm" onclick="approveFirebaseUser('${user.id}')">✅ موافقة</button></div>`).join('') : '<div class="small-note">لا توجد طلبات معلقة.</div>';
+  }catch(error){ console.warn('Could not load Firebase pending users:',error); }
 }
 async function approveFirebaseUser(uid){
   if(!firebaseReady || currentUser?.role!=='admin') return;
@@ -5471,15 +5393,9 @@ async function approveFirebaseUser(uid){
   await renderFirebasePendingUsers();
   alert('تمت الموافقة على الحساب.');
 }
-async function rejectFirebaseUser(uid){
-  if(!firebaseReady || currentUser?.role!=='admin') return;
-  await firebaseDb.collection('users').doc(uid).set({active:false,status:'rejected',rejectedAt:firebase.firestore.FieldValue.serverTimestamp(),rejectedBy:currentUser.email},{merge:true});
-  await renderFirebasePendingUsers();
-  alert('تم رفض الحساب.');
-}
 
 // ----- Google Identity Services (legacy/local option) -----
-function getGoogleClientId(){ return localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'1086177133796-nmdk6s14ku0hqmdjrotogscet08fv4nl.apps.googleusercontent.com'; }
+function getGoogleClientId(){ return localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||''; }
 function loadGoogleClientIdIntoForm(){
   const el=document.getElementById('googleClientIdInput'); if(el) el.value=getGoogleClientId();
 }
@@ -5507,15 +5423,13 @@ async function handleGoogleCredential(response){
     let user=await getUserByEmail(googleEmail);
     if(!user){
       user={id:'g-'+p.sub,name:p.name||p.email.split('@')[0],email:googleEmail,
-        role:'viewer',passwordHash:null,provider:'google',googleSub:p.sub,active:false,status:'pending',
-        createdAt:new Date().toISOString(),lastLogin:null,requestedAt:new Date().toISOString()};
+        role:'viewer',passwordHash:null,provider:'google',googleSub:p.sub,active:true,
+        createdAt:new Date().toISOString(),lastLogin:null};
       await putUser(user);
-      await addAudit('google_access_request',user,'طلب دخول Google جديد بانتظار موافقة المدير');
-      return showLoginError('⏳ تم إرسال طلب الدخول إلى المدير. لن يتم فتح لوحة المؤشرات إلا بعد الموافقة.');
+      await addAudit('user_create',user,'إنشاء مستخدم Google تلقائياً بدور مطلع');
     }else if(!user.active){
-      const message=user.status==='rejected' ? '❌ تم رفض طلب الدخول من المدير.' : '⏳ حسابك بانتظار موافقة المدير.';
-      await addAudit('failed_login',user,message);
-      return showLoginError(message);
+      await addAudit('failed_login',user,'حساب Google معطل');
+      return showLoginError('❌ هذا الحساب معطل من المدير');
     }else if(user.provider!=='google'){
       // لا نسمح لحساب Google بانتحال حساب محلي أو وراثة صلاحياته.
       await addAudit('failed_login',{...user,provider:'google'},'محاولة دخول Google لبريد مرتبط بحساب محلي');
