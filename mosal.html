@@ -650,7 +650,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 
     <div class="auth-methods">
       <div class="auth-divider"><span>أو</span></div>
-      <div id="googleSignIn"></div>
+      <div id="googleSignIn" style="display:none"></div>
       <button type="button" class="btn-login" id="firebaseGoogleLogin" onclick="firebaseGoogleLogin()" style="display:none;background:#fff;color:#0B5A7A;border:1px solid #c8dce3;margin-top:10px;">🔵 الدخول بحساب Google</button>
       <div class="auth-hint" id="googleHint">
         سجّل الدخول بحساب Google. الحساب الجديد يصبح «مطلعاً» بانتظار موافقة المدير أو رفضه.
@@ -5337,9 +5337,11 @@ function firebaseConfigured(){
 }
 function initFirebaseAuth(){
   const button=document.getElementById('firebaseGoogleLogin');
+  const legacyButton=document.getElementById('googleSignIn');
   const hint=document.getElementById('googleHint');
   if(!firebaseConfigured() || typeof firebase==='undefined'){
     if(button) button.style.display='none';
+    if(legacyButton) legacyButton.style.display='none';
     if(hint) hint.textContent='أكمل إعداد Firebase داخل الكود قبل النشر لتفعيل دخول Google والموافقة اليدوية.';
     return false;
   }
@@ -5347,7 +5349,8 @@ function initFirebaseAuth(){
     if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     firebaseAuth=firebase.auth(); firebaseDb=firebase.firestore(); firebaseReady=true;
     if(button) button.style.display='block';
-    if(hint) hint.textContent='الحسابات الجديدة تنتظر موافقة المالك قبل الدخول.';
+    if(legacyButton) legacyButton.style.display='none';
+    if(hint) hint.textContent='✅ Firebase مفعّل. الحسابات الجديدة تنتظر موافقة المدير قبل الدخول.';
     firebaseAuth.onAuthStateChanged(async account=>{
       if(!account || currentUser) return;
       try{
@@ -5363,12 +5366,14 @@ function initFirebaseAuth(){
     return true;
   }catch(error){
     console.error('Firebase initialization failed:',error);
+    if(button) button.style.display='none';
     if(hint) hint.textContent='تعذر تهيئة Firebase. تحقق من إعدادات المشروع.';
     return false;
   }
 }
 async function firebaseGoogleLogin(){
   if(!firebaseReady && !initFirebaseAuth()) return showLoginError('أكمل إعداد Firebase أولاً.');
+  if(!firebaseAuth || !firebaseDb) return showLoginError('تعذر الاتصال بخدمة Firebase. أعد تحميل الصفحة.');
   try{
     const provider=new firebase.auth.GoogleAuthProvider();
     const result=await firebaseAuth.signInWithPopup(provider);
