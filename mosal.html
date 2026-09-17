@@ -4697,6 +4697,34 @@ async function getUserById(id){
 async function checkCurrentSession(){
   if(!currentUser) return true;
   try{
+    if(currentUser.provider==='firebase'){
+      if(!firebaseReady || !firebaseAuth || !firebaseDb || !firebaseAuth.currentUser) return true;
+      const account=firebaseAuth.currentUser;
+      const email=(account.email||currentUser.email||'').toLowerCase();
+      const isOwner=email===FIREBASE_OWNER_EMAIL.toLowerCase();
+      const snap=await firebaseDb.collection('users').doc(account.uid).get();
+      const profile=snap.exists?snap.data():null;
+      if(!isOwner && (!profile || profile.active!==true)){
+        stopSessionGuard();
+        await firebaseAuth.signOut().catch(()=>{});
+        alert('تم إخراج هذا المستخدم وتعطيل حسابه من قبل المدير.');
+        localStorage.removeItem(SESSION_KEY);
+        currentUser=null;
+        location.reload();
+        return false;
+      }
+      currentUser={
+        ...currentUser,
+        id:'fb-'+account.uid,
+        name:profile?.name||account.displayName||email,
+        email,
+        role:isOwner?'admin':(profile?.role||'viewer'),
+        active:true,
+        provider:'firebase',
+        firebaseUid:account.uid
+      };
+      return true;
+    }
     const fresh=await getUserById(currentUser.id);
     if(!fresh || fresh.active===false){
       stopSessionGuard();
