@@ -2823,11 +2823,16 @@ function renderExecutiveSummary(){
   const govTotals = {};
   arr.forEach(row => { govTotals[row.gov] = (govTotals[row.gov] || 0) + (parseFloat(row.camp_families) || 0); });
   const topGov = Object.entries(govTotals).sort((a,b)=>b[1]-a[1])[0];
+  const executiveMonths = [...new Set(arr.map(row => normalizeMonth(row.month)).filter(Boolean))]
+    .sort((a,b) => analyticsMonthOrder(a) - analyticsMonthOrder(b));
+  const monthCount = executiveMonths.length;
+  const monthCountLabel = monthCount === 1 ? 'شهر واحد' : monthCount === 2 ? 'شهرين' : `${monthCount} أشهر`;
   const period = rangeFromMonth || rangeToMonth
     ? `الفترة من ${rangeFromMonth || MONTHS_LIST[0]} إلى ${rangeToMonth || MONTHS_LIST[MONTHS_LIST.length-1]}`
     : (selectedMonthChips.size ? `الأشهر: ${[...selectedMonthChips].join('، ')}` : 'جميع الأشهر المتاحة');
   const values = [
     ['عدد السجلات', arr.length],
+    ['عدد الأشهر', monthCount],
     ['عدد المحافظات', new Set(arr.map(d=>d.gov).filter(Boolean)).size],
     ['المخيمات', total('camps_count')],
     ['الأسر المقيمة', total('camp_families')],
@@ -2835,7 +2840,8 @@ function renderExecutiveSummary(){
   ];
   cards.innerHTML = values.map(([label,value]) => `<div class="executive-summary-card"><div class="value">${fmt(Number(value)||0)}</div><div class="label">${label}</div></div>`).join('');
   const topText = topGov && topGov[1] > 0 ? `وتستحوذ ${escapeHtml(topGov[0])} على أعلى عدد من الأسر المقيمة (${fmt(topGov[1])}).` : 'لا تتوفر بيانات كافية لاستخراج المحافظة الأعلى في الأسر المقيمة.';
-  narrative.innerHTML = `📅 ${period} · 🏛️ ${activeGov === 'all' ? 'كل المحافظات' : escapeHtml(activeGov)}. إجمالي العائدين ${fmt(total('returnees'))} مقابل ${fmt(total('camp_families'))} أسرة مقيمة، وإجمالي المساعدات الغذائية ${fmt(total('food_baskets'))}. ${topText}`;
+  const monthsText = executiveMonths.length ? `عدد الأشهر: ${monthCountLabel} (${executiveMonths.join('، ')})` : 'لا توجد أشهر متاحة';
+  narrative.innerHTML = `📅 ${period} · ${monthsText} · 🏛️ ${activeGov === 'all' ? 'كل المحافظات' : escapeHtml(activeGov)}. إجمالي العائدين ${fmt(total('returnees'))} مقابل ${fmt(total('camp_families'))} أسرة مقيمة، وإجمالي المساعدات الغذائية ${fmt(total('food_baskets'))}. ${topText}`;
 }
 
 function renderAll(){
