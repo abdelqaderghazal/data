@@ -707,7 +707,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
       </div>
       <div class="admin-form" style="margin-top:18px;border-top:1px dashed var(--line);padding-top:16px;">
         <h4 style="margin:0 0 8px;font-family:Tajawal;color:var(--ink);">⏳ طلبات Google بانتظار الموافقة</h4>
-        <div id="firebasePendingUsers"><div class="small-note">لا توجد طلبات معلقة أو لم يتم ضبط Firebase بعد.</div></div>
+        <div id="firebasePendingUsers"><div class="small-note">جاري تحميل طلبات Google...</div></div>
       </div>
     </div>
 
@@ -5445,18 +5445,37 @@ async function firebaseGoogleLogin(){
 }
 async function renderFirebasePendingUsers(){
   const box=document.getElementById('firebasePendingUsers');
-  if(!box || !firebaseReady || currentUser?.role!=='admin') return;
+  if(!box) return;
+  if(!firebaseReady || !firebaseDb){
+    box.innerHTML='<div class="small-note" style="color:#c62828">❌ Firebase غير مهيأ. تحقق من إعدادات Firebase داخل الملف ثم أعد تحميل الصفحة.</div>';
+    return;
+  }
+  if(currentUser?.role!=='admin'){
+    box.innerHTML='<div class="small-note">لا يمكن عرض الطلبات إلا للمدير.</div>';
+    return;
+  }
   try{
-    const snap=await firebaseDb.collection('users').where('active','==',false).get();
-    const pending=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
-    box.innerHTML=pending.length ? pending.map(user=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)"><span><b>${escapeHtml(user.name||'—')}</b><br><small>${escapeHtml(user.email||'—')}</small></span><button class="btn btn-primary btn-sm" onclick="approveFirebaseUser('${user.id}')">✅ موافقة</button></div>`).join('') : '<div class="small-note">لا توجد طلبات معلقة.</div>';
-  }catch(error){ console.warn('Could not load Firebase pending users:',error); }
+    const snap=await firebaseDb.collection('users').get();
+    const pending=snap.docs.map(doc=>({id:doc.id,...doc.data()}))
+      .filter(user=>user.provider==='firebase' && user.active!==true && user.status==='pending');
+    box.innerHTML=pending.length ? pending.map(user=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)"><span><b>${escapeHtml(user.name||'—')}</b><br><small>${escapeHtml(user.email||'—')}</small></span><span style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="approveFirebaseUser('${user.id}')">✅ موافقة</button><button class="btn btn-danger btn-sm" onclick="rejectFirebaseUser('${user.id}')">❌ رفض</button></span></div>`).join('') : '<div class="small-note">لا توجد طلبات Google معلقة حاليًا.</div>';
+  }catch(error){
+    console.warn('Could not load Firebase pending users:',error);
+    const code=String(error?.code||'').replace('firestore/','');
+    box.innerHTML=`<div class="small-note" style="color:#c62828">❌ تعذر قراءة طلبات Firestore${code?` (${escapeHtml(code)})`:''}. راجع Firestore Rules وتأكد أن بريد المدير مضبوط.</div>`;
+  }
 }
 async function approveFirebaseUser(uid){
   if(!firebaseReady || currentUser?.role!=='admin') return;
   await firebaseDb.collection('users').doc(uid).set({active:true,status:'approved',approvedAt:firebase.firestore.FieldValue.serverTimestamp(),approvedBy:currentUser.email},{merge:true});
   await renderFirebasePendingUsers();
   alert('تمت الموافقة على الحساب.');
+}
+async function rejectFirebaseUser(uid){
+  if(!firebaseReady || currentUser?.role!=='admin') return;
+  await firebaseDb.collection('users').doc(uid).set({active:false,status:'rejected',rejectedAt:firebase.firestore.FieldValue.serverTimestamp(),rejectedBy:currentUser.email},{merge:true});
+  await renderFirebasePendingUsers();
+  alert('تم رفض الحساب.');
 }
 
 // ----- Google Identity Services (legacy/local option) -----
