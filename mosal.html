@@ -4805,6 +4805,23 @@ async function getUserById(id){
 async function checkCurrentSession(){
   if(!currentUser) return true;
   try{
+    // Firebase users are stored in Firestore, not in the local IndexedDB store.
+    // Looking them up locally incorrectly treated every Google session as disabled.
+    if(currentUser.provider==='firebase'){
+      if(!firebaseDb || !currentUser.firebaseUid) return true;
+      const snap=await firebaseDb.collection('users').doc(currentUser.firebaseUid).get();
+      const isOwner=(currentUser.email||'').toLowerCase()===FIREBASE_OWNER_EMAIL.toLowerCase();
+      if(!isOwner && (!snap.exists || snap.data()?.active!==true)){
+        stopSessionGuard();
+        alert('تم إخراج هذا المستخدم وتعطيل حسابه من قبل المدير.');
+        if(firebaseAuth) try{ await firebaseAuth.signOut(); }catch(e){}
+        localStorage.removeItem(SESSION_KEY);
+        currentUser=null;
+        location.reload();
+        return false;
+      }
+      return true;
+    }
     const fresh=await getUserById(currentUser.id);
     if(!fresh || fresh.active===false){
       stopSessionGuard();
@@ -5484,7 +5501,23 @@ async function firebaseGoogleLogin(){
     enterDashboard();
   }catch(error){
     console.error('Firebase Google login failed:',error);
-    showLoginError('تعذر تسجيل الدخول بواسطة Google. تحقق من إعدادات Firebase والنطاق المسموح.');
+    const code=error?.code||'';
+    if(code==='auth/popup-blocked' || code==='auth/operation-not-supported-in-this-environment'){
+      try{
+        await firebaseAuth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+        return;
+      }catch(redirectError){
+        console.error('Firebase Google redirect failed:',redirectError);
+        return showLoginError('تعذر فتح تسجيل Google. افتح الصفحة عبر localhost أو اسم نطاق HTTPS ثم حاول مجدداً.');
+      }
+    }
+    if(code==='auth/unauthorized-domain'){
+      return showLoginError('هذا النطاق غير مصرح به في Firebase. أضفه من Authentication > Settings > Authorized domains.');
+    }
+    if(location.protocol==='file:'){
+      return showLoginError('افتح الصفحة عبر خادم محلي أو HTTPS؛ تسجيل Google لا يعمل مباشرةً من file://.');
+    }
+    showLoginError(`تعذر تسجيل الدخول بواسطة Google (${code||'خطأ غير معروف'}). تحقق من تفعيل Google وإضافة النطاق المسموح.`);
   }
 }
 async function renderFirebasePendingUsers(){
