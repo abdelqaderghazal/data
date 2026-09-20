@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{--ink:#0b5573;--ink-2:#073c55;--sand:#f3f8fa;--sand-2:#e3eff3;--paper:#fff;--brass:#0b91ad;--brass-light:#8ed1df;--alert:#e74c3c;--good:#0b5573;--line:#c8dce3;--ink-soft:#58717e;--accent-blue:#0b5573;--accent-green:#0b91ad;--syria-green:#0b5573;--syria-white:#fff;--syria-black:#073c55;--syria-red:#0b91ad;--shadow-sm:0 3px 12px rgba(7,60,85,.07);--shadow-md:0 12px 32px rgba(7,60,85,.11);--radius-sm:10px;--radius-md:14px;--radius-lg:18px;--shadow-card:0 6px 22px rgba(11,90,122,.07);--shadow-hover:0 10px 30px rgba(11,90,122,.13);--chart-blue:#2563eb;--chart-cyan:#06b6d4;--chart-teal:#14b8a6;--chart-purple:#8b5cf6;--chart-ink:#0f172a;--chart-muted:#64748b;--chart-grid:rgba(100,116,139,.14);--brand-deep:#06384d;--brand-blue:#0b5a7a;--brand-cyan:#0d8ba8;--brand-mist:#eaf5f8;--brand-gold:#d3a85c;}
   *{box-sizing:border-box;}body{margin:0;background:var(--sand);color:var(--ink);font-family:'Cairo',sans-serif;}
@@ -4118,6 +4120,7 @@ let mapInfoWindow = null;
 let googleMapsLoadPromise = null;
 let placesAutocomplete = null;
 let mapHeatLayers = {};
+let mapProvider = null; // google or leaflet
 // Google Maps JavaScript API configuration.
 // Restrict this key in Google Cloud by HTTP referrer and enabled APIs.
 const GOOGLE_MAPS_API_KEY = 'AIzaSyAGI6yqE0GfOZUDwtyN1JdHz2YZZjZgB5U';
@@ -4155,9 +4158,8 @@ function showMapUnavailable(message){
 // restriction is rejected. Show an actionable message instead of the generic
 // "Google Maps didn't load correctly" banner.
 window.gm_authFailure = function(){
-  const mapEl = document.getElementById('govMap');
-  if(!mapEl) return;
-  mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;text-align:center;padding:20px;"><div style="font-size:36px;">⚠️</div><div style="font-weight:700;color:#b3261e;">رفضت Google Maps استخدام المفتاح</div><div style="font-size:12px;max-width:560px;line-height:1.9;">تحقق من تفعيل Maps JavaScript API، تفعيل الفوترة، وإضافة نطاق هذه الصفحة ضمن Websites / HTTP referrers في قيود المفتاح. راجع Console لمعرفة الخطأ التفصيلي.</div></div>`;
+  console.warn('Google Maps rejected the configured key; using OpenStreetMap fallback.');
+  if(window.L && !map) initLeafletMap();
 };
 
 function loadGoogleMapsApi(){
@@ -4249,11 +4251,51 @@ function updateHeatmapLayers(){
   });
 }
 
-function initMap(){
-  if(map !== null) return;
-  if(!window.google?.maps) return;
+function initLeafletMap(){
+  if(map !== null || !window.L) return;
   const mapEl = document.getElementById('govMap');
   if(!mapEl) return;
+  mapProvider = 'leaflet';
+  map = L.map(mapEl, {zoomControl:true, attributionControl:true}).setView([35.3,38.4], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  window.google = window.google || {};
+  google.maps = google.maps || {};
+  google.maps.Size = function(w,h){this.width=w;this.height=h;};
+  google.maps.Point = function(x,y){this.x=x;this.y=y;};
+  google.maps.Animation = {BOUNCE:'BOUNCE'};
+  google.maps.event = {trigger:(obj,name)=>obj && obj._emit && obj._emit(name)};
+  google.maps.Marker = function(opts){
+    const iconUrl = opts.icon && opts.icon.url;
+    const icon = iconUrl ? L.icon({iconUrl, iconSize:[48,58], iconAnchor:[24,55], popupAnchor:[0,-52]}) : undefined;
+    const layer = L.marker([opts.position.lat, opts.position.lng], {icon, title:opts.title}).addTo(opts.map);
+    const listeners = {};
+    layer._emit = name => (listeners[name] || []).forEach(fn=>fn());
+    layer.addListener = (name, fn) => { (listeners[name] ||= []).push(fn); layer.on(name, fn); };
+    layer.setMap = target => { if(target) layer.addTo(target); else layer.remove(); };
+    layer.setAnimation = () => {};
+    return layer;
+  };
+  google.maps.InfoWindow = function(){
+    let content='';
+    return {setContent:v=>{content=v;}, open:({anchor})=>anchor.bindPopup(content,{maxWidth:360}).openPopup()};
+  };
+  google.maps.Circle = function(opts){
+    const layer = L.circle([opts.center.lat, opts.center.lng], {radius:opts.radius, color:opts.strokeColor, weight:opts.strokeWeight, opacity:opts.strokeOpacity, fillColor:opts.fillColor, fillOpacity:opts.fillOpacity}).addTo(opts.map);
+    layer.setMap = target => { if(!target) layer.remove(); else layer.addTo(target); };
+    return layer;
+  };
+  map.fitBounds([[30.20,32.00],[39.60,44.80]], {padding:[12,12]});
+  setupMapTools(); setupHeatmapControls(); renderGovSidebar(); updateMapMarkers();
+}
+
+function initMap(){
+  if(map !== null) return;
+  const mapEl = document.getElementById('govMap');
+  if(!mapEl) return;
+  if(!window.google?.maps){ initLeafletMap(); return; }
+  mapProvider = 'google';
 
   // نطاق إقليمي لإظهار سوريا والدول المجاورة: تركيا، العراق، الأردن، لبنان وفلسطين.
   const syriaBounds = {north:39.60, south:30.20, west:32.00, east:44.80};
@@ -4320,7 +4362,7 @@ function animateGovSelection(gov){
   const row=document.querySelector(`.gov-table-row[data-gov="${CSS.escape(gov)}"]`);
   if(row){row.classList.add('gov-selected');row.scrollIntoView({behavior:'smooth',block:'nearest'});}
   const marker=mapMarkers[gov];
-  if(marker && window.google?.maps){marker.setAnimation(google.maps.Animation.BOUNCE);setTimeout(()=>marker.setAnimation(null),900);}
+  if(marker && mapProvider === 'google'){marker.setAnimation(google.maps.Animation.BOUNCE);setTimeout(()=>marker.setAnimation(null),900);}
   const mapEl=document.getElementById('govMap');
   if(mapEl){mapEl.classList.remove('map-focus-flash');void mapEl.offsetWidth;mapEl.classList.add('map-focus-flash');}
 }
@@ -4328,7 +4370,7 @@ function showGovOnMap(gov){
   const coords=GOV_COORDS[gov];
   if(!coords || !map) return;
   animateGovSelection(gov);
-  map.panTo({lat:coords[0],lng:coords[1]}); map.setZoom(9);
+  if(mapProvider === 'leaflet') map.setView([coords[0],coords[1]], 9); else { map.panTo({lat:coords[0],lng:coords[1]}); map.setZoom(9); }
   const marker=mapMarkers[gov];
   if(marker){ google.maps.event.trigger(marker,'click'); }
   const input=document.getElementById('mapPlaceSearch');
@@ -4369,7 +4411,7 @@ function setupMapSidebar(){
   button.addEventListener('click',()=>{
     sidebar.classList.toggle('collapsed');
     button.setAttribute('aria-expanded',String(!sidebar.classList.contains('collapsed')));
-    setTimeout(()=>{if(map) google.maps.event.trigger(map,'resize');},220);
+    setTimeout(()=>{if(map && mapProvider === 'google') google.maps.event.trigger(map,'resize'); if(map && mapProvider === 'leaflet') map.invalidateSize();},220);
   });
 }
 function setupMapTools(){setupMapSearch();setupMapSidebar();}
@@ -4613,10 +4655,9 @@ function initMapOnDemand(){
     if(!map) initMap();
     else updateMapMarkers();
   }).catch(err => {
-    console.warn('Google Maps unavailable:', err);
-    showMapUnavailable(err.message.includes('مفتاح')
-      ? 'لم يتم ضبط مفتاح Google Maps API. أدخله من الزر أدناه أو احفظه في localStorage باسم googleMapsApiKey.'
-      : `${err.message}. تحقق من تفعيل Maps JavaScript API والفوترة وقيود النطاق في Google Cloud.`);
+    console.warn('Google Maps unavailable; using OpenStreetMap fallback:', err);
+    if(window.L) initLeafletMap();
+    else showMapUnavailable(`${err.message}. تعذر تحميل الخريطة البديلة أيضاً؛ تحقق من الاتصال بالإنترنت.`);
   });
 }
 
