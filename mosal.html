@@ -4169,11 +4169,25 @@ function loadGoogleMapsApi(){
   if(!key) return Promise.reject(new Error('لم يتم ضبط مفتاح Google Maps API'));
   googleMapsLoadPromise = new Promise((resolve, reject) => {
     const callbackName = '__googleMapsReady_' + Date.now();
-    window[callbackName] = () => { delete window[callbackName]; resolve(); };
+    let settled = false;
+    const fail = message => {
+      if(settled) return;
+      settled = true;
+      delete window[callbackName];
+      reject(new Error(message));
+    };
+    const timer = setTimeout(() => fail('انتهت مهلة تحميل Google Maps API'), 8000);
+    window[callbackName] = () => {
+      if(settled) return;
+      settled = true;
+      clearTimeout(timer);
+      delete window[callbackName];
+      resolve();
+    };
     const script = document.createElement('script');
     script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&callback=' + callbackName + '&language=ar&region=SY';
     script.async = true; script.defer = true;
-    script.onerror = () => { delete window[callbackName]; reject(new Error('تعذر تحميل Google Maps API')); };
+    script.onerror = () => { clearTimeout(timer); fail('تعذر تحميل Google Maps API'); };
     document.head.appendChild(script);
   });
   return googleMapsLoadPromise;
@@ -4255,6 +4269,8 @@ function initLeafletMap(){
   if(map !== null || !window.L) return;
   const mapEl = document.getElementById('govMap');
   if(!mapEl) return;
+  // Google may insert its generic error banner before gm_authFailure fires.
+  mapEl.innerHTML = '';
   mapProvider = 'leaflet';
   map = L.map(mapEl, {zoomControl:true, attributionControl:true}).setView([35.3,38.4], 6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
