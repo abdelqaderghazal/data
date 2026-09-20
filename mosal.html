@@ -623,6 +623,32 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+
+<style id="login-polish">
+  .password-overlay{background:radial-gradient(circle at 12% 12%,rgba(78,177,201,.25),transparent 28%),radial-gradient(circle at 92% 88%,rgba(211,168,92,.14),transparent 25%),#062f43;padding:24px;overflow:auto}
+  .login-shell{width:min(920px,100%);min-height:570px;display:grid;grid-template-columns:40% 60%;direction:ltr;border-radius:28px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.34);background:#fff;animation:loginRise .55s ease-out both}
+  .login-brand-panel{direction:rtl;position:relative;padding:44px 38px;color:#fff;background:linear-gradient(155deg,#0b6682 0%,#084a66 48%,#052a3a 100%);display:flex;flex-direction:column;align-items:flex-start;text-align:right;overflow:hidden}
+  .login-brand-panel:after{content:"";position:absolute;width:290px;height:290px;border:1px solid rgba(255,255,255,.13);border-radius:50%;left:-120px;bottom:-130px;box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025)}
+  .login-brand-mark,.login-mobile-mark{display:flex;align-items:center;justify-content:center;width:58px;height:58px;border:1px solid rgba(211,168,92,.75);border-radius:18px;color:#e6c477;font-size:34px;font-family:Georgia,serif;box-shadow:0 8px 22px rgba(0,0,0,.18);background:rgba(255,255,255,.08)}
+  .login-brand-kicker{margin-top:30px;color:#c7e6ec;font-size:11px;font-weight:700;letter-spacing:.08em}
+  .login-brand-panel h1{font-family:'Tajawal',sans-serif;color:#fff;font-size:31px;line-height:1.42;margin:10px 0 14px;font-weight:500}
+  .login-brand-panel h1 strong{color:#e6c477;font-weight:900}
+  .login-brand-panel p{font-size:13px;line-height:1.9;color:rgba(255,255,255,.77);max-width:260px;margin:0}
+  .login-brand-divider{height:1px;width:100%;background:linear-gradient(90deg,rgba(230,196,119,.65),transparent);margin:28px 0 20px}
+  .login-trust-list{display:flex;flex-direction:column;gap:12px;color:rgba(255,255,255,.84);font-size:12px}
+  .login-trust-list b{color:#e6c477;font-size:16px;margin-left:7px}
+  .login-brand-footer{margin-top:auto;color:#fff;font-family:'Tajawal',sans-serif;font-size:12px;line-height:1.8;position:relative;z-index:1}
+  .login-brand-footer small{color:rgba(255,255,255,.6);font-family:'Cairo',sans-serif}
+  .password-box{direction:rtl;max-width:none;width:auto;border:0;border-radius:0;padding:56px 64px 32px;text-align:right;box-shadow:none;display:flex;flex-direction:column;justify-content:center}
+  .login-mobile-mark{display:none}
+  .login-heading{margin-bottom:28px}.login-eyebrow{font-size:12px;color:#0d8ba8;font-weight:700}.login-heading h2{font-size:29px;color:#073c55;margin:5px 0 6px;font-family:'Tajawal',sans-serif;font-weight:900}.login-heading p{font-size:12.5px;color:#718894;margin:0;line-height:1.7}
+  .login-form{display:flex;flex-direction:column;gap:8px}.login-label{font-size:12px;font-weight:800;color:#315765;margin-top:5px}.login-input-wrap{display:flex;align-items:center;border:1px solid #cfe0e5;border-radius:12px;background:#f8fbfc;transition:.2s;direction:ltr}.login-input-wrap:focus-within{border-color:#0d8ba8;box-shadow:0 0 0 4px rgba(13,139,168,.11);background:#fff}.login-input-icon{width:42px;text-align:center;color:#7fa4af;font-size:17px}.login-input-wrap input{border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;border-radius:12px!important;padding:13px 8px!important;margin:0!important;text-align:left!important;letter-spacing:0!important;font-family:'Cairo',sans-serif!important;font-size:13px!important;flex:1}.password-toggle{border:0;background:transparent;color:#7897a1;cursor:pointer;font-size:14px;padding:10px 13px}.password-toggle:hover{color:#0b5a7a}
+  .login-submit{display:flex!important;align-items:center;justify-content:center;gap:10px;margin-top:14px;background:linear-gradient(135deg,#0b6682,#0b91ad)!important;box-shadow:0 10px 20px rgba(11,145,173,.2);font-size:14px!important}.login-submit:hover{transform:translateY(-1px);box-shadow:0 13px 24px rgba(11,145,173,.28)}.login-submit-arrow{font-size:18px;line-height:1}.login-spinner{display:none;width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:loginSpin .7s linear infinite}.login-submit.is-loading{opacity:.78;cursor:wait}.login-submit.is-loading .login-submit-label,.login-submit.is-loading .login-submit-arrow{display:none}.login-submit.is-loading .login-spinner{display:block}
+  .password-box .error-msg{background:#fff1f0;border:1px solid #ffd0cb;border-radius:9px;padding:9px 11px;color:#b43c32;font-size:11.5px;margin-top:12px}.login-security-note{display:flex;align-items:center;gap:7px;color:#6f8993;font-size:10.5px;margin-top:18px}.login-security-note span{color:#0d8ba8;font-size:15px}.auth-methods{margin-top:22px}.auth-divider{display:flex;align-items:center;gap:10px;color:#9aadb4;font-size:10px}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:#e4edef;flex:1}.auth-divider span{white-space:nowrap}.auth-methods #googleSignIn{display:flex;justify-content:center;margin-top:14px}.google-login-btn{background:#fff!important;color:#315765!important;border:1px solid #cfe0e5!important;box-shadow:none!important;margin-top:10px;font-size:13px!important}.google-login-btn:hover{background:#f5fafb!important}.auth-hint{text-align:center;color:#8da2aa;font-size:10px;line-height:1.7;margin-top:9px}.login-version{text-align:center;color:#a5b6bb;font-size:10px;margin-top:22px}.login-version span{color:#d3a85c;padding:0 5px}
+  @keyframes loginRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}@keyframes loginSpin{to{transform:rotate(360deg)}}
+  @media(max-width:700px){.password-overlay{padding:12px}.login-shell{display:block;min-height:0;border-radius:20px;max-width:440px}.login-brand-panel{display:none}.password-box{padding:34px 24px 24px}.login-mobile-mark{display:flex;margin:0 auto 18px;width:48px;height:48px;font-size:28px;border-radius:15px}.login-heading{text-align:center;margin-bottom:22px}.login-heading h2{font-size:25px}.login-security-note{justify-content:center;text-align:center}.login-version{margin-top:18px}}
+  @media(max-width:360px){.password-box{padding:26px 17px 20px}.login-heading h2{font-size:23px}}
+</style>
 </head>
 <body class="locked">
 
@@ -636,28 +662,54 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
      ═══════════════════════════════════════ -->
 
 <div class="password-overlay" id="passwordOverlay">
-  <div class="password-box" id="loginBox">
-    <div class="lock-icon">🔐</div>
-    <h2>وزارة الشؤون الاجتماعية والعمل</h2>
-    <h3 style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;margin:4px 0 8px;color:#0B5A7A;">مديرية الإحصاء والتخطيط</h3>
-    <p style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:15px;margin:0 0 16px;color:var(--ink);">سجل المؤشرات التشغيلية</p>
-
-    <div class="login-fields">
-      <input type="email" id="loginEmail" placeholder="البريد الإلكتروني / اسم المستخدم" autocomplete="username">
-      <input type="password" id="passwordInput" placeholder="كلمة المرور" autocomplete="current-password">
-    </div>
-
-    <button class="btn-login" onclick="loginWithPassword()">🔓 تسجيل الدخول</button>
-    <div class="error-msg" id="passwordError">❌ بيانات الدخول غير صحيحة</div>
-
-    <div class="auth-methods">
-      <div class="auth-divider"><span>أو</span></div>
-      <div id="googleSignIn"></div>
-      <button type="button" class="btn-login" id="firebaseGoogleLogin" onclick="firebaseGoogleLogin()" style="display:none;background:#fff;color:#0B5A7A;border:1px solid #c8dce3;margin-top:10px;">🔵 الدخول بحساب Google</button>
-      <div class="auth-hint" id="googleHint">
-        سجّل الدخول بحساب Google، وسيحتاج الحساب الجديد إلى موافقة المالك.
+  <div class="login-shell">
+    <aside class="login-brand-panel" aria-label="هوية النظام">
+      <div class="login-brand-mark">◈</div>
+      <div class="login-brand-kicker">نظام حكومي موحّد</div>
+      <h1>سِجل المؤشرات<br><strong>التشغيلية</strong></h1>
+      <p>منصة آمنة لمتابعة المؤشرات والبيانات التشغيلية حسب المحافظات.</p>
+      <div class="login-brand-divider"></div>
+      <div class="login-trust-list">
+        <span><b>✓</b> بيانات مركزية محدثة</span>
+        <span><b>✓</b> صلاحيات دخول متعددة</span>
+        <span><b>✓</b> سجل تدقيق للمستخدمين</span>
       </div>
-    </div>
+      <div class="login-brand-footer">وزارة الشؤون الاجتماعية والعمل<br><small>مديرية التخطيط والإحصاء</small></div>
+    </aside>
+
+    <main class="password-box" id="loginBox">
+      <div class="login-mobile-mark">◈</div>
+      <div class="login-heading">
+        <span class="login-eyebrow">مرحباً بك من جديد</span>
+        <h2>تسجيل الدخول</h2>
+        <p>أدخل بيانات حسابك للوصول إلى لوحة المؤشرات.</p>
+      </div>
+
+      <form class="login-form" id="loginForm" onsubmit="event.preventDefault(); loginWithPassword();">
+        <label class="login-label" for="loginEmail">البريد الإلكتروني</label>
+        <div class="login-input-wrap">
+          <span class="login-input-icon">✉</span>
+          <input type="email" id="loginEmail" placeholder="name@example.com" autocomplete="username" dir="ltr" required>
+        </div>
+        <label class="login-label" for="passwordInput">كلمة المرور</label>
+        <div class="login-input-wrap">
+          <span class="login-input-icon">⌑</span>
+          <input type="password" id="passwordInput" placeholder="أدخل كلمة المرور" autocomplete="current-password" dir="ltr" required>
+          <button type="button" class="password-toggle" id="passwordToggle" onclick="toggleLoginPassword()" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور">◉</button>
+        </div>
+        <button class="btn-login login-submit" id="loginSubmit" type="submit"><span class="login-submit-label">دخول إلى اللوحة</span><span class="login-spinner" aria-hidden="true"></span><span class="login-submit-arrow">←</span></button>
+      </form>
+      <div class="error-msg" id="passwordError" role="alert" aria-live="polite">بيانات الدخول غير صحيحة</div>
+
+      <div class="login-security-note"><span>▣</span> اتصال محمي — تتم إدارة صلاحياتك وفق دور المستخدم</div>
+      <div class="auth-methods">
+        <div class="auth-divider"><span>أو الدخول باستخدام</span></div>
+        <div id="googleSignIn"></div>
+        <button type="button" class="btn-login google-login-btn" id="firebaseGoogleLogin" onclick="firebaseGoogleLogin()" style="display:none;">G&nbsp;&nbsp; الدخول بحساب Google</button>
+        <div class="auth-hint" id="googleHint">الحسابات الجديدة تحتاج إلى موافقة مالك النظام.</div>
+      </div>
+      <div class="login-version">لوحة المؤشرات التشغيلية <span>•</span> دخول آمن</div>
+    </main>
   </div>
 
   <div class="admin-dashboard" id="adminPanel" style="display:none;">
@@ -4689,14 +4741,14 @@ const GOOGLE_CLIENT_ID_KEY = 'govDashboard_googleClientId';
 const DEFAULT_LOCAL_USERS = [];
 let currentUser = null;
 let authDbPromise = null;
-// Firebase setup: replace these placeholders with the Web App config from Firebase Console.
+// Firebase Web App configuration.
 const FIREBASE_CONFIG = {
-  apiKey: 'ضع_Firebase_API_Key_هنا',
-  authDomain: 'ضع_معرف_المشروع.firebaseapp.com',
-  projectId: 'ضع_معرف_المشروع_هنا',
-  storageBucket: 'ضع_معرف_المشروع.firebasestorage.app',
-  messagingSenderId: 'ضع_Sender_ID_هنا',
-  appId: 'ضع_App_ID_هنا'
+  apiKey: 'AIzaSyD-GBxVB7sRur7XiHRGU2tQ-ZqQH9iZrm4',
+  authDomain: 'mosal-c9406.firebaseapp.com',
+  projectId: 'mosal-c9406',
+  storageBucket: 'mosal-c9406.firebasestorage.app',
+  messagingSenderId: '263943819058',
+  appId: '1:263943819058:web:4e045666843e61ec03912b'
 };
 // Set this to the owner's Google email. This account is approved as admin automatically.
 const FIREBASE_OWNER_EMAIL = 'abodekazal@gmail.com';
@@ -6909,6 +6961,28 @@ if (typeof Chart !== 'undefined') {
   Chart.defaults.plugins.tooltip.cornerRadius = 12;
   Chart.defaults.plugins.tooltip.displayColors = false;
 }
+</script>
+<script>
+function toggleLoginPassword(){
+  const input=document.getElementById('passwordInput');
+  const button=document.getElementById('passwordToggle');
+  if(!input || !button) return;
+  const showing=input.type==='text';
+  input.type=showing?'password':'text';
+  button.textContent=showing?'◉':'◌';
+  button.setAttribute('aria-label',showing?'إظهار كلمة المرور':'إخفاء كلمة المرور');
+  button.title=button.getAttribute('aria-label');
+}
+(function(){
+  const form=document.getElementById('loginForm');
+  const submit=document.getElementById('loginSubmit');
+  if(!form || !submit) return;
+  form.addEventListener('submit',()=>{
+    submit.classList.add('is-loading');
+    submit.setAttribute('aria-busy','true');
+    setTimeout(()=>{submit.classList.remove('is-loading');submit.removeAttribute('aria-busy');},2500);
+  });
+})();
 </script>
 </body>
 </html>
