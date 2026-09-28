@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{--ink:#0b5573;--ink-2:#073c55;--sand:#f3f8fa;--sand-2:#e3eff3;--paper:#fff;--brass:#0b91ad;--brass-light:#8ed1df;--alert:#e74c3c;--good:#0b5573;--line:#c8dce3;--ink-soft:#58717e;--accent-blue:#0b5573;--accent-green:#0b91ad;--syria-green:#0b5573;--syria-white:#fff;--syria-black:#073c55;--syria-red:#0b91ad;--shadow-sm:0 3px 12px rgba(7,60,85,.07);--shadow-md:0 12px 32px rgba(7,60,85,.11);--radius-sm:10px;--radius-md:14px;--radius-lg:18px;--shadow-card:0 6px 22px rgba(11,90,122,.07);--shadow-hover:0 10px 30px rgba(11,90,122,.13);--chart-blue:#2563eb;--chart-cyan:#06b6d4;--chart-teal:#14b8a6;--chart-purple:#8b5cf6;--chart-ink:#0f172a;--chart-muted:#64748b;--chart-grid:rgba(100,116,139,.14);--brand-deep:#06384d;--brand-blue:#0b5a7a;--brand-cyan:#0d8ba8;--brand-mist:#eaf5f8;--brand-gold:#d3a85c;}
   *{box-sizing:border-box;}body{margin:0;background:var(--sand);color:var(--ink);font-family:'Cairo',sans-serif;}
@@ -587,9 +585,6 @@
 
 <!-- Google Maps JavaScript API is loaded on demand; configure its key at runtime. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 
 @media(max-width:760px){.chart-wrap,.profile-card,.strat-axis-card,.comparison-card,.insight-card,.monthly-report-card{border-radius:14px;}.chart-wrap{padding:12px 10px;}}
@@ -623,32 +618,6 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
-
-<style id="login-polish">
-  .password-overlay{background:radial-gradient(circle at 12% 12%,rgba(78,177,201,.25),transparent 28%),radial-gradient(circle at 92% 88%,rgba(211,168,92,.14),transparent 25%),#062f43;padding:24px;overflow:auto}
-  .login-shell{width:min(920px,100%);min-height:570px;display:grid;grid-template-columns:40% 60%;direction:ltr;border-radius:28px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.34);background:#fff;animation:loginRise .55s ease-out both}
-  .login-brand-panel{direction:rtl;position:relative;padding:44px 38px;color:#fff;background:linear-gradient(155deg,#0b6682 0%,#084a66 48%,#052a3a 100%);display:flex;flex-direction:column;align-items:flex-start;text-align:right;overflow:hidden}
-  .login-brand-panel:after{content:"";position:absolute;width:290px;height:290px;border:1px solid rgba(255,255,255,.13);border-radius:50%;left:-120px;bottom:-130px;box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025)}
-  .login-brand-mark,.login-mobile-mark{display:flex;align-items:center;justify-content:center;width:58px;height:58px;border:1px solid rgba(211,168,92,.75);border-radius:18px;color:#e6c477;font-size:34px;font-family:Georgia,serif;box-shadow:0 8px 22px rgba(0,0,0,.18);background:rgba(255,255,255,.08)}
-  .login-brand-kicker{margin-top:30px;color:#c7e6ec;font-size:11px;font-weight:700;letter-spacing:.08em}
-  .login-brand-panel h1{font-family:'Tajawal',sans-serif;color:#fff;font-size:31px;line-height:1.42;margin:10px 0 14px;font-weight:500}
-  .login-brand-panel h1 strong{color:#e6c477;font-weight:900}
-  .login-brand-panel p{font-size:13px;line-height:1.9;color:rgba(255,255,255,.77);max-width:260px;margin:0}
-  .login-brand-divider{height:1px;width:100%;background:linear-gradient(90deg,rgba(230,196,119,.65),transparent);margin:28px 0 20px}
-  .login-trust-list{display:flex;flex-direction:column;gap:12px;color:rgba(255,255,255,.84);font-size:12px}
-  .login-trust-list b{color:#e6c477;font-size:16px;margin-left:7px}
-  .login-brand-footer{margin-top:auto;color:#fff;font-family:'Tajawal',sans-serif;font-size:12px;line-height:1.8;position:relative;z-index:1}
-  .login-brand-footer small{color:rgba(255,255,255,.6);font-family:'Cairo',sans-serif}
-  .password-box{direction:rtl;max-width:none;width:auto;border:0;border-radius:0;padding:56px 64px 32px;text-align:right;box-shadow:none;display:flex;flex-direction:column;justify-content:center}
-  .login-mobile-mark{display:none}
-  .login-heading{margin-bottom:28px}.login-eyebrow{font-size:12px;color:#0d8ba8;font-weight:700}.login-heading h2{font-size:29px;color:#073c55;margin:5px 0 6px;font-family:'Tajawal',sans-serif;font-weight:900}.login-heading p{font-size:12.5px;color:#718894;margin:0;line-height:1.7}
-  .login-form{display:flex;flex-direction:column;gap:8px}.login-label{font-size:12px;font-weight:800;color:#315765;margin-top:5px}.login-input-wrap{display:flex;align-items:center;border:1px solid #cfe0e5;border-radius:12px;background:#f8fbfc;transition:.2s;direction:ltr}.login-input-wrap:focus-within{border-color:#0d8ba8;box-shadow:0 0 0 4px rgba(13,139,168,.11);background:#fff}.login-input-icon{width:42px;text-align:center;color:#7fa4af;font-size:17px}.login-input-wrap input{border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;border-radius:12px!important;padding:13px 8px!important;margin:0!important;text-align:left!important;letter-spacing:0!important;font-family:'Cairo',sans-serif!important;font-size:13px!important;flex:1}.password-toggle{border:0;background:transparent;color:#7897a1;cursor:pointer;font-size:14px;padding:10px 13px}.password-toggle:hover{color:#0b5a7a}
-  .login-submit{display:flex!important;align-items:center;justify-content:center;gap:10px;margin-top:14px;background:linear-gradient(135deg,#0b6682,#0b91ad)!important;box-shadow:0 10px 20px rgba(11,145,173,.2);font-size:14px!important}.login-submit:hover{transform:translateY(-1px);box-shadow:0 13px 24px rgba(11,145,173,.28)}.login-submit-arrow{font-size:18px;line-height:1}.login-spinner{display:none;width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:loginSpin .7s linear infinite}.login-submit.is-loading{opacity:.78;cursor:wait}.login-submit.is-loading .login-submit-label,.login-submit.is-loading .login-submit-arrow{display:none}.login-submit.is-loading .login-spinner{display:block}
-  .password-box .error-msg{background:#fff1f0;border:1px solid #ffd0cb;border-radius:9px;padding:9px 11px;color:#b43c32;font-size:11.5px;margin-top:12px}.login-security-note{display:flex;align-items:center;gap:7px;color:#6f8993;font-size:10.5px;margin-top:18px}.login-security-note span{color:#0d8ba8;font-size:15px}.auth-methods{margin-top:22px}.auth-divider{display:flex;align-items:center;gap:10px;color:#9aadb4;font-size:10px}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:#e4edef;flex:1}.auth-divider span{white-space:nowrap}.auth-methods #googleSignIn{display:flex;justify-content:center;margin-top:14px}.google-login-btn{background:#fff!important;color:#315765!important;border:1px solid #cfe0e5!important;box-shadow:none!important;margin-top:10px;font-size:13px!important}.google-login-btn:hover{background:#f5fafb!important}.auth-hint{text-align:center;color:#8da2aa;font-size:10px;line-height:1.7;margin-top:9px}.login-version{text-align:center;color:#a5b6bb;font-size:10px;margin-top:22px}.login-version span{color:#d3a85c;padding:0 5px}
-  @keyframes loginRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}@keyframes loginSpin{to{transform:rotate(360deg)}}
-  @media(max-width:700px){.password-overlay{padding:12px}.login-shell{display:block;min-height:0;border-radius:20px;max-width:440px}.login-brand-panel{display:none}.password-box{padding:34px 24px 24px}.login-mobile-mark{display:flex;margin:0 auto 18px;width:48px;height:48px;font-size:28px;border-radius:15px}.login-heading{text-align:center;margin-bottom:22px}.login-heading h2{font-size:25px}.login-security-note{justify-content:center;text-align:center}.login-version{margin-top:18px}}
-  @media(max-width:360px){.password-box{padding:26px 17px 20px}.login-heading h2{font-size:23px}}
-</style>
 </head>
 <body class="locked">
 
@@ -662,54 +631,27 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
      ═══════════════════════════════════════ -->
 
 <div class="password-overlay" id="passwordOverlay">
-  <div class="login-shell">
-    <aside class="login-brand-panel" aria-label="هوية النظام">
-      <div class="login-brand-mark">◈</div>
-      <div class="login-brand-kicker">نظام حكومي موحّد</div>
-      <h1>سِجل المؤشرات<br><strong>التشغيلية</strong></h1>
-      <p>منصة آمنة لمتابعة المؤشرات والبيانات التشغيلية حسب المحافظات.</p>
-      <div class="login-brand-divider"></div>
-      <div class="login-trust-list">
-        <span><b>✓</b> بيانات مركزية محدثة</span>
-        <span><b>✓</b> صلاحيات دخول متعددة</span>
-        <span><b>✓</b> سجل تدقيق للمستخدمين</span>
-      </div>
-      <div class="login-brand-footer">وزارة الشؤون الاجتماعية والعمل<br><small>مديرية التخطيط والإحصاء</small></div>
-    </aside>
+  <div class="password-box" id="loginBox">
+    <div class="lock-icon">🔐</div>
+    <h2>وزارة الشؤون الاجتماعية والعمل</h2>
+    <h3 style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;margin:4px 0 8px;color:#0B5A7A;">مديرية الإحصاء والتخطيط</h3>
+    <p style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:15px;margin:0 0 16px;color:var(--ink);">سجل المؤشرات التشغيلية</p>
 
-    <main class="password-box" id="loginBox">
-      <div class="login-mobile-mark">◈</div>
-      <div class="login-heading">
-        <span class="login-eyebrow">مرحباً بك من جديد</span>
-        <h2>تسجيل الدخول</h2>
-        <p>أدخل بيانات حسابك للوصول إلى لوحة المؤشرات.</p>
-      </div>
+    <div class="login-fields">
+      <input type="email" id="loginEmail" placeholder="البريد الإلكتروني / اسم المستخدم" autocomplete="username">
+      <input type="password" id="passwordInput" placeholder="كلمة المرور" autocomplete="current-password">
+    </div>
 
-      <form class="login-form" id="loginForm" onsubmit="event.preventDefault(); loginWithPassword();">
-        <label class="login-label" for="loginEmail">البريد الإلكتروني</label>
-        <div class="login-input-wrap">
-          <span class="login-input-icon">✉</span>
-          <input type="email" id="loginEmail" placeholder="name@example.com" autocomplete="username" dir="ltr" required>
-        </div>
-        <label class="login-label" for="passwordInput">كلمة المرور</label>
-        <div class="login-input-wrap">
-          <span class="login-input-icon">⌑</span>
-          <input type="password" id="passwordInput" placeholder="أدخل كلمة المرور" autocomplete="current-password" dir="ltr" required>
-          <button type="button" class="password-toggle" id="passwordToggle" onclick="toggleLoginPassword()" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور">◉</button>
-        </div>
-        <button class="btn-login login-submit" id="loginSubmit" type="submit"><span class="login-submit-label">دخول إلى اللوحة</span><span class="login-spinner" aria-hidden="true"></span><span class="login-submit-arrow">←</span></button>
-      </form>
-      <div class="error-msg" id="passwordError" role="alert" aria-live="polite">بيانات الدخول غير صحيحة</div>
+    <button class="btn-login" onclick="loginWithPassword()">🔓 تسجيل الدخول</button>
+    <div class="error-msg" id="passwordError">❌ بيانات الدخول غير صحيحة</div>
 
-      <div class="login-security-note"><span>▣</span> اتصال محمي — تتم إدارة صلاحياتك وفق دور المستخدم</div>
-      <div class="auth-methods">
-        <div class="auth-divider"><span>أو الدخول باستخدام</span></div>
-        <div id="googleSignIn"></div>
-        <button type="button" class="btn-login google-login-btn" id="firebaseGoogleLogin" onclick="firebaseGoogleLogin()" style="display:none;">G&nbsp;&nbsp; الدخول بحساب Google</button>
-        <div class="auth-hint" id="googleHint">الحسابات الجديدة تحتاج إلى موافقة مالك النظام.</div>
+    <div class="auth-methods">
+      <div class="auth-divider"><span>أو</span></div>
+      <div id="googleSignIn"></div>
+      <div class="auth-hint" id="googleHint">
+        تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً.
       </div>
-      <div class="login-version">لوحة المؤشرات التشغيلية <span>•</span> دخول آمن</div>
-    </main>
+    </div>
   </div>
 
   <div class="admin-dashboard" id="adminPanel" style="display:none;">
@@ -759,10 +701,6 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
           <tbody id="usersTableBody"></tbody>
         </table>
       </div>
-      <div class="admin-form" style="margin-top:18px;border-top:1px dashed var(--line);padding-top:16px;">
-        <h4 style="margin:0 0 8px;font-family:Tajawal;color:var(--ink);">⏳ طلبات Google بانتظار الموافقة</h4>
-        <div id="firebasePendingUsers"><div class="small-note">لا توجد طلبات معلقة أو لم يتم ضبط Firebase بعد.</div></div>
-      </div>
     </div>
 
     <div class="admin-section" id="adminTab-logs">
@@ -801,7 +739,7 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 
     <div class="admin-section" id="adminTab-google">
       <div class="small-note">
-        أدخل إعدادات Firebase من الثوابت البرمجية قبل النشر. الحسابات الجديدة عبر Google تُحفظ كطلبات <b>مطلع</b> معلقة، ولا تدخل إلا بعد موافقة المالك.
+        Google Identity Services يحتاج OAuth 2.0 Client ID من Google Cloud. بعد وضعه هنا سيظهر زر Google في شاشة الدخول. أي حساب Google جديد يُضاف تلقائياً بدور <b>مطلع</b> فقط، ولا يحصل على صلاحيات الإدارة.
       </div>
       <div class="admin-form">
         <input id="googleClientIdInput" placeholder="1234567890-xxxx.apps.googleusercontent.com">
@@ -4172,7 +4110,6 @@ let mapInfoWindow = null;
 let googleMapsLoadPromise = null;
 let placesAutocomplete = null;
 let mapHeatLayers = {};
-let mapProvider = null; // google or leaflet
 // Google Maps JavaScript API configuration.
 // Restrict this key in Google Cloud by HTTP referrer and enabled APIs.
 const GOOGLE_MAPS_API_KEY = 'AIzaSyAGI6yqE0GfOZUDwtyN1JdHz2YZZjZgB5U';
@@ -4210,8 +4147,9 @@ function showMapUnavailable(message){
 // restriction is rejected. Show an actionable message instead of the generic
 // "Google Maps didn't load correctly" banner.
 window.gm_authFailure = function(){
-  console.warn('Google Maps rejected the configured key; using OpenStreetMap fallback.');
-  if(window.L && !map) initLeafletMap();
+  const mapEl = document.getElementById('govMap');
+  if(!mapEl) return;
+  mapEl.innerHTML = `<div class="map-unavailable" style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:Cairo;font-size:14px;flex-direction:column;gap:10px;background:#f9f9f9;border-radius:0 0 18px 18px;text-align:center;padding:20px;"><div style="font-size:36px;">⚠️</div><div style="font-weight:700;color:#b3261e;">رفضت Google Maps استخدام المفتاح</div><div style="font-size:12px;max-width:560px;line-height:1.9;">تحقق من تفعيل Maps JavaScript API، تفعيل الفوترة، وإضافة نطاق هذه الصفحة ضمن Websites / HTTP referrers في قيود المفتاح. راجع Console لمعرفة الخطأ التفصيلي.</div></div>`;
 };
 
 function loadGoogleMapsApi(){
@@ -4221,25 +4159,11 @@ function loadGoogleMapsApi(){
   if(!key) return Promise.reject(new Error('لم يتم ضبط مفتاح Google Maps API'));
   googleMapsLoadPromise = new Promise((resolve, reject) => {
     const callbackName = '__googleMapsReady_' + Date.now();
-    let settled = false;
-    const fail = message => {
-      if(settled) return;
-      settled = true;
-      delete window[callbackName];
-      reject(new Error(message));
-    };
-    const timer = setTimeout(() => fail('انتهت مهلة تحميل Google Maps API'), 8000);
-    window[callbackName] = () => {
-      if(settled) return;
-      settled = true;
-      clearTimeout(timer);
-      delete window[callbackName];
-      resolve();
-    };
+    window[callbackName] = () => { delete window[callbackName]; resolve(); };
     const script = document.createElement('script');
     script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&callback=' + callbackName + '&language=ar&region=SY';
     script.async = true; script.defer = true;
-    script.onerror = () => { clearTimeout(timer); fail('تعذر تحميل Google Maps API'); };
+    script.onerror = () => { delete window[callbackName]; reject(new Error('تعذر تحميل Google Maps API')); };
     document.head.appendChild(script);
   });
   return googleMapsLoadPromise;
@@ -4317,53 +4241,11 @@ function updateHeatmapLayers(){
   });
 }
 
-function initLeafletMap(){
-  if(map !== null || !window.L) return;
-  const mapEl = document.getElementById('govMap');
-  if(!mapEl) return;
-  // Google may insert its generic error banner before gm_authFailure fires.
-  mapEl.innerHTML = '';
-  mapProvider = 'leaflet';
-  map = L.map(mapEl, {zoomControl:true, attributionControl:true}).setView([35.3,38.4], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-  window.google = window.google || {};
-  google.maps = google.maps || {};
-  google.maps.Size = function(w,h){this.width=w;this.height=h;};
-  google.maps.Point = function(x,y){this.x=x;this.y=y;};
-  google.maps.Animation = {BOUNCE:'BOUNCE'};
-  google.maps.event = {trigger:(obj,name)=>obj && obj._emit && obj._emit(name)};
-  google.maps.Marker = function(opts){
-    const iconUrl = opts.icon && opts.icon.url;
-    const icon = iconUrl ? L.icon({iconUrl, iconSize:[48,58], iconAnchor:[24,55], popupAnchor:[0,-52]}) : undefined;
-    const layer = L.marker([opts.position.lat, opts.position.lng], {icon, title:opts.title}).addTo(opts.map);
-    const listeners = {};
-    layer._emit = name => (listeners[name] || []).forEach(fn=>fn());
-    layer.addListener = (name, fn) => { (listeners[name] ||= []).push(fn); layer.on(name, fn); };
-    layer.setMap = target => { if(target) layer.addTo(target); else layer.remove(); };
-    layer.setAnimation = () => {};
-    return layer;
-  };
-  google.maps.InfoWindow = function(){
-    let content='';
-    return {setContent:v=>{content=v;}, open:({anchor})=>anchor.bindPopup(content,{maxWidth:360}).openPopup()};
-  };
-  google.maps.Circle = function(opts){
-    const layer = L.circle([opts.center.lat, opts.center.lng], {radius:opts.radius, color:opts.strokeColor, weight:opts.strokeWeight, opacity:opts.strokeOpacity, fillColor:opts.fillColor, fillOpacity:opts.fillOpacity}).addTo(opts.map);
-    layer.setMap = target => { if(!target) layer.remove(); else layer.addTo(target); };
-    return layer;
-  };
-  map.fitBounds([[30.20,32.00],[39.60,44.80]], {padding:[12,12]});
-  setupMapTools(); setupHeatmapControls(); renderGovSidebar(); updateMapMarkers();
-}
-
 function initMap(){
   if(map !== null) return;
+  if(!window.google?.maps) return;
   const mapEl = document.getElementById('govMap');
   if(!mapEl) return;
-  if(!window.google?.maps){ initLeafletMap(); return; }
-  mapProvider = 'google';
 
   // نطاق إقليمي لإظهار سوريا والدول المجاورة: تركيا، العراق، الأردن، لبنان وفلسطين.
   const syriaBounds = {north:39.60, south:30.20, west:32.00, east:44.80};
@@ -4430,7 +4312,7 @@ function animateGovSelection(gov){
   const row=document.querySelector(`.gov-table-row[data-gov="${CSS.escape(gov)}"]`);
   if(row){row.classList.add('gov-selected');row.scrollIntoView({behavior:'smooth',block:'nearest'});}
   const marker=mapMarkers[gov];
-  if(marker && mapProvider === 'google'){marker.setAnimation(google.maps.Animation.BOUNCE);setTimeout(()=>marker.setAnimation(null),900);}
+  if(marker && window.google?.maps){marker.setAnimation(google.maps.Animation.BOUNCE);setTimeout(()=>marker.setAnimation(null),900);}
   const mapEl=document.getElementById('govMap');
   if(mapEl){mapEl.classList.remove('map-focus-flash');void mapEl.offsetWidth;mapEl.classList.add('map-focus-flash');}
 }
@@ -4438,7 +4320,7 @@ function showGovOnMap(gov){
   const coords=GOV_COORDS[gov];
   if(!coords || !map) return;
   animateGovSelection(gov);
-  if(mapProvider === 'leaflet') map.setView([coords[0],coords[1]], 9); else { map.panTo({lat:coords[0],lng:coords[1]}); map.setZoom(9); }
+  map.panTo({lat:coords[0],lng:coords[1]}); map.setZoom(9);
   const marker=mapMarkers[gov];
   if(marker){ google.maps.event.trigger(marker,'click'); }
   const input=document.getElementById('mapPlaceSearch');
@@ -4479,7 +4361,7 @@ function setupMapSidebar(){
   button.addEventListener('click',()=>{
     sidebar.classList.toggle('collapsed');
     button.setAttribute('aria-expanded',String(!sidebar.classList.contains('collapsed')));
-    setTimeout(()=>{if(map && mapProvider === 'google') google.maps.event.trigger(map,'resize'); if(map && mapProvider === 'leaflet') map.invalidateSize();},220);
+    setTimeout(()=>{if(map) google.maps.event.trigger(map,'resize');},220);
   });
 }
 function setupMapTools(){setupMapSearch();setupMapSidebar();}
@@ -4723,9 +4605,10 @@ function initMapOnDemand(){
     if(!map) initMap();
     else updateMapMarkers();
   }).catch(err => {
-    console.warn('Google Maps unavailable; using OpenStreetMap fallback:', err);
-    if(window.L) initLeafletMap();
-    else showMapUnavailable(`${err.message}. تعذر تحميل الخريطة البديلة أيضاً؛ تحقق من الاتصال بالإنترنت.`);
+    console.warn('Google Maps unavailable:', err);
+    showMapUnavailable(err.message.includes('مفتاح')
+      ? 'لم يتم ضبط مفتاح Google Maps API. أدخله من الزر أدناه أو احفظه في localStorage باسم googleMapsApiKey.'
+      : `${err.message}. تحقق من تفعيل Maps JavaScript API والفوترة وقيود النطاق في Google Cloud.`);
   });
 }
 
@@ -4737,24 +4620,13 @@ const AUTH_DB_VERSION = 1;
 const USERS_STORE = 'users';
 const LOGS_STORE = 'auditLogs';
 const GOOGLE_CLIENT_ID_KEY = 'govDashboard_googleClientId';
-// لا توجد حسابات محلية افتراضية؛ الدخول بعد النشر يتم عبر Firebase Google Login.
-const DEFAULT_LOCAL_USERS = [];
+const DEFAULT_LOCAL_USERS = [
+  { id:'u-admin', name:'المدير الرئيسي', email:'admin@local', role:'admin', password:'246269', provider:'local', active:true },
+  { id:'u-editor', name:'المحرر الافتراضي', email:'editor@local', role:'editor', password:'editor123', provider:'local', active:true },
+  { id:'u-viewer', name:'المطلع الافتراضي', email:'viewer@local', role:'viewer', password:'123456', provider:'local', active:true }
+];
 let currentUser = null;
 let authDbPromise = null;
-// Firebase Web App configuration.
-const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyD-GBxVB7sRur7XiHRGU2tQ-ZqQH9iZrm4',
-  authDomain: 'mosal-c9406.firebaseapp.com',
-  projectId: 'mosal-c9406',
-  storageBucket: 'mosal-c9406.firebasestorage.app',
-  messagingSenderId: '263943819058',
-  appId: '1:263943819058:web:4e045666843e61ec03912b'
-};
-// Set this to the owner's Google email. This account is approved as admin automatically.
-const FIREBASE_OWNER_EMAIL = 'abodekazal@gmail.com';
-let firebaseAuth = null;
-let firebaseDb = null;
-let firebaseReady = false;
 const AUDIT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const AUDIT_CLEANUP_KEY = 'govDashboard_auditCleanupAt';
 const AUDIT_REVISION_KEY = 'govDashboard_auditRevision';
@@ -4805,23 +4677,6 @@ async function getUserById(id){
 async function checkCurrentSession(){
   if(!currentUser) return true;
   try{
-    // Firebase users are stored in Firestore, not in the local IndexedDB store.
-    // Looking them up locally incorrectly treated every Google session as disabled.
-    if(currentUser.provider==='firebase'){
-      if(!firebaseDb || !currentUser.firebaseUid) return true;
-      const snap=await firebaseDb.collection('users').doc(currentUser.firebaseUid).get();
-      const isOwner=(currentUser.email||'').toLowerCase()===FIREBASE_OWNER_EMAIL.toLowerCase();
-      if(!isOwner && (!snap.exists || snap.data()?.active!==true)){
-        stopSessionGuard();
-        alert('تم إخراج هذا المستخدم وتعطيل حسابه من قبل المدير.');
-        if(firebaseAuth) try{ await firebaseAuth.signOut(); }catch(e){}
-        localStorage.removeItem(SESSION_KEY);
-        currentUser=null;
-        location.reload();
-        return false;
-      }
-      return true;
-    }
     const fresh=await getUserById(currentUser.id);
     if(!fresh || fresh.active===false){
       stopSessionGuard();
@@ -5253,7 +5108,6 @@ async function restoreSession(){
 }
 async function logout(){
   if(currentUser) await addAudit('logout',currentUser,'تسجيل خروج');
-  if(firebaseAuth) { try{ await firebaseAuth.signOut(); }catch(e){} }
   localStorage.removeItem(SESSION_KEY);
   currentUser=null;
   location.reload();
@@ -5282,7 +5136,6 @@ async function renderUsers(){
       </td>
     </tr>`;
   }).join('');
-  renderFirebasePendingUsers();
 }
 function escapeHtml(v){
   return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -5435,108 +5288,7 @@ async function exportAuditLogs(){
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})); a.download='سجل_دخول_لوحة_المؤشرات.csv'; a.click();
 }
 
-// ----- Firebase Google Login + manual approval -----
-function firebaseConfigured(){
-  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('ضع_')
-    && FIREBASE_CONFIG.projectId && !FIREBASE_CONFIG.projectId.includes('ضع_')
-    && FIREBASE_OWNER_EMAIL && !FIREBASE_OWNER_EMAIL.includes('ضع_');
-}
-function initFirebaseAuth(){
-  const button=document.getElementById('firebaseGoogleLogin');
-  const hint=document.getElementById('googleHint');
-  if(!firebaseConfigured() || typeof firebase==='undefined'){
-    if(button) button.style.display='none';
-    if(hint) hint.textContent='أكمل إعداد Firebase داخل الكود قبل النشر لتفعيل دخول Google والموافقة اليدوية.';
-    return false;
-  }
-  try{
-    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-    firebaseAuth=firebase.auth(); firebaseDb=firebase.firestore(); firebaseReady=true;
-    if(button) button.style.display='block';
-    if(hint) hint.textContent='الحسابات الجديدة تنتظر موافقة المالك قبل الدخول.';
-    firebaseAuth.onAuthStateChanged(async account=>{
-      if(!account || currentUser) return;
-      try{
-        const email=(account.email||'').toLowerCase();
-        const snap=await firebaseDb.collection('users').doc(account.uid).get();
-        const profile=snap.exists?snap.data():null;
-        if(email===FIREBASE_OWNER_EMAIL.toLowerCase() || profile?.active===true){
-          currentUser={id:'fb-'+account.uid,name:profile?.name||account.displayName||email,email,role:email===FIREBASE_OWNER_EMAIL.toLowerCase()?'admin':(profile.role||'viewer'),active:true,provider:'firebase',firebaseUid:account.uid};
-          saveSession(currentUser); enterDashboard();
-        }else if(profile?.active!==true){ await firebaseAuth.signOut(); }
-      }catch(error){ console.warn('Firebase session restore failed:',error); }
-    });
-    return true;
-  }catch(error){
-    console.error('Firebase initialization failed:',error);
-    if(hint) hint.textContent='تعذر تهيئة Firebase. تحقق من إعدادات المشروع.';
-    return false;
-  }
-}
-async function firebaseGoogleLogin(){
-  if(!firebaseReady && !initFirebaseAuth()) return showLoginError('أكمل إعداد Firebase أولاً.');
-  try{
-    const provider=new firebase.auth.GoogleAuthProvider();
-    const result=await firebaseAuth.signInWithPopup(provider);
-    const account=result.user;
-    const email=(account.email||'').toLowerCase();
-    const ref=firebaseDb.collection('users').doc(account.uid);
-    const snap=await ref.get();
-    let profile=snap.exists?snap.data():null;
-    if(email===FIREBASE_OWNER_EMAIL.toLowerCase()){
-      profile={uid:account.uid,name:account.displayName||'المالك',email,role:'admin',active:true,provider:'firebase',updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-      await ref.set(profile,{merge:true});
-    }else if(!profile){
-      profile={uid:account.uid,name:account.displayName||email.split('@')[0],email,role:'viewer',active:false,status:'pending',requestedAt:firebase.firestore.FieldValue.serverTimestamp(),provider:'firebase'};
-      await ref.set(profile);
-      await firebaseAuth.signOut();
-      return showLoginError('تم إرسال طلبك إلى مالك النظام. ستتمكن من الدخول بعد الموافقة.');
-    }else if(profile.active!==true){
-      await firebaseAuth.signOut();
-      return showLoginError('حسابك بانتظار موافقة مالك النظام أو تم تعطيله.');
-    }
-    currentUser={id:'fb-'+account.uid,name:profile.name||account.displayName||email,email,role:profile.role||'viewer',active:true,provider:'firebase',firebaseUid:account.uid};
-    saveSession(currentUser);
-    await addAudit('google_login',currentUser,'تسجيل دخول Google عبر Firebase');
-    enterDashboard();
-  }catch(error){
-    console.error('Firebase Google login failed:',error);
-    const code=error?.code||'';
-    if(code==='auth/popup-blocked' || code==='auth/operation-not-supported-in-this-environment'){
-      try{
-        await firebaseAuth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-        return;
-      }catch(redirectError){
-        console.error('Firebase Google redirect failed:',redirectError);
-        return showLoginError('تعذر فتح تسجيل Google. افتح الصفحة عبر localhost أو اسم نطاق HTTPS ثم حاول مجدداً.');
-      }
-    }
-    if(code==='auth/unauthorized-domain'){
-      return showLoginError('هذا النطاق غير مصرح به في Firebase. أضفه من Authentication > Settings > Authorized domains.');
-    }
-    if(location.protocol==='file:'){
-      return showLoginError('افتح الصفحة عبر خادم محلي أو HTTPS؛ تسجيل Google لا يعمل مباشرةً من file://.');
-    }
-    showLoginError(`تعذر تسجيل الدخول بواسطة Google (${code||'خطأ غير معروف'}). تحقق من تفعيل Google وإضافة النطاق المسموح.`);
-  }
-}
-async function renderFirebasePendingUsers(){
-  const box=document.getElementById('firebasePendingUsers');
-  if(!box || !firebaseReady || currentUser?.role!=='admin') return;
-  try{
-    const snap=await firebaseDb.collection('users').where('active','==',false).get();
-    const pending=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
-    box.innerHTML=pending.length ? pending.map(user=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)"><span><b>${escapeHtml(user.name||'—')}</b><br><small>${escapeHtml(user.email||'—')}</small></span><button class="btn btn-primary btn-sm" onclick="approveFirebaseUser('${user.id}')">✅ موافقة</button></div>`).join('') : '<div class="small-note">لا توجد طلبات معلقة.</div>';
-  }catch(error){ console.warn('Could not load Firebase pending users:',error); }
-}
-async function approveFirebaseUser(uid){
-  if(!firebaseReady || currentUser?.role!=='admin') return;
-  await firebaseDb.collection('users').doc(uid).set({active:true,status:'approved',approvedAt:firebase.firestore.FieldValue.serverTimestamp(),approvedBy:currentUser.email},{merge:true});
-  await renderFirebasePendingUsers();
-  alert('تمت الموافقة على الحساب.');
-}
-
-// ----- Google Identity Services (legacy/local option) -----
+// ----- Google Identity Services -----
 function getGoogleClientId(){ return localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||''; }
 function loadGoogleClientIdIntoForm(){
   const el=document.getElementById('googleClientIdInput'); if(el) el.value=getGoogleClientId();
@@ -6321,7 +6073,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupGovFilter();
   setupMonthFilter();
   try { await openAuthDB(); await seedUsers(); } catch(e) { console.error('Auth DB init failed',e); }
-  initFirebaseAuth();
+  initGoogleSignIn();
 
   setTimeout(() => {
     if(SHEETS_CONFIG.apiKey && !SHEETS_CONFIG.apiKey.includes('ضع_')){
@@ -6994,28 +6746,6 @@ if (typeof Chart !== 'undefined') {
   Chart.defaults.plugins.tooltip.cornerRadius = 12;
   Chart.defaults.plugins.tooltip.displayColors = false;
 }
-</script>
-<script>
-function toggleLoginPassword(){
-  const input=document.getElementById('passwordInput');
-  const button=document.getElementById('passwordToggle');
-  if(!input || !button) return;
-  const showing=input.type==='text';
-  input.type=showing?'password':'text';
-  button.textContent=showing?'◉':'◌';
-  button.setAttribute('aria-label',showing?'إظهار كلمة المرور':'إخفاء كلمة المرور');
-  button.title=button.getAttribute('aria-label');
-}
-(function(){
-  const form=document.getElementById('loginForm');
-  const submit=document.getElementById('loginSubmit');
-  if(!form || !submit) return;
-  form.addEventListener('submit',()=>{
-    submit.classList.add('is-loading');
-    submit.setAttribute('aria-busy','true');
-    setTimeout(()=>{submit.classList.remove('is-loading');submit.removeAttribute('aria-busy');},2500);
-  });
-})();
 </script>
 </body>
 </html>
