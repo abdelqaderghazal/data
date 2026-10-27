@@ -659,6 +659,58 @@ html[data-theme="dark"] .qn-pill.active,html[data-theme="dark"] .qn-index-btn{ba
   .qn-top{left:12px;bottom:16px}
 }
 </style>
+<style id="login-redesign-css">
+#passwordOverlay{overflow-y:auto;background:
+  radial-gradient(circle at 88% 8%,rgba(211,168,92,.18),transparent 26%),
+  radial-gradient(circle at 8% 92%,rgba(13,139,168,.38),transparent 34%),
+  repeating-linear-gradient(135deg,rgba(255,255,255,.028) 0 2px,transparent 2px 30px),
+  linear-gradient(135deg,#0b5a7a 0%,#073c55 55%,#041f2c 100%)}
+#loginBox.password-box{margin:auto;max-width:920px;padding:0;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);overflow:hidden;border:0;border-radius:26px;text-align:start;box-shadow:0 34px 90px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.14)}
+#loginBox .lg-brand{position:relative;overflow:hidden;padding:46px 34px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;
+  background:radial-gradient(circle at 22% 0%,rgba(13,139,168,.6),transparent 55%),repeating-linear-gradient(135deg,rgba(255,255,255,.045) 0 2px,transparent 2px 24px),linear-gradient(160deg,#0b5a7a 0%,#073c55 55%,#052a3a 100%)}
+#loginBox .lg-brand::after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;border:1px solid rgba(211,168,92,.4);inset-inline-start:-120px;bottom:-120px;box-shadow:0 0 0 30px rgba(211,168,92,.06);pointer-events:none}
+#loginBox .lg-brand>*{position:relative;z-index:1}
+#loginBox .lg-emblem{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:rgba(255,255,255,.08);border:2px solid rgba(211,168,92,.85);box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 0 0 7px rgba(255,255,255,.05)}
+#loginBox .lg-emblem img{width:82px;height:82px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+#loginBox .lg-ministry{font:900 21px/1.55 'Tajawal',sans-serif;margin:0;color:#fff}
+#loginBox .lg-dir{font:700 14.5px 'Tajawal',sans-serif;color:var(--brass-light);margin:4px 0 0;line-height:1.6}
+#loginBox .lg-rule{width:56px;height:3px;border-radius:3px;background:var(--brand-gold);margin:14px auto}
+#loginBox .lg-title{font:700 15.5px/1.8 'Tajawal',sans-serif;color:rgba(255,255,255,.9);margin:0}
+#loginBox .lg-form{padding:46px 42px;display:flex;flex-direction:column;justify-content:center;background:var(--paper);text-align:start}
+#loginBox .lg-welcome{font:900 27px/1.3 'Tajawal',sans-serif;color:#0B5A7A}
+#loginBox .lg-sub{margin:6px 0 26px;font-size:13.5px;color:var(--ink-soft);line-height:1.7}
+#loginBox .lg-field{position:relative;margin-bottom:14px}
+#loginBox .lg-field input{width:100%;height:52px;margin:0;padding:0 46px;border:1.5px solid var(--line);border-radius:14px;background:var(--sand);color:var(--ink);font:600 15px 'Cairo',sans-serif;letter-spacing:0;text-align:start;transition:border-color .15s,box-shadow .15s,background .15s}
+#loginBox .lg-field input::placeholder{color:var(--ink-soft);font-weight:500;opacity:.85}
+#loginBox .lg-field input:focus{outline:none;border-color:#0D8BA8;background:var(--paper);box-shadow:0 0 0 4px rgba(13,139,168,.16)}
+#loginBox .lg-field .ico{position:absolute;inset-inline-start:15px;top:50%;width:20px;height:20px;margin-top:-10px;color:var(--ink-soft);pointer-events:none;transition:color .15s}
+#loginBox .lg-field:focus-within .ico{color:#0D8BA8}
+#loginBox .lg-eye{position:absolute;inset-inline-end:6px;top:50%;width:38px;height:38px;margin-top:-19px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--ink-soft);cursor:pointer}
+#loginBox .lg-eye:hover{background:var(--sand-2);color:#0B5A7A}
+#loginBox .lg-eye svg{width:20px;height:20px}
+#loginBox .lg-eye.on{color:#0D8BA8}
+#loginBox .btn-login{height:52px;margin-top:8px;padding:0;border-radius:14px;font:700 16px 'Cairo',sans-serif;letter-spacing:0;background:linear-gradient(135deg,#0B5A7A 0%,#0D8BA8 100%);box-shadow:0 10px 22px rgba(11,90,122,.3);transition:transform .15s,box-shadow .15s,filter .15s}
+#loginBox .btn-login:hover{background:linear-gradient(135deg,#0B5A7A 0%,#0D8BA8 100%);filter:brightness(1.07);transform:translateY(-1px);box-shadow:0 14px 28px rgba(11,90,122,.36)}
+#loginBox .btn-login:active{transform:none}
+#loginBox .error-msg{margin-top:12px;padding:9px 12px;border-radius:10px;background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.35);color:#c0392b;font-size:13px;text-align:center}
+#loginBox .auth-methods{margin-top:20px;padding-top:0;border:0}
+#loginBox .auth-divider{margin:0 0 14px;font-size:12px}
+#loginBox .auth-hint{text-align:center;font-size:11.5px}
+html[data-theme="dark"] #loginBox .lg-welcome{color:#8ed1df}
+html[data-theme="dark"] #loginBox .lg-eye:hover{color:#8ed1df}
+@media(max-width:760px){
+  #loginBox.password-box{grid-template-columns:1fr;max-width:440px;border-radius:22px}
+  #loginBox .lg-brand{flex-direction:row;justify-content:flex-start;text-align:start;gap:14px;padding:20px 22px}
+  #loginBox .lg-emblem{width:66px;height:66px}
+  #loginBox .lg-emblem img{width:46px;height:46px}
+  #loginBox .lg-ministry{font-size:16px}
+  #loginBox .lg-dir{font-size:13px;margin-top:2px}
+  #loginBox .lg-rule,#loginBox .lg-title{display:none}
+  #loginBox .lg-form{padding:26px 22px 28px}
+  #loginBox .lg-welcome{font-size:23px}
+  #loginBox .lg-sub{margin-bottom:20px}
+}
+</style>
 </head>
 <body class="locked">
 
@@ -673,26 +725,43 @@ html[data-theme="dark"] .qn-pill.active,html[data-theme="dark"] .qn-index-btn{ba
 
 <div class="password-overlay" id="passwordOverlay">
   <div class="password-box" id="loginBox">
-    <div class="lock-icon">🔐</div>
-    <h2>وزارة الشؤون الاجتماعية والعمل</h2>
-    <h3 style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;margin:4px 0 8px;color:#0B5A7A;">مديرية الإحصاء والتخطيط</h3>
-    <p style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:15px;margin:0 0 16px;color:var(--ink);">سجل المؤشرات التشغيلية</p>
-
-    <div class="login-fields">
-      <input type="email" id="loginEmail" placeholder="البريد الإلكتروني / اسم المستخدم" autocomplete="username">
-      <input type="password" id="passwordInput" placeholder="كلمة المرور" autocomplete="current-password">
-    </div>
-
-    <button class="btn-login" onclick="loginWithPassword()">🔓 تسجيل الدخول</button>
-    <div class="error-msg" id="passwordError">❌ بيانات الدخول غير صحيحة</div>
-
-    <div class="auth-methods">
-      <div class="auth-divider"><span>أو</span></div>
-      <div id="googleSignIn"></div>
-      <div class="auth-hint" id="googleHint">
-        تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً.
+    <aside class="lg-brand">
+      <div class="lg-emblem"><img id="loginEmblem" alt="" hidden></div>
+      <div class="lg-brand-text">
+        <h2 class="lg-ministry">وزارة الشؤون الاجتماعية والعمل</h2>
+        <p class="lg-dir">مديرية الإحصاء والتخطيط</p>
+        <div class="lg-rule"></div>
+        <p class="lg-title">سجل المؤشرات التشغيلية<br>للمحافظات</p>
       </div>
-    </div>
+    </aside>
+
+    <section class="lg-form">
+      <div class="lg-welcome">تسجيل الدخول</div>
+      <p class="lg-sub">أدخل بيانات حسابك للوصول إلى لوحة المؤشرات</p>
+
+      <div class="lg-field">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <input type="email" id="loginEmail" dir="auto" placeholder="البريد الإلكتروني / اسم المستخدم" aria-label="البريد الإلكتروني أو اسم المستخدم" autocomplete="username">
+      </div>
+      <div class="lg-field">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input type="password" id="passwordInput" dir="auto" placeholder="كلمة المرور" aria-label="كلمة المرور" autocomplete="current-password">
+        <button type="button" class="lg-eye" id="lgEye" aria-label="إظهار كلمة المرور" title="إظهار / إخفاء كلمة المرور">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
+      <button class="btn-login" onclick="loginWithPassword()">تسجيل الدخول</button>
+      <div class="error-msg" id="passwordError">❌ بيانات الدخول غير صحيحة</div>
+
+      <div class="auth-methods">
+        <div class="auth-divider"><span>أو</span></div>
+        <div id="googleSignIn"></div>
+        <div class="auth-hint" id="googleHint">
+          تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً.
+        </div>
+      </div>
+    </section>
   </div>
 
   <div class="admin-dashboard" id="adminPanel" style="display:none;">
@@ -6931,6 +7000,18 @@ if (typeof Chart !== 'undefined') {
 
   build(); syncFocus(); spy();
   setTimeout(spy,1500); setTimeout(spy,4000); // بعد تحميل البيانات وظهور الأقسام
+})();
+</script>
+<script id="login-redesign-js">
+(function(){
+  var img=document.getElementById('loginEmblem'), src=document.querySelector('.masthead-emblem img');
+  if(img&&src&&src.getAttribute('src')){ img.src=src.getAttribute('src'); img.hidden=false; }
+  else if(img){ img.parentNode.style.display='none'; }
+  var eye=document.getElementById('lgEye'), pw=document.getElementById('passwordInput');
+  if(eye&&pw) eye.addEventListener('click',function(){
+    var show=pw.type==='password'; pw.type=show?'text':'password';
+    eye.classList.toggle('on',show); eye.setAttribute('aria-label',show?'إخفاء كلمة المرور':'إظهار كلمة المرور');
+  });
 })();
 </script>
 </body>
