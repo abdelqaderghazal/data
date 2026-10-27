@@ -618,6 +618,47 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<style id="quick-nav-css">
+.quick-nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 6px 18px rgba(7,60,85,.08)}
+body.locked .quick-nav,body.locked .qn-top{display:none}
+.qn-row{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:8px 16px;padding-inline-start:72px}
+.qn-index-btn,.qn-tool{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--sand);color:var(--ink);border-radius:100px;padding:7px 14px;font:700 13px 'Cairo',sans-serif;cursor:pointer;white-space:nowrap}
+.qn-index-btn{background:#0B5A7A;border-color:#0B5A7A;color:#fff}
+.qn-index-btn[aria-expanded="true"]{background:#073c55}
+.qn-tool:hover,.qn-index-btn:hover{border-color:#0D8BA8}
+.qn-tool[aria-pressed="true"]{background:#0D8BA8;border-color:#0D8BA8;color:#fff}
+.qn-pills{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;scroll-behavior:auto;padding:2px 0;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 22px),transparent 100%)}
+.qn-pills::-webkit-scrollbar{display:none}
+.qn-pill{flex-shrink:0;border:1px solid transparent;background:transparent;color:var(--ink-soft);border-radius:100px;padding:6px 13px;font:600 13px 'Cairo',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+.qn-pill:hover{background:var(--sand-2);color:var(--ink)}
+.qn-pill.active{background:#0B5A7A;color:#fff;border-color:#0B5A7A}
+.qn-pill[hidden]{display:none}
+.qn-tools{display:flex;gap:6px;flex-shrink:0}
+.qn-panel{position:absolute;inset-inline:0;top:100%;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 18px 34px rgba(7,60,85,.16);max-height:min(70vh,520px);overflow:auto}
+.qn-panel[hidden]{display:none}
+.qn-panel-grid{max-width:1240px;margin:0 auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.qn-item{display:flex;align-items:center;gap:10px;text-align:start;border:1px solid var(--line);background:var(--sand);color:var(--ink);border-radius:12px;padding:10px 12px;font:600 13.5px 'Cairo',sans-serif;cursor:pointer}
+.qn-item:hover{border-color:#0D8BA8;background:var(--paper)}
+.qn-item.active{border-color:#0B5A7A;box-shadow:inset 0 0 0 1px #0B5A7A}
+.qn-item[hidden]{display:none}
+.qn-item .ic{width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,#0D8BA8,#0B5A7A);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.qn-progress{height:3px;background:transparent}
+.qn-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#0D8BA8,#d3a85c);float:inline-start}
+.qn-top{position:fixed;inset-inline-end:auto;inset-inline-start:auto;left:18px;bottom:22px;z-index:900;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:#0B5A7A;color:#fff;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 8px 22px rgba(7,60,85,.3);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s!important}
+.qn-top.show{opacity:1;pointer-events:auto;transform:none}
+main>section,main>.kpi-grid{scroll-margin-top:70px}
+html[data-theme="dark"] .quick-nav{background:rgba(11,32,42,.95)}
+html[data-theme="dark"] .qn-pill.active,html[data-theme="dark"] .qn-index-btn{background:#0D8BA8;border-color:#0D8BA8}
+@media(max-width:760px){
+  .qn-row{padding:7px 10px;padding-inline-start:60px;gap:6px}
+  .qn-index-btn span,.qn-tool span{display:none}
+  .qn-index-btn,.qn-tool{padding:7px 11px}
+  .qn-pill{padding:6px 11px;font-size:12.5px}
+  .qn-panel-grid{grid-template-columns:1fr 1fr;padding:12px}
+  .qn-item{padding:9px 10px;font-size:12.5px}
+  .qn-top{left:12px;bottom:16px}
+}
+</style>
 </head>
 <body class="locked">
 
@@ -883,6 +924,21 @@ html[data-theme="dark"] .map-tools{background:linear-gradient(135deg,#102a35,#12
     <p style="margin-top:8px;">عند فتح الملف محلياً، استخدم خادماً محلياً للسماح بالاتصال بـ Google Sheets.</p>
   </div>
 </div>
+
+<!-- ═══ شريط التنقل السريع بين الأقسام ═══ -->
+<nav class="quick-nav" id="quickNav" aria-label="التنقل بين الأقسام">
+  <div class="qn-row">
+    <button type="button" class="qn-index-btn" id="qnIndexBtn" aria-expanded="false" aria-controls="qnPanel" title="فهرس الأقسام">☰ <span>الفهرس</span></button>
+    <div class="qn-pills" id="qnPills" role="tablist"></div>
+    <div class="qn-tools">
+      <button type="button" class="qn-tool" id="qnFocus" aria-pressed="true" title="وضع التركيز: فتح قسم واحد فقط في كل مرة">🎯 <span>تركيز</span></button>
+      <button type="button" class="qn-tool" id="qnCollapse" title="طي جميع الأقسام المفتوحة">⇪ <span>طي الكل</span></button>
+    </div>
+  </div>
+  <div class="qn-panel" id="qnPanel" hidden><div class="qn-panel-grid" id="qnPanelGrid"></div></div>
+  <div class="qn-progress"><i id="qnBar"></i></div>
+</nav>
+<button type="button" class="qn-top" id="qnTop" aria-label="العودة إلى الأعلى" title="العودة إلى الأعلى">↑</button>
 
 <main>
   <div class="kpi-grid" id="kpiGrid"></div>
@@ -6746,6 +6802,136 @@ if (typeof Chart !== 'undefined') {
   Chart.defaults.plugins.tooltip.cornerRadius = 12;
   Chart.defaults.plugins.tooltip.displayColors = false;
 }
+</script>
+<script id="quick-nav-js">
+(function(){
+  var main=document.querySelector('main'), nav=document.getElementById('quickNav');
+  if(!main||!nav) return;
+  var pills=document.getElementById('qnPills'), grid=document.getElementById('qnPanelGrid'),
+      panel=document.getElementById('qnPanel'), idxBtn=document.getElementById('qnIndexBtn'),
+      focusBtn=document.getElementById('qnFocus'), collapseBtn=document.getElementById('qnCollapse'),
+      topBtn=document.getElementById('qnTop'), bar=document.getElementById('qnBar');
+
+  var LABELS=[ // [جزء من العنوان, الاسم المختصر]
+    ['الملخص التنفيذي','الملخص التنفيذي'],['بوصلة','الخطة الاستراتيجية'],['الخريطة','الخريطة'],
+    ['الإعاقة','ذوو الإعاقة'],['الرعاية الاجتماعية','الرعاية الاجتماعية'],['المنظمات','المنظمات'],
+    ['إصلاح','إصلاح الأحداث'],['الريفية','التنمية الريفية'],['التفتيش','التفتيش'],
+    ['والبطالة','سوق العمل'],['التأمينات','التأمينات'],['المساعدات','المساعدات'],
+    ['المخيمات','المخيمات'],['منصة','المنصة الرقمية'],['الديموغرافية','الديموغرافيا'],
+    ['شهر بشهر','مقارنة شهرين'],['الدروس','الدروس المستفادة'],['التحليلات','التحليلات'],
+    ['المؤشرات المرئية','الرسوم البيانية'],['ملف كل محافظة','ملفات المحافظات']
+  ];
+  var items=[], FOCUS=true, busy=false;
+  try{ if(localStorage.getItem('qnFocus')==='0') FOCUS=false; }catch(e){}
+
+  function headOf(sec){ return sec.querySelector(':scope > div[onclick]'); }
+  function isOpen(sec){ return sec.classList.contains('open'); }
+  function navH(){ return nav.offsetHeight; }
+
+  function build(){
+    var kids=Array.prototype.slice.call(main.children);
+    kids.forEach(function(el){
+      var label,icon,h2;
+      if(el.id==='kpiGrid'){ label='المؤشرات الرئيسية'; icon='📊'; }
+      else if(el.tagName==='SECTION'){
+        h2=el.querySelector('h2'); if(!h2) return;
+        var txt=h2.textContent.trim();
+        var ic=el.querySelector('[class*="icon"]'); icon=ic?ic.textContent.trim():'•';
+        label=txt;
+        for(var i=0;i<LABELS.length;i++){ if(txt.indexOf(LABELS[i][0])>-1){ label=LABELS[i][1]; break; } }
+      } else return;
+      var it={el:el,label:label,icon:icon,head:headOf(el)};
+      it.pill=document.createElement('button'); it.pill.type='button'; it.pill.className='qn-pill'; it.pill.textContent=label;
+      it.item=document.createElement('button'); it.item.type='button'; it.item.className='qn-item';
+      it.item.innerHTML='<span class="ic"></span><span></span>';
+      it.item.firstChild.textContent=icon; it.item.lastChild.textContent=label;
+      it.pill.onclick=it.item.onclick=function(){ go(it); closePanel(); };
+      pills.appendChild(it.pill); grid.appendChild(it.item); items.push(it);
+    });
+  }
+
+  function setOpen(it,want){
+    if(!it.head||isOpen(it.el)===want) return;
+    busy=true; it.head.click(); busy=false;
+  }
+  function closeOthers(except){
+    items.forEach(function(o){ if(o!==except && o.head && isOpen(o.el)) setOpen(o,false); });
+  }
+  function go(it){
+    if(it.head){ if(FOCUS) closeOthers(it); setOpen(it,true); }
+    requestAnimationFrame(function(){
+      var y=it.el.getBoundingClientRect().top+window.pageYOffset-navH()-8;
+      window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+    });
+  }
+
+  // عند فتح قسم يدوياً (بالضغط على رأسه) في وضع التركيز: أغلق البقية
+  document.addEventListener('click',function(e){
+    if(busy||!FOCUS) return;
+    var head=e.target.closest&&e.target.closest('main > section > div[onclick]');
+    if(!head) return;
+    var sec=head.parentElement;
+    setTimeout(function(){
+      if(!isOpen(sec)) return;
+      var it=items.filter(function(o){return o.el===sec;})[0];
+      closeOthers(it);
+      var top=sec.getBoundingClientRect().top;
+      if(top<navH()||top>window.innerHeight*.6){
+        window.scrollTo({top:Math.max(0,top+window.pageYOffset-navH()-8),behavior:'smooth'});
+      }
+    },30);
+  },true);
+
+  function closePanel(){ panel.hidden=true; idxBtn.setAttribute('aria-expanded','false'); }
+  idxBtn.onclick=function(e){ e.stopPropagation(); var open=panel.hidden; panel.hidden=!open; idxBtn.setAttribute('aria-expanded',String(open)); };
+  document.addEventListener('click',function(e){ if(!panel.hidden && !nav.contains(e.target)) closePanel(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePanel(); });
+
+  function syncFocus(){
+    focusBtn.setAttribute('aria-pressed',String(FOCUS));
+    try{ localStorage.setItem('qnFocus',FOCUS?'1':'0'); }catch(e){}
+  }
+  focusBtn.onclick=function(){
+    FOCUS=!FOCUS; syncFocus();
+    if(FOCUS){ // أبقِ القسم الأقرب فقط
+      var cur=current(); items.forEach(function(o){ if(o!==cur) setOpen(o,false); });
+    }
+  };
+  collapseBtn.onclick=function(){
+    items.forEach(function(o){ setOpen(o,false); });
+    window.scrollTo({top:Math.max(0,main.getBoundingClientRect().top+window.pageYOffset-navH()-8),behavior:'smooth'});
+  };
+  topBtn.onclick=function(){ window.scrollTo({top:0,behavior:'smooth'}); };
+
+  function current(){
+    var line=navH()+Math.min(140,window.innerHeight*.25), cur=null;
+    items.forEach(function(o){
+      if(o.el.offsetParent===null) return;
+      if(o.el.getBoundingClientRect().top<=line) cur=o;
+    });
+    return cur;
+  }
+  var last=null, tick=false;
+  function spy(){
+    tick=false;
+    var y=window.pageYOffset, max=document.documentElement.scrollHeight-window.innerHeight;
+    bar.style.width=(max>0?Math.min(100,y/max*100):0)+'%';
+    topBtn.classList.toggle('show',y>500);
+    items.forEach(function(o){ var hide=o.el.offsetParent===null; o.pill.hidden=hide; o.item.hidden=hide; });
+    var cur=current();
+    if(cur===last) return; last=cur;
+    items.forEach(function(o){ var on=o===cur; o.pill.classList.toggle('active',on); o.item.classList.toggle('active',on); });
+    if(cur){
+      var p=cur.pill, c=pills.getBoundingClientRect(), r=p.getBoundingClientRect();
+      if(r.left<c.left+30||r.right>c.right-30) pills.scrollBy({left:(r.left+r.right)/2-(c.left+c.right)/2,behavior:'smooth'});
+    }
+  }
+  window.addEventListener('scroll',function(){ if(!tick){ tick=true; requestAnimationFrame(spy);} },{passive:true});
+  window.addEventListener('resize',spy);
+
+  build(); syncFocus(); spy();
+  setTimeout(spy,1500); setTimeout(spy,4000); // بعد تحميل البيانات وظهور الأقسام
+})();
 </script>
 </body>
 </html>
