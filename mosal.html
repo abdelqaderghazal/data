@@ -764,6 +764,48 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
   #filterPanel .filter-reset{width:auto}
 }
 </style>
+<style id="governance-css">
+#governanceSection .cat-head .chev{margin-inline-start:0}
+.gv-badge{margin-inline-start:auto;flex-shrink:0;padding:5px 12px;border-radius:100px;font:700 12px 'Cairo',sans-serif;background:var(--sand-2);color:var(--ink-soft);white-space:nowrap}
+.gv-badge.g-ok{background:#dff5ec;color:#0f7a52}.gv-badge.g-good{background:#e0f2f7;color:#0b6f8a}.gv-badge.g-warn{background:#fff1d6;color:#9a6200}.gv-badge.g-bad{background:#fde4e4;color:#b02f2f}
+.gv-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.gv-tab{border:1px solid var(--line);background:var(--sand);color:var(--ink);border-radius:100px;padding:7px 15px;font:700 13px 'Cairo',sans-serif;cursor:pointer}
+.gv-tab:hover{border-color:#0D8BA8}.gv-tab.active{background:#0B5A7A;border-color:#0B5A7A;color:#fff}
+.gv-pane{display:none}.gv-pane.active{display:block}
+.gv-hero{display:grid;grid-template-columns:200px minmax(0,1fr);gap:22px;align-items:center;background:linear-gradient(135deg,var(--sand),var(--paper));border:1px solid var(--line);border-radius:18px;padding:18px 22px;margin-bottom:16px}
+.gv-gauge{width:170px;height:170px;display:block;margin:auto}
+.gv-g-num{font:900 34px 'Tajawal',sans-serif;fill:var(--ink)}.gv-g-sub{font:600 11px 'Cairo',sans-serif;fill:var(--ink-soft)}
+.gv-grade{font:900 20px 'Tajawal',sans-serif;color:var(--ink);margin:0 0 4px}.gv-grade-sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.7}
+.gv-dim{display:grid;grid-template-columns:130px minmax(0,1fr) 54px;gap:10px;align-items:center;margin:7px 0;font-size:12.5px;font-weight:600}
+.gv-bar{height:9px;border-radius:9px;background:var(--sand-2);overflow:hidden}.gv-bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#0D8BA8,#0B5A7A)}
+.gv-dim b{font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:end}
+.gv-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.gv-tile{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.gv-tile small{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-bottom:3px}.gv-tile strong{font:900 21px 'Tajawal',sans-serif;color:var(--ink)}
+.gv-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:16px}
+.gv-card h3{margin:0 0 10px;font:900 16px 'Tajawal',sans-serif;color:var(--ink)}
+.gv-kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:7px 12px;font-size:13px}.gv-kv dt{color:var(--ink-soft);font-weight:600}.gv-kv dd{margin:0;font-weight:600;word-break:break-word}
+.gv-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:460px;background:var(--paper)}
+.gv-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.gv-table th{position:sticky;top:0;z-index:2;background:var(--sand-2);color:var(--ink);text-align:start;padding:8px 10px;font-weight:700;white-space:nowrap}
+.gv-table td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top}
+.gv-sev{display:inline-block;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:700}
+.gv-sev.high{background:#fde4e4;color:#b02f2f}.gv-sev.med{background:#fff1d6;color:#9a6200}.gv-sev.low{background:#e0f2f7;color:#0b6f8a}
+.gv-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.gv-btn{border:1px solid var(--line);background:var(--sand);color:var(--ink);border-radius:10px;padding:7px 14px;font:700 12.5px 'Cairo',sans-serif;cursor:pointer}.gv-btn:hover{border-color:#0D8BA8}
+.gv-search{flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--sand);color:var(--ink);font:500 13px 'Cairo',sans-serif}
+.gv-matrix td,.gv-matrix th{text-align:center;padding:5px 6px;min-width:46px}
+.gv-matrix td:first-child,.gv-matrix th:first-child{position:sticky;inset-inline-start:0;z-index:1;text-align:start;background:var(--paper);font-weight:700;min-width:110px;border-inline-end:1px solid var(--line)}
+.gv-matrix th:first-child{z-index:3;background:var(--sand-2)}
+.gv-cell{border-radius:6px;font:600 11px 'IBM Plex Mono',monospace;padding:4px 0}
+.gv-cell.none{background:repeating-linear-gradient(45deg,var(--sand-2) 0 4px,transparent 4px 8px);color:var(--ink-soft)}
+.gv-ctl{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px dashed var(--line);font-size:13px;line-height:1.7}.gv-ctl:first-of-type{border-top:0}
+.gv-ctl .ic{flex-shrink:0;font-size:16px}.gv-ctl b{display:block}.gv-ctl span{color:var(--ink-soft);font-size:12.5px}
+.gv-yes{color:#0f7a52;font-weight:900}.gv-no{color:#b02f2f;font-weight:900}
+.gv-lock{text-align:center;padding:26px;color:var(--ink-soft);font-weight:600;background:var(--sand);border:1px dashed var(--line);border-radius:14px}
+.gv-empty{text-align:center;padding:36px 16px;color:var(--ink-soft);font-weight:600}
+@media(max-width:760px){.gv-hero{grid-template-columns:1fr;text-align:center}.gv-dim{grid-template-columns:100px minmax(0,1fr) 48px}.gv-kv{grid-template-columns:1fr}.gv-kv dt{margin-top:6px}}
+</style>
 </head>
 <body class="locked">
 
@@ -1429,6 +1471,28 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
         <div class="modern-chart-card wide"><div class="modern-chart-title"><span>⌁</span><div><h3>بصمة الأداء الاجتماعي والاقتصادي</h3><small>مؤشرات نسبية قابلة للمقارنة ضمن البيانات المحددة</small></div></div><div class="modern-chart-canvas radar-canvas"><canvas id="modernRadarChart"></canvas></div></div>
         <div class="modern-chart-card wide"><div class="modern-chart-title"><span>▥</span><div><h3>مقارنة السكان حسب المحافظة</h3><small>الأعلى والأدنى وفق الفلاتر الحالية</small></div></div><div class="modern-chart-canvas governor-canvas"><canvas id="modernGovernorChart"></canvas></div></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ═══ حوكمة البيانات ═══ -->
+  <section class="category" data-cat="governance" id="governanceSection">
+    <div class="cat-head" onclick="toggleGovernance(this)">
+      <div class="icon">🛡️</div>
+      <div><h2>حوكمة البيانات</h2><p>جودة البيانات والاكتمال والمصدر والصلاحيات وسجل التدقيق</p></div>
+      <span class="gv-badge" id="gvBadge">بانتظار البيانات</span>
+      <div class="chev">⌄</div>
+    </div>
+    <div class="cat-body" id="gvBody">
+      <div class="gv-tabs" role="tablist">
+        <button type="button" class="gv-tab active" data-pane="overview" onclick="gvShow('overview')">📊 نظرة عامة</button>
+        <button type="button" class="gv-tab" data-pane="quality" onclick="gvShow('quality')">🔍 جودة البيانات</button>
+        <button type="button" class="gv-tab" data-pane="dict" onclick="gvShow('dict')">📖 قاموس المؤشرات</button>
+        <button type="button" class="gv-tab" data-pane="access" onclick="gvShow('access')">🔐 الصلاحيات والتدقيق</button>
+      </div>
+      <div class="gv-pane active" id="gvPane-overview"></div>
+      <div class="gv-pane" id="gvPane-quality"></div>
+      <div class="gv-pane" id="gvPane-dict"></div>
+      <div class="gv-pane" id="gvPane-access"></div>
     </div>
   </section>
 
@@ -7041,6 +7105,208 @@ if (typeof Chart !== 'undefined') {
   window.addEventListener('scroll',function(){ if(!tick){ tick=true; requestAnimationFrame(spy);} },{passive:true});
   window.addEventListener('resize',function(){ if(window.innerWidth>=1024) closeDrawer(); spy(); });
   syncFocus(); spy(); setTimeout(spy,1500); setTimeout(spy,4000);
+})();
+</script>
+<script id="governance-js">
+(function(){
+  var CORE=['gov','month','year'], A=null, active='overview';
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function isEmpty(v){ if(v==null) return true; var s=String(v).trim(); return s===''||s==='-'||s==='—'||s.toLowerCase()==='n/a'||s.toLowerCase()==='null'; }
+  function toNum(v){ if(typeof v==='number') return v; var s=String(v).replace(/[,٬%\s]/g,'').replace(/٫/g,'.'); return s===''?NaN:Number(s); }
+  function label(k){ try{ if(COLUMN_MAP_INV[k]) return COLUMN_MAP_INV[k]; }catch(e){} try{ if(ANALYTICS_METRICS[k]) return ANALYTICS_METRICS[k].label; }catch(e){} return k; }
+  function isRate(k){ var l=label(k).trim(); return (/^(معدل|نسبة)/.test(l)||l.indexOf('%')>-1) && l.indexOf('لكل')<0; }
+  function f1(n){ return (Math.round(n*10)/10).toLocaleString('en-US',{maximumFractionDigits:1}); }
+  function grade(s){ return s>=90?['ممتاز','g-ok','#1a9d6a']:s>=75?['جيد','g-good','#0D8BA8']:s>=55?['يحتاج تحسيناً','g-warn','#d98e04']:['حرج','g-bad','#d64545']; }
+  var SEV={high:'حرج',med:'تحذير',low:'ملاحظة'}, SEVORD={high:0,med:1,low:2};
+
+  function analyze(){
+    var rows=Array.isArray(ALL_DATA)?ALL_DATA:[];
+    if(!rows.length) return null;
+    var keySet={}; rows.forEach(function(r){ Object.keys(r||{}).forEach(function(k){ if(CORE.indexOf(k)<0) keySet[k]=1; }); });
+    var keys=Object.keys(keySet), st={};
+    keys.forEach(function(k){ st[k]={filled:0,num:0,min:Infinity,max:-Infinity}; });
+    rows.forEach(function(r){ keys.forEach(function(k){ var v=r[k]; if(isEmpty(v)) return; var s=st[k]; s.filled++; var n=toNum(v); if(isFinite(n)){ s.num++; if(n<s.min)s.min=n; if(n>s.max)s.max=n; } }); });
+    var numKeys=keys.filter(function(k){ return st[k].filled>0 && st[k].num/st[k].filled>=0.6; });
+    var recs=[];
+    function add(sev,type,r,k,v,note){ recs.push({sev:sev,type:type,gov:r?String(r.gov||'').trim():'',month:r?normalizeMonth(r.month):'',year:r&&r.year?r.year:'',ind:k?label(k):'',value:v==null?'':v,note:note||''}); }
+    var seen={}, dup=0, badGov=0, badMonth=0, invalid=0;
+    rows.forEach(function(r){
+      var g=String(r.gov||'').trim(), m=normalizeMonth(r.month);
+      if(ALL_GOVS.indexOf(g)<0){ badGov++; add('high','محافظة غير معروفة',r,'',g||'(فارغ)','الاسم لا يطابق القائمة المعتمدة'); }
+      if(MONTHS_LIST.indexOf(m)<0){ badMonth++; add('high','شهر غير معروف',r,'',r.month||'(فارغ)','تعذّر التعرف على الشهر'); }
+      var id=g+'|'+m+'|'+(r.year||''); if(seen[id]){ dup++; add('high','سجل مكرر',r,'','','تكرار نفس المحافظة والشهر والسنة'); } else seen[id]=1;
+      numKeys.forEach(function(k){ var v=r[k]; if(isEmpty(v)) return; var n=toNum(v);
+        if(!isFinite(n)){ invalid++; add('med','قيمة غير رقمية',r,k,v,'نص داخل مؤشر رقمي'); }
+        else if(n<0){ invalid++; add('med','قيمة سالبة',r,k,v,'تحقّق من صحة القيمة'); }
+        else if(isRate(k)&&n>100){ invalid++; add('med','نسبة تتجاوز 100',r,k,v,'معدل أو نسبة أكبر من 100'); }
+      });
+    });
+    var monthsPresent=MONTHS_LIST.filter(function(m){ return rows.some(function(r){ return normalizeMonth(r.month)===m; }); });
+    var cell={};
+    rows.forEach(function(r){ var g=String(r.gov||'').trim(), m=normalizeMonth(r.month); if(ALL_GOVS.indexOf(g)<0||MONTHS_LIST.indexOf(m)<0) return;
+      var f=numKeys.length?numKeys.filter(function(k){ return !isEmpty(r[k]); }).length/numKeys.length:0; (cell[g+'|'+m]=cell[g+'|'+m]||[]).push(f); });
+    var cellAvg={}; Object.keys(cell).forEach(function(k){ var a=cell[k]; cellAvg[k]=a.reduce(function(x,y){return x+y;},0)/a.length; });
+    ALL_GOVS.forEach(function(g){ monthsPresent.forEach(function(m){ var c=cellAvg[g+'|'+m];
+      if(c==null) add('high','سجل مفقود',{gov:g,month:m},'','','لا يوجد سجل لهذه المحافظة في هذا الشهر');
+      else if(c<0.5) add('med','اكتمال منخفض',{gov:g,month:m},'',f1(c*100)+'%','أقل من نصف المؤشرات معبّأة'); }); });
+    keys.filter(function(k){ return st[k].filled===0; }).forEach(function(k){ add('low','مؤشر بلا بيانات',null,k,'','العمود موجود دون أي قيمة'); });
+    var vals=Object.keys(cellAvg).map(function(k){return cellAvg[k];});
+    var completeness=vals.length?vals.reduce(function(a,b){return a+b;},0)/vals.length*100:0;
+    var expected=ALL_GOVS.length*monthsPresent.length, present=vals.length;
+    var coverage=expected?present/expected*100:0;
+    var filledCells=numKeys.reduce(function(a,k){return a+st[k].filled;},0);
+    var validity=Math.max(0,Math.min(100,100-100*(invalid+badGov+badMonth)/Math.max(1,filledCells)));
+    var uniqueness=(1-dup/rows.length)*100;
+    var score=completeness*.4+coverage*.25+validity*.2+uniqueness*.15;
+    var highTypes={}; recs.forEach(function(r){ if(r.sev==='high') highTypes[r.type]=1; });
+    var penalty=Math.min(12,Object.keys(highTypes).length*3); score=Math.max(0,score-penalty);
+    return {rows:rows,keys:keys,st:st,numKeys:numKeys,recs:recs,monthsPresent:monthsPresent,cellAvg:cellAvg,
+      completeness:completeness,coverage:coverage,validity:validity,uniqueness:uniqueness,score:score,
+      govsCovered:ALL_GOVS.filter(function(g){ return monthsPresent.some(function(m){ return cellAvg[g+'|'+m]!=null; }); }).length};
+  }
+
+  function timestamp(){ try{ var raw=localStorage.getItem(STORAGE_KEY); if(raw){ var ts=JSON.parse(raw).timestamp; if(ts) return ts; } }catch(e){} try{ return localStorage.getItem(STORAGE_TIMESTAMP_KEY)||null; }catch(e){} return null; }
+  function maskId(s){ s=String(s||''); return s.length>10?s.slice(0,5)+'••••••••'+s.slice(-4):s; }
+
+  function refresh(){
+    try{ A=analyze(); }catch(e){ console.warn('governance',e); A=null; }
+    var b=document.getElementById('gvBadge'); if(!b) return;
+    if(!A){ b.textContent='بانتظار البيانات'; b.className='gv-badge'; }
+    else { var g=grade(A.score); b.textContent=Math.round(A.score)+' / 100 · '+g[0]; b.className='gv-badge '+g[1]; }
+    var sec=document.getElementById('governanceSection'); if(sec&&sec.classList.contains('open')) render(active);
+  }
+
+  function renderOverview(el){
+    if(!A){ el.innerHTML='<div class="gv-empty">📂 لا توجد بيانات محمّلة بعد — ستظهر مؤشرات الحوكمة فور تحميل البيانات.</div>'; return; }
+    var g=grade(A.score), c=2*Math.PI*52, off=c*(1-A.score/100);
+    function dim(n,v){ return '<div class="gv-dim"><span>'+n+'</span><div class="gv-bar"><i style="width:'+Math.max(0,Math.min(100,v))+'%"></i></div><b>'+f1(v)+'%</b></div>'; }
+    var ts=timestamp(), days=null, fresh='غير معروف';
+    if(ts){ days=Math.floor((Date.now()-new Date(ts).getTime())/864e5); fresh=days<=1?'محدّثة اليوم':days<=35?'حديثة (قبل '+days+' يوم)':days<=70?'متأخرة ('+days+' يوماً)':'قديمة ('+days+' يوماً)'; }
+    var last=A.monthsPresent.length?A.monthsPresent[A.monthsPresent.length-1]:'—';
+    var high=A.recs.filter(function(r){return r.sev==='high';}).length, med=A.recs.filter(function(r){return r.sev==='med';}).length;
+    var cfg=(typeof SHEETS_CONFIG!=='undefined')?SHEETS_CONFIG:{};
+    el.innerHTML=
+      '<div class="gv-hero"><svg viewBox="0 0 130 130" class="gv-gauge" role="img" aria-label="درجة الحوكمة"><circle cx="65" cy="65" r="52" fill="none" stroke="var(--sand-2)" stroke-width="12"/><circle cx="65" cy="65" r="52" fill="none" stroke="'+g[2]+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 65 65)"/><text x="65" y="64" text-anchor="middle" class="gv-g-num">'+Math.round(A.score)+'</text><text x="65" y="84" text-anchor="middle" class="gv-g-sub">من 100</text></svg>'+
+      '<div><p class="gv-grade">درجة جودة البيانات: '+g[0]+'</p><p class="gv-grade-sub">محسوبة على كامل البيانات المحمّلة (دون تأثير الفلاتر): الاكتمال 40% · التغطية 25% · الصحة 20% · عدم التكرار 15% — مع خصم عند وجود ملاحظات حرجة.</p>'+
+      dim('اكتمال المؤشرات',A.completeness)+dim('تغطية المحافظات والأشهر',A.coverage)+dim('صحة القيم',A.validity)+dim('عدم التكرار',A.uniqueness)+'</div></div>'+
+      '<div class="gv-tiles">'+
+        '<div class="gv-tile"><small>عدد السجلات</small><strong>'+A.rows.length.toLocaleString('en-US')+'</strong></div>'+
+        '<div class="gv-tile"><small>المحافظات المغطاة</small><strong>'+A.govsCovered+' / '+ALL_GOVS.length+'</strong></div>'+
+        '<div class="gv-tile"><small>الأشهر المتوفرة</small><strong>'+A.monthsPresent.length+'</strong></div>'+
+        '<div class="gv-tile"><small>المؤشرات الرقمية</small><strong>'+A.numKeys.length+'</strong></div>'+
+        '<div class="gv-tile"><small>ملاحظات حرجة</small><strong style="color:'+(high?'#b02f2f':'#0f7a52')+'">'+high+'</strong></div>'+
+        '<div class="gv-tile"><small>تحذيرات</small><strong style="color:'+(med?'#9a6200':'#0f7a52')+'">'+med+'</strong></div>'+
+      '</div>'+
+      '<div class="gv-card"><h3>🧭 المصدر وسلسلة البيانات</h3><dl class="gv-kv">'+
+        '<dt>المصدر الأساسي</dt><dd>Google Sheets — ورقة «'+esc(String(cfg.range||'').split('!')[0]||'—')+'»</dd>'+
+        '<dt>معرّف الجدول</dt><dd style="direction:ltr;text-align:right">'+esc(maskId(cfg.spreadsheetId))+'</dd>'+
+        '<dt>طريقة الجلب</dt><dd>Google Sheets API (قراءة فقط) مع نسخة احتياطية محلية في المتصفح</dd>'+
+        '<dt>آخر مزامنة</dt><dd>'+(ts?esc(new Date(ts).toLocaleString('ar-SY',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})):'—')+'</dd>'+
+        '<dt>حداثة البيانات</dt><dd>'+esc(fresh)+'</dd>'+
+        '<dt>آخر شهر مغطى</dt><dd>'+esc(last)+'</dd>'+
+        '<dt>مالك البيانات</dt><dd>مديرية الإحصاء والتخطيط — وزارة الشؤون الاجتماعية والعمل</dd>'+
+      '</dl></div>';
+  }
+
+  function groupIssues(){
+    var m={}; A.recs.forEach(function(r){ var k=r.sev+'|'+r.type; var o=m[k]||(m[k]={sev:r.sev,type:r.type,n:0,ex:[]}); o.n++; if(o.ex.length<3) o.ex.push([r.gov,r.month,r.ind].filter(Boolean).join(' — ')+(r.value!==''?' ('+r.value+')':'')); });
+    return Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){ return SEVORD[a.sev]-SEVORD[b.sev]||b.n-a.n; });
+  }
+  function renderQuality(el){
+    if(!A){ el.innerHTML='<div class="gv-empty">📂 لا توجد بيانات محمّلة بعد.</div>'; return; }
+    var groups=groupIssues(), body=groups.length?groups.map(function(o){
+      return '<tr><td><span class="gv-sev '+o.sev+'">'+SEV[o.sev]+'</span></td><td><b>'+esc(o.type)+'</b></td><td style="font-family:\'IBM Plex Mono\',monospace">'+o.n.toLocaleString('en-US')+'</td><td style="color:var(--ink-soft)">'+o.ex.map(esc).join('<br>')+(o.n>o.ex.length?'<br>…':'')+'</td></tr>';
+    }).join(''):'<tr><td colspan="4" class="gv-empty">✅ لم تُكتشف أي ملاحظات على جودة البيانات.</td></tr>';
+    var head='<tr><th>المحافظة \\ الشهر</th>'+A.monthsPresent.map(function(m){ return '<th>'+esc(m)+'</th>'; }).join('')+'<th>المتوسط</th></tr>';
+    var mb=ALL_GOVS.map(function(g){
+      var sum=0,n=0, tds=A.monthsPresent.map(function(m){ var c=A.cellAvg[g+'|'+m];
+        if(c==null) return '<td><div class="gv-cell none" title="لا يوجد سجل">—</div></td>';
+        sum+=c; n++; var a=.14+.8*c, col=c>.55?'#fff':'var(--ink)';
+        return '<td><div class="gv-cell" style="background:rgba(13,139,168,'+a.toFixed(2)+');color:'+col+'" title="'+esc(g+' — '+m+': '+f1(c*100)+'%')+'">'+Math.round(c*100)+'</div></td>'; }).join('');
+      return '<tr><td>'+esc(g)+'</td>'+tds+'<td><div class="gv-cell" style="font-weight:900">'+(n?Math.round(sum/n*100)+'%':'—')+'</div></td></tr>';
+    }).join('');
+    el.innerHTML=
+      '<div class="gv-card"><h3>⚠️ سجل الملاحظات</h3><div class="gv-toolbar"><span style="font-size:12.5px;color:var(--ink-soft)">'+A.recs.length.toLocaleString('en-US')+' ملاحظة في '+groups.length+' نوع</span><span style="flex:1"></span><button type="button" class="gv-btn" onclick="gvExport()">⬇️ تصدير التفاصيل CSV</button></div>'+
+      '<div class="gv-table-wrap"><table class="gv-table"><thead><tr><th>الخطورة</th><th>النوع</th><th>العدد</th><th>أمثلة</th></tr></thead><tbody>'+body+'</tbody></table></div></div>'+
+      '<div class="gv-card"><h3>🗺️ مصفوفة اكتمال البيانات (نسبة المؤشرات المعبّأة)</h3>'+
+      '<div class="gv-table-wrap"><table class="gv-table gv-matrix"><thead>'+head+'</thead><tbody>'+mb+'</tbody></table></div></div>';
+  }
+
+  function renderDict(el,q){
+    if(!A){ el.innerHTML='<div class="gv-empty">📂 لا توجد بيانات محمّلة بعد.</div>'; return; }
+    q=(q||'').trim().toLowerCase();
+    var list=A.keys.map(function(k){ var s=A.st[k], numeric=A.numKeys.indexOf(k)>-1; return {k:k,label:label(k),numeric:numeric,rate:numeric&&isRate(k),fill:A.rows.length?s.filled/A.rows.length*100:0,min:s.min,max:s.max,filled:s.filled}; })
+      .filter(function(o){ return !q||o.label.toLowerCase().indexOf(q)>-1||o.k.toLowerCase().indexOf(q)>-1; })
+      .sort(function(a,b){ return a.label.localeCompare(b.label,'ar'); });
+    var rows=list.map(function(o){
+      return '<tr><td><b>'+esc(o.label)+'</b></td><td dir="ltr" style="text-align:start;color:var(--ink-soft);font-family:\'IBM Plex Mono\',monospace;font-size:11.5px">'+esc(o.k)+'</td><td>'+(o.numeric?(o.rate?'نسبة / معدل':'رقمي'):'نصي')+'</td><td style="font-family:\'IBM Plex Mono\',monospace">'+f1(o.fill)+'%</td><td style="font-family:\'IBM Plex Mono\',monospace">'+(o.numeric&&isFinite(o.min)?f1(o.min)+' ← '+f1(o.max):'—')+'</td></tr>';
+    }).join('')||'<tr><td colspan="5" class="gv-empty">لا نتائج مطابقة.</td></tr>';
+    el.innerHTML='<div class="gv-card"><h3>📖 قاموس المؤشرات ('+A.keys.length+')</h3><div class="gv-toolbar"><input class="gv-search" id="gvDictQ" placeholder="ابحث باسم المؤشر أو مفتاحه…" value="'+esc(q)+'"></div>'+
+      '<div class="gv-table-wrap"><table class="gv-table"><thead><tr><th>المؤشر</th><th>المفتاح</th><th>النوع</th><th>نسبة التعبئة</th><th>المدى (أدنى ← أعلى)</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+    var inp=document.getElementById('gvDictQ'); inp.oninput=function(){ var pos=inp.selectionStart; renderDict(el,inp.value); var n=document.getElementById('gvDictQ'); n.focus(); try{n.setSelectionRange(pos,pos);}catch(e){} };
+  }
+
+  async function renderAccess(el){
+    var yes='<span class="gv-yes">✔</span>', no='<span class="gv-no">✖</span>';
+    var matrix=[['عرض اللوحة والمؤشرات',1,1,1],['تحديث البيانات من Google Sheets',1,1,0],['تعديل الأهداف الاستراتيجية',1,0,0],['إدارة المستخدمين والأدوار',1,0,0],['سجل الدخول والتدقيق',1,0,0],['إعداد Google Client ID',1,0,0]];
+    var html='<div class="gv-card"><h3>🔑 مصفوفة الصلاحيات</h3><div class="gv-table-wrap"><table class="gv-table"><thead><tr><th>الصلاحية</th><th>مدير</th><th>محرر</th><th>مطلع</th></tr></thead><tbody>'+
+      matrix.map(function(r){ return '<tr><td>'+r[0]+'</td>'+[1,2,3].map(function(i){ return '<td style="text-align:center">'+(r[i]?yes:no)+'</td>'; }).join('')+'</tr>'; }).join('')+'</tbody></table></div></div>';
+    if(!currentUser||currentUser.role!=='admin'){
+      el.innerHTML=html+'<div class="gv-lock">🔒 تفاصيل الحسابات وسجل التدقيق وضوابط الأمان متاحة للمدير فقط.</div>'; return;
+    }
+    el.innerHTML=html+'<div class="gv-empty">جاري تحميل بيانات الحسابات والتدقيق…</div>';
+    var users=[], logs=[];
+    try{ users=await getAllUsers(); }catch(e){} try{ logs=await getAllLogs(); }catch(e){}
+    var cnt=function(r){ return users.filter(function(u){ return u.role===r; }).length; };
+    var defaults=users.filter(function(u){ return u.active&&/@local$/i.test(u.email||''); }).length;
+    var inactive=users.filter(function(u){ return !u.active; }).length, google=users.filter(function(u){ return u.provider==='google'; }).length;
+    var by=function(a){ return logs.filter(function(l){ return l.action===a; }).length; };
+    var days=0; try{ days=Math.round(AUDIT_RETENTION_MS/864e5); }catch(e){}
+    var hasKey=false; try{ hasKey=!!SHEETS_CONFIG.apiKey; }catch(e){}
+    var ctl=[
+      ['✅','سجل التدقيق مفعّل','يُسجَّل الدخول والخروج والتغييرات الإدارية'+(days?' ويُحتفظ بها '+days+' أيام':'')+'.'],
+      ['✅','تخزين كلمات المرور كتجزئة','تُحفظ كلمات المرور بصيغة SHA-256 وليس نصاً صريحاً.'],
+      ['⚠️','التجزئة دون «ملح» (Salt)','يُفضَّل اعتماد PBKDF2 أو bcrypt مع Salt، ويفضَّل أن يتم التحقق من الدخول على خادم لا داخل المتصفح.'],
+      [defaults?'⚠️':'✅','الحسابات الافتراضية', defaults?('يوجد '+defaults+' حساب افتراضي نشط (@local). غيّر كلمات مروره أو عطّله.'):'لا توجد حسابات افتراضية نشطة.'],
+      [hasKey?'⚠️':'✅','مفتاح Google API','المفتاح موجود داخل ملف الصفحة ويمكن لأي زائر قراءته. قيّده بنطاق الموقع (HTTP referrer) وبواجهة Sheets فقط، واجعل الجدول للقراءة.'],
+      ['ℹ️','تخزين الحسابات والتدقيق محلي','الحسابات وسجل التدقيق محفوظة في متصفح كل جهاز وليست قاعدة مركزية، لذلك لا تظهر عمليات الأجهزة الأخرى.']
+    ];
+    var tiles='<div class="gv-tiles"><div class="gv-tile"><small>المديرون</small><strong>'+cnt('admin')+'</strong></div><div class="gv-tile"><small>المحررون</small><strong>'+cnt('editor')+'</strong></div><div class="gv-tile"><small>المطلعون</small><strong>'+cnt('viewer')+'</strong></div><div class="gv-tile"><small>حسابات معطّلة</small><strong>'+inactive+'</strong></div><div class="gv-tile"><small>حسابات Google</small><strong>'+google+'</strong></div></div>';
+    var lt={login:'تسجيل دخول',logout:'تسجيل خروج',failed_login:'دخول فاشل',google_login:'دخول Google',user_create:'إضافة مستخدم',user_update:'تعديل مستخدم',user_delete:'حذف مستخدم',force_logout:'إخراج مستخدم',user_reactivate:'إعادة تفعيل'};
+    var recent=logs.slice(0,8).map(function(l){ return '<tr><td style="white-space:nowrap">'+esc(new Date(l.createdAt).toLocaleString('ar-SY',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}))+'</td><td>'+esc(l.userName||l.email||'')+'</td><td>'+esc(lt[l.action]||l.action)+'</td></tr>'; }).join('')||'<tr><td colspan="3" class="gv-empty">لا توجد سجلات.</td></tr>';
+    el.innerHTML=html+
+      '<div class="gv-card"><h3>👥 الحسابات</h3>'+tiles+'</div>'+
+      '<div class="gv-card"><h3>🛡️ ضوابط الأمان</h3>'+ctl.map(function(c){ return '<div class="gv-ctl"><span class="ic">'+c[0]+'</span><div><b>'+c[1]+'</b><span>'+c[2]+'</span></div></div>'; }).join('')+'</div>'+
+      '<div class="gv-card"><h3>🧾 ملخص التدقيق</h3><div class="gv-tiles"><div class="gv-tile"><small>إجمالي السجلات</small><strong>'+logs.length+'</strong></div><div class="gv-tile"><small>عمليات دخول</small><strong>'+(by('login')+by('google_login'))+'</strong></div><div class="gv-tile"><small>دخول فاشل</small><strong style="color:'+(by('failed_login')?'#b02f2f':'inherit')+'">'+by('failed_login')+'</strong></div></div>'+
+      '<div class="gv-table-wrap" style="max-height:300px"><table class="gv-table"><thead><tr><th>الوقت</th><th>المستخدم</th><th>العملية</th></tr></thead><tbody>'+recent+'</tbody></table></div></div>';
+  }
+
+  function render(name){
+    var el=document.getElementById('gvPane-'+name); if(!el) return;
+    if(name==='overview') renderOverview(el); else if(name==='quality') renderQuality(el);
+    else if(name==='dict') renderDict(el); else renderAccess(el);
+  }
+  window.gvShow=function(name){
+    active=name;
+    document.querySelectorAll('#governanceSection .gv-tab').forEach(function(b){ b.classList.toggle('active',b.dataset.pane===name); });
+    document.querySelectorAll('#governanceSection .gv-pane').forEach(function(p){ p.classList.toggle('active',p.id==='gvPane-'+name); });
+    if(!A) refresh(); render(name);
+  };
+  window.toggleGovernance=function(head){
+    var s=head.parentElement; s.classList.toggle('open');
+    if(s.classList.contains('open')){ refresh(); render(active); }
+  };
+  window.gvExport=function(){
+    if(!A) return;
+    var q=function(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; };
+    var rows=[['الخطورة','النوع','المحافظة','الشهر','السنة','المؤشر','القيمة','ملاحظة']].concat(A.recs.map(function(r){ return [SEV[r.sev],r.type,r.gov,r.month,r.year,r.ind,r.value,r.note]; }));
+    var csv='\uFEFF'+rows.map(function(r){ return r.map(q).join(','); }).join('\n');
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})); a.download='ملاحظات_جودة_البيانات.csv'; document.body.appendChild(a); a.click(); a.remove();
+  };
+
+  // ربط التحديث مع كل إعادة رسم للوحة
+  if(typeof renderAll==='function'){ var _ra=renderAll; renderAll=function(){ var r=_ra.apply(this,arguments); try{ refresh(); }catch(e){} return r; }; }
+  refresh(); setTimeout(refresh,2000); setTimeout(refresh,6000);
 })();
 </script>
 </body>
