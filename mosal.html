@@ -427,6 +427,15 @@
 .admin-tab.active{background:#0B5A7A;color:#fff;border-color:#0B5A7A;}
 .admin-section{display:none;}
 .admin-section.active{display:block;}
+.admin-gov-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.admin-gov-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.admin-gov-tab{border:1px solid var(--line);background:var(--sand);color:var(--ink);padding:8px 12px;border-radius:9px;cursor:pointer;font-family:'Cairo';font-weight:600;font-size:12px;transition:.15s ease;}
+.admin-gov-tab:hover{border-color:#0D8BA8;}
+.admin-gov-tab.active{background:#0B5A7A;color:#fff;border-color:#0B5A7A;}
+.admin-gov-pane{display:none;}
+.admin-gov-pane.active{display:block;}
+.admin-gov-note{background:var(--sand);border-inline-start:3px solid #0D8BA8;border-radius:8px;padding:10px 14px;color:var(--ink-soft);font-size:12.5px;line-height:1.8;margin-bottom:14px;}
+@media(max-width:760px){.admin-gov-toolbar{align-items:stretch;}.admin-gov-tabs{width:100%;}.admin-gov-tab{flex:1;min-width:120px;}}
 .users-table,.logs-table{width:100%;border-collapse:collapse;font-size:12px;}
 .users-table th,.users-table td,.logs-table th,.logs-table td{padding:9px 8px;border-bottom:1px solid var(--sand-2);vertical-align:top;}
 .users-table th,.logs-table th{background:var(--sand);color:var(--ink);font-family:'Tajawal';font-weight:700;position:sticky;top:0;}
@@ -875,6 +884,7 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
       <button class="admin-tab active" data-tab="users" onclick="openAdminTab('users')">👥 المستخدمون</button>
       <button class="admin-tab" data-tab="logs" onclick="openAdminTab('logs')">🧾 سجل الدخول</button>
       <button class="admin-tab" data-tab="google" onclick="openAdminTab('google')">🔵 إعداد Google</button>
+      <button class="admin-tab" data-tab="governance" onclick="openAdminTab('governance')">🛡️ حوكمة البيانات</button>
     </div>
 
     <div class="admin-section active" id="adminTab-users">
@@ -953,6 +963,26 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
         </div>
         <div id="googleConfigMsg" class="admin-message"></div>
       </div>
+    </div>
+
+    <div class="admin-section" id="adminTab-governance">
+      <div class="admin-gov-toolbar">
+        <div>
+          <div class="small-note" style="margin:0;">تحليل جودة البيانات والتغطية والصلاحيات باستخدام نفس البيانات المحمّلة في لوحة المؤشرات.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" type="button" onclick="adminGovRefresh()">🔄 إعادة فحص البيانات</button>
+      </div>
+      <div class="admin-gov-tabs" role="tablist" aria-label="لوحات حوكمة البيانات">
+        <button type="button" class="admin-gov-tab active" data-admin-pane="overview" onclick="adminGovShow('overview')">📊 الملخص</button>
+        <button type="button" class="admin-gov-tab" data-admin-pane="quality" onclick="adminGovShow('quality')">🔍 جودة البيانات</button>
+        <button type="button" class="admin-gov-tab" data-admin-pane="dict" onclick="adminGovShow('dict')">📖 قاموس المؤشرات</button>
+        <button type="button" class="admin-gov-tab" data-admin-pane="access" onclick="adminGovShow('access')">🔐 الصلاحيات والتدقيق</button>
+      </div>
+      <div class="admin-gov-note">هذه اللوحة مخصصة للمدير فقط. نتائج الفحص تعتمد على آخر نسخة محمّلة من Google Sheets، بينما الحسابات وسجل التدقيق الحاليان محفوظان محليًا داخل المتصفح.</div>
+      <div class="admin-gov-pane active" data-admin-gv-pane="overview" id="adminGovPane-overview"></div>
+      <div class="admin-gov-pane" data-admin-gv-pane="quality" id="adminGovPane-quality"></div>
+      <div class="admin-gov-pane" data-admin-gv-pane="dict" id="adminGovPane-dict"></div>
+      <div class="admin-gov-pane" data-admin-gv-pane="access" id="adminGovPane-access"></div>
     </div>
   </div>
 </div>
@@ -5313,6 +5343,7 @@ function openAdminTab(tab){
   document.querySelectorAll('.admin-section').forEach(x=>x.classList.toggle('active',x.id==='adminTab-'+tab));
   if(tab==='users') renderUsers();
   if(tab==='logs') renderAuditLogs();
+  if(tab==='governance' && typeof renderAdminGovernance==='function') renderAdminGovernance();
 }
 function enterDashboard(){
   document.body.classList.remove('locked');
@@ -7241,9 +7272,9 @@ if (typeof Chart !== 'undefined') {
     var rows=list.map(function(o){
       return '<tr><td><b>'+esc(o.label)+'</b></td><td dir="ltr" style="text-align:start;color:var(--ink-soft);font-family:\'IBM Plex Mono\',monospace;font-size:11.5px">'+esc(o.k)+'</td><td>'+(o.numeric?(o.rate?'نسبة / معدل':'رقمي'):'نصي')+'</td><td style="font-family:\'IBM Plex Mono\',monospace">'+f1(o.fill)+'%</td><td style="font-family:\'IBM Plex Mono\',monospace">'+(o.numeric&&isFinite(o.min)?f1(o.min)+' ← '+f1(o.max):'—')+'</td></tr>';
     }).join('')||'<tr><td colspan="5" class="gv-empty">لا نتائج مطابقة.</td></tr>';
-    el.innerHTML='<div class="gv-card"><h3>📖 قاموس المؤشرات ('+A.keys.length+')</h3><div class="gv-toolbar"><input class="gv-search" id="gvDictQ" placeholder="ابحث باسم المؤشر أو مفتاحه…" value="'+esc(q)+'"></div>'+
+    el.innerHTML='<div class="gv-card"><h3>📖 قاموس المؤشرات ('+A.keys.length+')</h3><div class="gv-toolbar"><input class="gv-search" placeholder="ابحث باسم المؤشر أو مفتاحه…" value="'+esc(q)+'"></div>'+
       '<div class="gv-table-wrap"><table class="gv-table"><thead><tr><th>المؤشر</th><th>المفتاح</th><th>النوع</th><th>نسبة التعبئة</th><th>المدى (أدنى ← أعلى)</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
-    var inp=document.getElementById('gvDictQ'); inp.oninput=function(){ var pos=inp.selectionStart; renderDict(el,inp.value); var n=document.getElementById('gvDictQ'); n.focus(); try{n.setSelectionRange(pos,pos);}catch(e){} };
+    var inp=el.querySelector('.gv-search'); if(inp) inp.oninput=function(){ var pos=inp.selectionStart; renderDict(el,inp.value); var n=el.querySelector('.gv-search'); if(n){ n.focus(); try{n.setSelectionRange(pos,pos);}catch(e){} } };
   }
 
   async function renderAccess(el){
@@ -7296,6 +7327,28 @@ if (typeof Chart !== 'undefined') {
     var s=head.parentElement; s.classList.toggle('open');
     if(s.classList.contains('open')){ refresh(); render(active); }
   };
+  function renderAdminPane(name){
+    var el=document.querySelector('#adminTab-governance [data-admin-gv-pane="'+name+'"]');
+    if(!el) return;
+    if(name==='overview') renderOverview(el); else if(name==='quality') renderQuality(el);
+    else if(name==='dict') renderDict(el,''); else renderAccess(el);
+  }
+  window.adminGovShow=function(name){
+    document.querySelectorAll('#adminTab-governance .admin-gov-tab').forEach(function(b){ b.classList.toggle('active',b.dataset.adminPane===name); });
+    document.querySelectorAll('#adminTab-governance .admin-gov-pane').forEach(function(p){ p.classList.toggle('active',p.dataset.adminGvPane===name); });
+    if(!A) refresh();
+    renderAdminPane(name);
+  };
+  window.adminGovRefresh=function(){
+    refresh();
+    var active=document.querySelector('#adminTab-governance .admin-gov-tab.active');
+    renderAdminPane(active?active.dataset.adminPane:'overview');
+  };
+  window.renderAdminGovernance=function(){
+    refresh();
+    renderAdminPane('overview');
+  };
+
   window.gvExport=function(){
     if(!A) return;
     var q=function(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; };
