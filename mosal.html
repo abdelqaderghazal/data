@@ -4875,11 +4875,13 @@ const GOOGLE_CLIENT_ID_KEY = 'govDashboard_googleClientId';
 // Google OAuth uses the exact origin from which this page is opened.
 // For local testing, add these origins in Google Cloud Console:
 const GOOGLE_LOCAL_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000'];
+// Production origin for this deployment (do not include /data/mosal in OAuth origins).
+const GOOGLE_PRODUCTION_ORIGIN = 'https://abdelqaderghazal.github.io';
 function getCurrentGoogleOrigin(){
   return location.protocol === 'file:' ? 'file:// (غير مدعوم — شغّل خادماً محلياً على http://localhost:8000)' : location.origin;
 }
 function googleOriginHelp(){
-  return 'مصدر الصفحة الحالي: ' + getCurrentGoogleOrigin() + '. أضف هذا العنوان في Google Cloud Console ضمن Authorized JavaScript origins.';
+  return 'مصدر الصفحة الحالي: ' + getCurrentGoogleOrigin() + '. أضف https://abdelqaderghazal.github.io في Google Cloud Console ضمن Authorized JavaScript origins.';
 }
 const DEFAULT_LOCAL_USERS = [
   { id:'u-admin', name:'المدير الرئيسي', email:'admin@local', role:'admin', password:'246269', provider:'local', active:true },
