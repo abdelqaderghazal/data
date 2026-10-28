@@ -414,18 +414,7 @@
 .auth-methods{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line);}
 .auth-divider{display:flex;align-items:center;gap:10px;color:var(--ink-soft);font-size:11px;margin:12px 0;}
 .auth-divider::before,.auth-divider::after{content:"";height:1px;background:var(--line);flex:1;}
-  #googleSignIn{display:flex;justify-content:center;min-height:44px;}
-  .firebase-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;width:300px;border:1px solid #dadce0;border-radius:4px;background:#fff;color:#3c4043;font-family:Arial,sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.12);transition:.15s}
-  .firebase-google-btn:hover{background:#f8faff;box-shadow:0 2px 5px rgba(0,0,0,.18)}
-  .firebase-google-btn:disabled{opacity:.55;cursor:not-allowed}
-  .firebase-g{font-size:20px;font-weight:700;color:#4285f4;font-family:Arial,sans-serif}
-  .firebase-pending-card{margin-top:18px;padding:16px;border:1px solid #f0c36d;border-radius:12px;background:#fff8e6;text-align:right}
-  .firebase-pending-card h4{margin:0 0 10px;font-family:'Tajawal';color:#8a5a00}
-  .firebase-pending-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #f1dfb0;font-size:13px}
-  .firebase-pending-row small{display:block;color:var(--ink-soft);margin-top:3px}
-  @media(max-width:480px){.firebase-google-btn{width:100%}.firebase-pending-row{align-items:flex-start;flex-direction:column}}
-  .firebase-toast{position:fixed;right:22px;bottom:22px;z-index:3000;min-width:300px;max-width:420px;background:#0B5A7A;color:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 12px 35px rgba(0,0,0,.25);display:flex;align-items:flex-start;gap:10px;animation:firebaseToastIn .25s ease;font-family:'Cairo',sans-serif}.firebase-toast b{display:block;font-family:'Tajawal',sans-serif;margin-bottom:3px}.firebase-toast small{opacity:.9;line-height:1.5}.firebase-toast button{margin-inline-start:auto;border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer;line-height:1}@keyframes firebaseToastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@media(max-width:480px){.firebase-toast{right:12px;left:12px;bottom:12px;min-width:0}}
-
+#googleSignIn{display:flex;justify-content:center;min-height:44px;}
 .auth-hint{font-size:11px;color:var(--ink-soft);line-height:1.7;margin-top:8px;}
 .login-fields{display:grid;gap:10px;margin-bottom:12px;text-align:right;}
 .login-fields input,.admin-form input,.admin-form select{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--ink);background:var(--sand);}
@@ -871,9 +860,9 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
 
       <div class="auth-methods">
         <div class="auth-divider"><span>أو</span></div>
-        <div id="googleSignIn"><button type="button" class="firebase-google-btn" id="firebaseGoogleButton" onclick="firebaseLogin()"><span class="firebase-g">G</span><span>المتابعة باستخدام Google</span></button></div>
+        <div id="googleSignIn"></div>
         <div class="auth-hint" id="googleHint">
-          سيتم التحقق من حساب Google، ثم ينتظر الحساب موافقة المدير قبل الدخول.
+          تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً.
         </div>
       </div>
     </section>
@@ -894,7 +883,7 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="users" onclick="openAdminTab('users')">👥 المستخدمون</button>
       <button class="admin-tab" data-tab="logs" onclick="openAdminTab('logs')">🧾 سجل الدخول</button>
-      <button class="admin-tab" data-tab="google" onclick="openAdminTab('google')">🔵 إعداد Firebase</button>
+      <button class="admin-tab" data-tab="google" onclick="openAdminTab('google')">🔵 إعداد Google</button>
       <button class="admin-tab" data-tab="governance" onclick="openAdminTab('governance')">🛡️ حوكمة البيانات</button>
     </div>
 
@@ -921,7 +910,6 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
         </div>
         <div id="userFormMsg" class="admin-message"></div>
       </form>
-      <div id="firebasePendingUsers" class="firebase-pending-card" style="display:none"></div>
       <div class="table-scroll" style="margin-top:16px;">
         <table class="users-table">
           <thead><tr><th>الاسم</th><th>البريد</th><th>الدور</th><th>المصدر</th><th>آخر دخول</th><th>إجراءات</th></tr></thead>
@@ -953,7 +941,6 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
           <option value="google_login">دخول Google</option>
           <option value="force_logout">إخراج مستخدم</option>
           <option value="user_reactivate">إعادة تفعيل مستخدم</option>
-          <option value="user_approve">الموافقة على حساب Google</option>
         </select>
         <button class="btn btn-sm btn-warning" onclick="exportAuditLogs()">⬇️ تصدير CSV</button>
       </div>
@@ -967,10 +954,14 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
 
     <div class="admin-section" id="adminTab-google">
       <div class="small-note">
-        المصادقة المركزية تعمل عبر Firebase Authentication وCloud Firestore. ضع إعدادات مشروع Firebase في الثابت <b>FIREBASE_CONFIG</b> داخل ملف HTML، ثم فعّل Google Authentication وأنشئ قاعدة Firestore وقواعد الأمان. الحسابات الجديدة تظهر أدناه كطلبات بانتظار موافقة المدير.
+        Google Identity Services يحتاج OAuth 2.0 Client ID من Google Cloud. بعد وضعه هنا سيظهر زر Google في شاشة الدخول. أي حساب Google جديد يُضاف تلقائياً بدور <b>مطلع</b> فقط، ولا يحصل على صلاحيات الإدارة.
       </div>
-      <div class="help-box" style="margin-top:14px;">
-        <b>تنبيه:</b> إعداد Firebase لا يُحفظ من هذه اللوحة. يجب تعديل قيم <code>FIREBASE_CONFIG</code> في الملف ثم رفع النسخة المحدثة إلى موقعك.
+      <div class="admin-form">
+        <input id="googleClientIdInput" placeholder="1234567890-xxxx.apps.googleusercontent.com">
+        <div class="admin-actions">
+          <button class="btn btn-primary btn-sm" onclick="saveGoogleClientId()">💾 حفظ وتفعيل Google</button>
+        </div>
+        <div id="googleConfigMsg" class="admin-message"></div>
       </div>
     </div>
 
@@ -4881,18 +4872,6 @@ const AUTH_DB_VERSION = 1;
 const USERS_STORE = 'users';
 const LOGS_STORE = 'auditLogs';
 const GOOGLE_CLIENT_ID_KEY = 'govDashboard_googleClientId';
-// إعدادات Firebase: استبدل القيم التالية من Firebase Console > Project settings > Your apps.
-const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyD-GBxVB7sRur7XiHRGU2tQ-ZqQH9iZrm4',
-  authDomain: 'mosal-c9406.firebaseapp.com',
-  projectId: 'mosal-c9406',
-  storageBucket: 'mosal-c9406.firebasestorage.app',
-  messagingSenderId: '263943819058',
-  appId: '1:263943819058:web:4e045666843e61ec03912b',
-  measurementId: 'G-PM2CGBXBZY'
-};
-window.FIREBASE_CONFIG = FIREBASE_CONFIG;
-
 const DEFAULT_LOCAL_USERS = [
   { id:'u-admin', name:'المدير الرئيسي', email:'admin@local', role:'admin', password:'246269', provider:'local', active:true },
   { id:'u-editor', name:'المحرر الافتراضي', email:'editor@local', role:'editor', password:'editor123', provider:'local', active:true },
@@ -5323,8 +5302,6 @@ function showAdminPanel(){
   loadGoogleClientIdIntoForm();
   startSessionGuard();
   renderUsers();
-  if(window.renderFirebasePendingUsers) window.renderFirebasePendingUsers();
-  if(window.startFirebaseAdminNotifications) window.startFirebaseAdminNotifications();
   cleanupAuditLogsWeekly().then(()=>renderAuditLogs());
 }
 function enterIndicatorsFromAdmin(){
@@ -5383,8 +5360,6 @@ async function restoreSession(){
   }catch(e){ console.warn('Session restore failed',e); return false; }
 }
 async function logout(){
-  if(window.stopFirebaseAdminNotifications) window.stopFirebaseAdminNotifications();
-  if(window.firebaseLogout) await window.firebaseLogout();
   if(currentUser) await addAudit('logout',currentUser,'تسجيل خروج');
   localStorage.removeItem(SESSION_KEY);
   currentUser=null;
@@ -5408,7 +5383,7 @@ async function renderUsers(){
       <td>
         <button class="btn btn-sm btn-primary" onclick="editUser('${u.id}')">تعديل</button>
         ${u.active===false
-          ? `<button class="btn btn-sm btn-primary" onclick="reactivateUser('${u.id}')">${u.pendingApproval?'موافقة':'تفعيل'}</button>`
+          ? `<button class="btn btn-sm btn-primary" onclick="reactivateUser('${u.id}')">تفعيل</button>`
           : `<button class="btn btn-sm btn-warning" onclick="forceLogoutUser('${u.id}')">إخراج المستخدم</button>`}
         ${canDelete?`<button class="btn btn-sm btn-danger" onclick="removeUser('${u.id}')">حذف</button>`:''}
       </td>
@@ -5527,12 +5502,10 @@ async function reactivateUser(id){
   const user=await getUserById(id);
   if(!user) return;
   user.active=true;
-  const wasPending=!!user.pendingApproval;
-  delete user.pendingApproval;
   delete user.disabledAt;
   delete user.disabledBy;
   await putUser(user);
-  await addAudit(wasPending?'user_approve':'user_reactivate',currentUser,`${wasPending?'الموافقة على طلب Google':'إعادة تفعيل مستخدم'} ${user.email}`);
+  await addAudit('user_reactivate',currentUser,`إعادة تفعيل المستخدم ${user.email}`);
   await renderUsers();
   showUserMsg(`✅ تم تفعيل المستخدم ${user.name}.`,`success`);
 }
@@ -5596,18 +5569,14 @@ async function handleGoogleCredential(response){
     const googleEmail=p.email.toLowerCase();
     let user=await getUserByEmail(googleEmail);
     if(!user){
-      // لا يتم تفعيل الحساب تلقائياً: يحتاج موافقة صريحة من المدير.
       user={id:'g-'+p.sub,name:p.name||p.email.split('@')[0],email:googleEmail,
-        role:'viewer',passwordHash:null,provider:'google',googleSub:p.sub,active:false,
-        pendingApproval:true,createdAt:new Date().toISOString(),lastLogin:null};
+        role:'viewer',passwordHash:null,provider:'google',googleSub:p.sub,active:true,
+        createdAt:new Date().toISOString(),lastLogin:null};
       await putUser(user);
-      await addAudit('user_create',user,'طلب حساب Google جديد بانتظار موافقة المدير');
-      return showLoginError('✅ تم التحقق من Google. أُرسل طلبك إلى المدير، وسيصبح الدخول متاحاً بعد الموافقة.');
+      await addAudit('user_create',user,'إنشاء مستخدم Google تلقائياً بدور مطلع');
     }else if(!user.active){
-      await addAudit('failed_login',user,user.pendingApproval?'حساب Google بانتظار موافقة المدير':'حساب Google معطل');
-      return showLoginError(user.pendingApproval
-        ? '⏳ حسابك بانتظار موافقة المدير. حاول لاحقاً.'
-        : '❌ هذا الحساب معطل من المدير');
+      await addAudit('failed_login',user,'حساب Google معطل');
+      return showLoginError('❌ هذا الحساب معطل من المدير');
     }else if(user.provider!=='google'){
       // لا نسمح لحساب Google بانتحال حساب محلي أو وراثة صلاحياته.
       await addAudit('failed_login',{...user,provider:'google'},'محاولة دخول Google لبريد مرتبط بحساب محلي');
@@ -5630,17 +5599,23 @@ async function handleGoogleCredential(response){
 function initGoogleSignIn(){
   const holder=document.getElementById('googleSignIn');
   const hint=document.getElementById('googleHint');
-  const button=document.getElementById('firebaseGoogleButton');
-  if(!holder || !button) return;
-  const configured=window.firebaseConfigured ? window.firebaseConfigured() : false;
-  if(!configured){
-    button.disabled=true;
-    if(hint) hint.textContent='أكمل إعداد Firebase في الثابت FIREBASE_CONFIG داخل الملف أولاً.';
+  if(!holder) return;
+  const clientId=getGoogleClientId();
+  if(!clientId){
+    holder.innerHTML='';
+    if(hint) hint.style.display='block';
     return;
   }
-  button.disabled=false;
-  if(hint) hint.textContent='سيتم التحقق من حساب Google، ثم ينتظر الحساب موافقة المدير قبل الدخول.';
-}// Helpers for old code compatibility
+  if(!window.google || !google.accounts || !google.accounts.id){
+    setTimeout(initGoogleSignIn,500); return;
+  }
+  if(hint) hint.style.display='none';
+  holder.innerHTML='';
+  google.accounts.id.initialize({client_id:clientId,callback:handleGoogleCredential});
+  google.accounts.id.renderButton(holder,{theme:'outline',size:'large',shape:'rectangular',width:300,text:'signin_with',locale:'ar'});
+}
+
+// Helpers for old code compatibility
 function selectUserType(type) {}
 function showChangePw() {}
 function hideChangePw() {}
@@ -7306,7 +7281,7 @@ if (typeof Chart !== 'undefined') {
       ['ℹ️','تخزين الحسابات والتدقيق محلي','الحسابات وسجل التدقيق محفوظة في متصفح كل جهاز وليست قاعدة مركزية، لذلك لا تظهر عمليات الأجهزة الأخرى.']
     ];
     var tiles='<div class="gv-tiles"><div class="gv-tile"><small>المديرون</small><strong>'+cnt('admin')+'</strong></div><div class="gv-tile"><small>المحررون</small><strong>'+cnt('editor')+'</strong></div><div class="gv-tile"><small>المطلعون</small><strong>'+cnt('viewer')+'</strong></div><div class="gv-tile"><small>حسابات معطّلة</small><strong>'+inactive+'</strong></div><div class="gv-tile"><small>حسابات Google</small><strong>'+google+'</strong></div></div>';
-    var lt={login:'تسجيل دخول',logout:'تسجيل خروج',failed_login:'دخول فاشل',google_login:'دخول Google',user_create:'إضافة مستخدم',user_update:'تعديل مستخدم',user_delete:'حذف مستخدم',force_logout:'إخراج مستخدم',user_reactivate:'إعادة تفعيل',user_approve:'موافقة على حساب Google'};
+    var lt={login:'تسجيل دخول',logout:'تسجيل خروج',failed_login:'دخول فاشل',google_login:'دخول Google',user_create:'إضافة مستخدم',user_update:'تعديل مستخدم',user_delete:'حذف مستخدم',force_logout:'إخراج مستخدم',user_reactivate:'إعادة تفعيل'};
     var recent=logs.slice(0,8).map(function(l){ return '<tr><td style="white-space:nowrap">'+esc(new Date(l.createdAt).toLocaleString('ar-SY',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}))+'</td><td>'+esc(l.userName||l.email||'')+'</td><td>'+esc(lt[l.action]||l.action)+'</td></tr>'; }).join('')||'<tr><td colspan="3" class="gv-empty">لا توجد سجلات.</td></tr>';
     el.innerHTML=html+
       '<div class="gv-card"><h3>👥 الحسابات</h3>'+tiles+'</div>'+
@@ -7364,114 +7339,6 @@ if (typeof Chart !== 'undefined') {
   if(typeof renderAll==='function'){ var _ra=renderAll; renderAll=function(){ var r=_ra.apply(this,arguments); try{ refresh(); }catch(e){} return r; }; }
   refresh(); setTimeout(refresh,2000); setTimeout(refresh,6000);
 })();
-</script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-  const firebaseConfigured = () => {
-    const c = window.FIREBASE_CONFIG || {};
-    return !!c.apiKey && !String(c.apiKey).includes('ضع_') && !!c.projectId && !String(c.projectId).includes('ضع-');
-  };
-  window.FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
-    apiKey: 'ضع_apiKey_هنا', authDomain: 'ضع-اسم-المشروع.firebaseapp.com', projectId: 'ضع-معرّف-المشروع',
-    storageBucket: 'ضع-معرّف-المشروع.firebasestorage.app', messagingSenderId: 'ضع_messagingSenderId_هنا', appId: 'ضع_appId_هنا'
-  };
-  window.firebaseConfigured = firebaseConfigured;
-  let auth=null, db=null, provider=null, firebaseReady=false;
-  if(firebaseConfigured()){
-    try{
-      const app=initializeApp(window.FIREBASE_CONFIG);
-      auth=getAuth(app); db=getFirestore(app); provider=new GoogleAuthProvider();
-      auth.languageCode='ar'; firebaseReady=true;
-    }catch(e){ console.error('Firebase initialization failed',e); }
-  }
-  const msg=text=>{ const el=document.getElementById('passwordError'); if(el){el.textContent=text;el.classList.add('show');} };
-  const safeText=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  let pendingUnsubscribe=null, knownPendingIds=new Set(), pendingListenerStarted=false;
-  function showFirebaseToast(name,email){
-    document.querySelectorAll('.firebase-toast').forEach(x=>x.remove());
-    const el=document.createElement('div'); el.className='firebase-toast';
-    el.innerHTML='<div style="font-size:21px">🔔</div><div><b>طلب تسجيل جديد عبر Google</b><small>'+safeText(name||'مستخدم جديد')+' — '+safeText(email||'')+'</small></div><button aria-label="إغلاق">×</button>';
-    el.querySelector('button').onclick=()=>el.remove(); document.body.appendChild(el); setTimeout(()=>el.remove(),9000);
-  }
-  async function requestBrowserNotifications(){
-    try{ if('Notification' in window && Notification.permission==='default') await Notification.requestPermission(); }catch(e){ console.warn('Notification permission unavailable',e); }
-  }
-  window.startFirebaseAdminNotifications=async function(){
-    if(pendingListenerStarted || !firebaseReady || !auth?.currentUser || window.currentUserProfile?.role!=='admin') return;
-    pendingListenerStarted=true; await requestBrowserNotifications();
-    const pendingQuery=query(collection(db,'users'),where('status','==','pending'));
-    pendingUnsubscribe=onSnapshot(pendingQuery,snap=>{
-      const current=new Set(); snap.forEach(d=>current.add(d.id));
-      if(knownPendingIds.size){
-        snap.docChanges().forEach(change=>{
-          if(change.type==='added' && !knownPendingIds.has(change.doc.id)){
-            const u=change.doc.data(); showFirebaseToast(u.name,u.email);
-            if('Notification' in window && Notification.permission==='granted') new Notification('طلب تسجيل جديد عبر Google',{body:(u.name||'مستخدم جديد')+' — '+(u.email||'')});
-          }
-        });
-      }
-      knownPendingIds=current; if(window.renderFirebasePendingUsers) window.renderFirebasePendingUsers();
-    },err=>{console.error('Firebase notification listener failed',err);pendingListenerStarted=false;});
-  };
-  window.stopFirebaseAdminNotifications=function(){
-    if(pendingUnsubscribe) pendingUnsubscribe(); pendingUnsubscribe=null; pendingListenerStarted=false; knownPendingIds=new Set();
-  };
-
-  window.firebaseLogin=async function(){
-    if(!firebaseReady) return msg('❌ لم يتم إعداد Firebase بعد. ضع إعدادات مشروعك داخل FIREBASE_CONFIG.');
-    const btn=document.getElementById('firebaseGoogleButton'); if(btn){btn.disabled=true;btn.textContent='جارٍ التحقق من Google...';}
-    try{
-      const result=await signInWithPopup(auth,provider), fu=result.user, ref=doc(db,'users',fu.uid), snap=await getDoc(ref);
-      if(!snap.exists()){
-        await setDoc(ref,{uid:fu.uid,name:fu.displayName||'',email:(fu.email||'').toLowerCase(),photoURL:fu.photoURL||'',provider:'google',role:'viewer',status:'pending',createdAt:serverTimestamp(),approvedAt:null,approvedBy:null,lastLoginAt:null});
-        await addDoc(collection(db,'auditLogs'),{action:'user_requested',targetUid:fu.uid,targetEmail:fu.email||'',createdAt:serverTimestamp()});
-        await signOut(auth); msg('✅ تم التحقق من حساب Google. أُرسل طلبك إلى المدير وبانتظار الموافقة.'); return;
-      }
-      const profile=snap.data();
-      if(profile.status==='pending'){await signOut(auth);msg('⏳ حسابك بانتظار موافقة المدير. حاول لاحقاً.');return;}
-      if(profile.status==='disabled'){await signOut(auth);msg('❌ تم تعطيل حسابك من قبل المدير.');return;}
-      await updateDoc(ref,{lastLoginAt:serverTimestamp(),name:fu.displayName||profile.name||'',photoURL:fu.photoURL||profile.photoURL||''});
-      window.currentFirebaseUser=fu; window.currentUserProfile={...profile,status:'approved'};
-      currentUser={id:fu.uid,name:fu.displayName||profile.name||fu.email,email:(fu.email||'').toLowerCase(),role:profile.role||'viewer',provider:'google',active:true,lastLogin:new Date().toISOString()};
-      saveSession(currentUser); await addDoc(collection(db,'auditLogs'),{action:'login',targetUid:fu.uid,targetEmail:fu.email||'',createdAt:serverTimestamp()});
-      if(currentUser.role==='admin') showAdminPanel(); else enterDashboard();
-    }catch(e){console.error('Firebase login failed',e);msg(e.code==='auth/popup-closed-by-user'?'أُغلقت نافذة Google قبل إكمال الدخول.':'❌ تعذر تسجيل الدخول بواسطة Google.');}
-    finally{if(btn){btn.disabled=false;btn.innerHTML='<span class="firebase-g">G</span><span>المتابعة باستخدام Google</span>';}}
-  };
-  window.firebaseLogout=async function(){if(auth&&auth.currentUser){try{await signOut(auth);}catch(e){console.warn(e);}}};
-  window.approveFirebaseUser=async function(uid,email){
-    if(!auth?.currentUser || !window.currentUserProfile || window.currentUserProfile.role!=='admin') return msg('❌ لا تملك صلاحية الموافقة.');
-    try{
-      await updateDoc(doc(db,'users',uid),{status:'approved',role:'viewer',approvedAt:serverTimestamp(),approvedBy:auth.currentUser.uid});
-      await addDoc(collection(db,'auditLogs'),{action:'user_approved',targetUid:uid,targetEmail:email||'',performedBy:auth.currentUser.uid,createdAt:serverTimestamp()});
-      await window.renderFirebasePendingUsers();
-    }catch(e){console.error(e);alert('تعذرت الموافقة. تحقق من Firestore Security Rules.');}
-  };
-  window.renderFirebasePendingUsers=async function(){
-    const el=document.getElementById('firebasePendingUsers'); if(!el||!firebaseReady||!auth?.currentUser||window.currentUserProfile?.role!=='admin') return;
-    try{
-      const snap=await getDocs(query(collection(db,'users'),where('status','==','pending')));
-      const rows=[]; snap.forEach(d=>{const u=d.data();rows.push(`<div class="firebase-pending-row"><div><b>${safeText(u.name||'بدون اسم')}</b><small>${safeText(u.email||'')} — طلب Google</small></div><button class="btn btn-sm btn-primary" onclick="approveFirebaseUser('${safeText(d.id)}','${safeText(u.email||'')}')">موافقة</button></div>`);});
-      el.style.display='block'; el.innerHTML='<h4>طلبات Google بانتظار الموافقة ('+rows.length+')</h4>'+(rows.join('')||'<div style="font-size:13px;color:var(--ink-soft)">لا توجد طلبات معلقة حالياً.</div>');
-    }catch(e){console.error('Pending users load failed',e);el.style.display='block';el.innerHTML='<h4>طلبات Google</h4><div style="font-size:13px;color:#b02f2f">تعذر تحميل الطلبات. تحقق من قواعد Firestore.</div>';}
-  };
-  if(firebaseReady){
-    onAuthStateChanged(auth, async fu=>{
-      if(!fu) return;
-      try{
-        const snap=await getDoc(doc(db,'users',fu.uid)); if(!snap.exists()) return;
-        const p=snap.data(); if(p.status!=='approved') return;
-        if(window.currentUser && window.currentUser.id===fu.uid) return;
-        window.currentFirebaseUser=fu; window.currentUserProfile=p;
-        currentUser={id:fu.uid,name:fu.displayName||p.name||fu.email,email:(fu.email||'').toLowerCase(),role:p.role||'viewer',provider:'google',active:true,lastLogin:new Date().toISOString()};
-        saveSession(currentUser); if(currentUser.role==='admin') showAdminPanel(); else enterDashboard();
-      }catch(e){console.warn('Firebase session restore failed',e);}
-    });
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(initGoogleSignIn,200)); else setTimeout(initGoogleSignIn,200);
 </script>
 </body>
 </html>
