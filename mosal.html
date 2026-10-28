@@ -862,7 +862,7 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
         <div class="auth-divider"><span>أو</span></div>
         <div id="googleSignIn"></div>
         <div class="auth-hint" id="googleHint">
-          تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً.
+          تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً. إذا ظهر خطأ origin_mismatch، يجب تسجيل مصدر الصفحة الحالي في Google Cloud Console.
         </div>
       </div>
     </section>
@@ -4872,6 +4872,15 @@ const AUTH_DB_VERSION = 1;
 const USERS_STORE = 'users';
 const LOGS_STORE = 'auditLogs';
 const GOOGLE_CLIENT_ID_KEY = 'govDashboard_googleClientId';
+// Google OAuth uses the exact origin from which this page is opened.
+// For local testing, add these origins in Google Cloud Console:
+const GOOGLE_LOCAL_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000'];
+function getCurrentGoogleOrigin(){
+  return location.protocol === 'file:' ? 'file:// (غير مدعوم — شغّل خادماً محلياً على http://localhost:8000)' : location.origin;
+}
+function googleOriginHelp(){
+  return 'مصدر الصفحة الحالي: ' + getCurrentGoogleOrigin() + '. أضف هذا العنوان في Google Cloud Console ضمن Authorized JavaScript origins.';
+}
 const DEFAULT_LOCAL_USERS = [
   { id:'u-admin', name:'المدير الرئيسي', email:'admin@local', role:'admin', password:'246269', provider:'local', active:true },
   { id:'u-editor', name:'المحرر الافتراضي', email:'editor@local', role:'editor', password:'editor123', provider:'local', active:true },
@@ -5551,7 +5560,7 @@ function saveGoogleClientId(){
   const msg=document.getElementById('googleConfigMsg');
   if(!/\.apps\.googleusercontent\.com$/.test(id)){msg.textContent='❌ أدخل Google OAuth Client ID صحيحاً.';msg.className='admin-message show error';return;}
   localStorage.setItem(GOOGLE_CLIENT_ID_KEY,id);
-  msg.textContent='✅ تم الحفظ. سيظهر زر Google في شاشة الدخول عند إعادة فتح الصفحة.';
+  msg.textContent='✅ تم الحفظ. ' + googleOriginHelp();
   msg.className='admin-message show success';
 }
 function decodeJwtPayload(token){
@@ -5601,6 +5610,14 @@ function initGoogleSignIn(){
   const hint=document.getElementById('googleHint');
   if(!holder) return;
   const clientId=getGoogleClientId();
+  if(location.protocol === 'file:'){
+    holder.innerHTML='';
+    if(hint) {
+      hint.style.display='block';
+      hint.textContent='⚠️ Google OAuth لا يعمل عند فتح الملف مباشرة. شغّل: python3 -m http.server 8000 ثم افتح http://localhost:8000/الاصدار3_جاهز.html';
+    }
+    return;
+  }
   if(!clientId){
     holder.innerHTML='';
     if(hint) hint.style.display='block';
