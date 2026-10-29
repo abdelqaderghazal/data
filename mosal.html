@@ -594,6 +594,9 @@
 
 <!-- Google Maps JavaScript API is loaded on demand; configure its key at runtime. -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 
 @media(max-width:760px){.chart-wrap,.profile-card,.strat-axis-card,.comparison-card,.insight-card,.monthly-report-card{border-radius:14px;}.chart-wrap{padding:12px 10px;}}
@@ -862,7 +865,7 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
         <div class="auth-divider"><span>أو</span></div>
         <div id="googleSignIn"></div>
         <div class="auth-hint" id="googleHint">
-          تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً. إذا ظهر خطأ origin_mismatch، يجب تسجيل مصدر الصفحة الحالي في Google Cloud Console.
+          تسجيل الدخول بواسطة Google يتطلب ضبط Google Client ID من لوحة المدير أولاً.
         </div>
       </div>
     </section>
@@ -888,7 +891,7 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
     </div>
 
     <div class="admin-section active" id="adminTab-users">
-      <div class="small-note">يمكن للمدير إضافة/تعديل/حذف المستخدمين وتغيير أدوارهم. الأدوار: مدير، محرر، مطلع.</div>
+      <div class="small-note">يمكن للمدير إضافة/تعديل/حذف المستخدمين وتغيير أدوارهم. الأدوار: مدير، محرر، مطلع. اضغط "ربط Firebase" أولاً (مرة واحدة) لتُحفظ الحسابات الجديدة سحابياً وتعمل من أي جهاز.</div>
       <form class="admin-form" onsubmit="return saveUserFromForm(event)">
         <div class="form-grid">
           <div><input id="userNameInput" placeholder="اسم المستخدم" required></div>
@@ -907,6 +910,8 @@ html[data-theme="dark"] .st-tab.active{background:linear-gradient(90deg,#0b6687,
           <button class="btn btn-primary btn-sm" type="submit">💾 حفظ المستخدم</button>
           <button class="btn btn-sm" type="button" onclick="resetUserForm()" style="background:var(--sand);color:var(--ink-soft)">مسح</button>
           <button class="btn btn-sm btn-sync-users" type="button" onclick="syncUsersStorage()">🔄 تحديث ومزامنة الحسابات</button>
+          <button class="btn btn-sm btn-primary" type="button" onclick="connectFirebaseAdmin()">☁️ ربط Firebase (حساب المالك)</button>
+          <span id="firebaseStatus" style="font-size:12px;font-weight:600"></span>
         </div>
         <div id="userFormMsg" class="admin-message"></div>
       </form>
@@ -4872,23 +4877,77 @@ const AUTH_DB_VERSION = 1;
 const USERS_STORE = 'users';
 const LOGS_STORE = 'auditLogs';
 const GOOGLE_CLIENT_ID_KEY = 'govDashboard_googleClientId';
-// Google OAuth uses the exact origin from which this page is opened.
-// For local testing, add these origins in Google Cloud Console:
-const GOOGLE_LOCAL_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000'];
-// Production origin for this deployment (do not include /data/mosal in OAuth origins).
-const GOOGLE_PRODUCTION_ORIGIN = 'https://abdelqaderghazal.github.io';
-function getCurrentGoogleOrigin(){
-  return location.protocol === 'file:' ? 'file:// (غير مدعوم — شغّل خادماً محلياً على http://localhost:8000)' : location.origin;
-}
-function googleOriginHelp(){
-  return 'مصدر الصفحة الحالي: ' + getCurrentGoogleOrigin() + '. أضف https://abdelqaderghazal.github.io في Google Cloud Console ضمن Authorized JavaScript origins.';
-}
 const DEFAULT_LOCAL_USERS = [
   { id:'u-admin', name:'المدير الرئيسي', email:'admin@local', role:'admin', password:'246269', provider:'local', active:true },
   { id:'u-editor', name:'المحرر الافتراضي', email:'editor@local', role:'editor', password:'editor123', provider:'local', active:true },
   { id:'u-viewer', name:'المطلع الافتراضي', email:'viewer@local', role:'viewer', password:'123456', provider:'local', active:true }
 ];
 let currentUser = null;
+
+// ===== Firebase (cloud users) =====
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyD-GBxVB7sRur7XiHRGU2tQ-ZqQH9iZrm4',
+  authDomain: 'mosal-c9406.firebaseapp.com',
+  projectId: 'mosal-c9406',
+  storageBucket: 'mosal-c9406.firebasestorage.app',
+  messagingSenderId: '263943819058',
+  appId: '1:263943819058:web:4e045666843e61ec03912b'
+};
+// Owner's Google email: the only Google account allowed to "connect" the admin panel to Firebase.
+const FIREBASE_OWNER_EMAIL = 'abodekazal@gmail.com';
+let firebaseAuth = null, firebaseDb = null, firebaseReady = false;
+function initFirebaseCloud(){
+  try{
+    if(typeof firebase==='undefined') return false;
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebaseAuth=firebase.auth(); firebaseDb=firebase.firestore(); firebaseReady=true;
+    firebaseAuth.onAuthStateChanged(()=>{ updateFirebaseStatus(); });
+    return true;
+  }catch(err){ console.warn('Firebase init failed:',err); return false; }
+}
+function updateFirebaseStatus(){
+  const el=document.getElementById('firebaseStatus'); if(!el) return;
+  if(!firebaseReady){ el.textContent='☁️ Firebase غير متاح'; el.style.color='#c0392b'; return; }
+  const a=firebaseAuth.currentUser;
+  if(a){ el.textContent='☁️ متصل بـ Firebase: '+(a.email||''); el.style.color='#0b7a4a'; }
+  else { el.textContent='☁️ غير متصل — الحسابات الجديدة ستُحفظ محلياً فقط'; el.style.color='#b9770e'; }
+}
+async function connectFirebaseAdmin(){
+  if(!firebaseReady && !initFirebaseCloud()) return showUserMsg('❌ تعذر تحميل Firebase. تحقق من الاتصال بالإنترنت.','error');
+  try{
+    const res=await firebaseAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    const a=res.user, email=(a.email||'').toLowerCase();
+    if(email!==FIREBASE_OWNER_EMAIL.toLowerCase() || !a.emailVerified){
+      await firebaseAuth.signOut(); updateFirebaseStatus();
+      return showUserMsg('❌ هذا الحساب ليس حساب المالك المصرّح له.','error');
+    }
+    await firebaseDb.collection('users').doc(a.uid).set({uid:a.uid,name:a.displayName||'المالك',email,role:'admin',active:true,status:'approved',provider:'firebase',updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    updateFirebaseStatus();
+    showUserMsg('✅ تم الربط بـ Firebase. الحسابات الجديدة ستعمل من أي جهاز.','success');
+    await renderUsers();
+  }catch(err){
+    const code=err?.code||'';
+    console.error(err);
+    if(code==='auth/unauthorized-domain') return showUserMsg('❌ أضف نطاق الموقع في Firebase: Authentication > Settings > Authorized domains.','error');
+    if(code==='auth/popup-blocked') return showUserMsg('❌ المتصفح منع النافذة المنبثقة. اسمح بها ثم أعد المحاولة.','error');
+    if(code==='auth/popup-closed-by-user') return;
+    if(location.protocol==='file:') return showUserMsg('❌ افتح الصفحة عبر HTTPS أو localhost؛ دخول Google لا يعمل من file://','error');
+    showUserMsg(`❌ تعذر الربط (${code||'خطأ'}).`,'error');
+  }
+}
+async function restoreFirebaseSession(session){
+  if(!firebaseReady) return null;
+  const account=await new Promise(res=>{
+    const un=firebaseAuth.onAuthStateChanged(a=>{un();res(a);});
+    setTimeout(()=>res(null),4000);
+  });
+  if(!account || 'fb-'+account.uid!==session.userId) return null;
+  const snap=await firebaseDb.collection('users').doc(account.uid).get();
+  const p=snap.exists?snap.data():null;
+  if(!p || p.active!==true) return null;
+  return {id:'fb-'+account.uid,name:p.name||account.email,email:(account.email||'').toLowerCase(),role:p.role||'viewer',active:true,provider:'firebase',firebaseUid:account.uid};
+}
+
 let authDbPromise = null;
 const AUDIT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const AUDIT_CLEANUP_KEY = 'govDashboard_auditCleanupAt';
@@ -4911,6 +4970,7 @@ window.addEventListener('storage', e => {
   if(e.key === SESSION_REVISION_KEY && currentUser) checkCurrentSession();
 });
 
+initFirebaseCloud();
 function startSessionGuard(){
   if(sessionGuardTimer) return;
   sessionGuardTimer=setInterval(checkCurrentSession,10000);
@@ -4940,6 +5000,20 @@ async function getUserById(id){
 async function checkCurrentSession(){
   if(!currentUser) return true;
   try{
+    if(currentUser.provider==='firebase'){
+      if(!firebaseDb || !currentUser.firebaseUid) return true;
+      const snap=await firebaseDb.collection('users').doc(currentUser.firebaseUid).get();
+      if(!snap.exists || snap.data()?.active!==true){
+        stopSessionGuard();
+        alert('تم إخراج هذا المستخدم وتعطيل حسابه من قبل المدير.');
+        if(firebaseAuth) try{ await firebaseAuth.signOut(); }catch(e){}
+        localStorage.removeItem(SESSION_KEY);
+        currentUser=null;
+        location.reload();
+        return false;
+      }
+      return true;
+    }
     const fresh=await getUserById(currentUser.id);
     if(!fresh || fresh.active===false){
       stopSessionGuard();
@@ -5233,6 +5307,10 @@ async function loginWithPassword(){
   try{
     await openAuthDB(); await seedUsers();
     if(!email || !password){ return showLoginError('❌ أدخل البريد الإلكتروني وكلمة المرور'); }
+    if(firebaseReady && firebaseAuth && !email.endsWith('@local')){
+      const handled=await firebasePasswordLogin(email,password);
+      if(handled) return;
+    }
     const user=await getUserByEmail(email);
     const valid=user && user.active && user.passwordHash===await sha256(password);
     if(!valid){
@@ -5359,8 +5437,13 @@ async function restoreSession(){
     if(!session?.userId) return false;
     const ageDays=(Date.now()-new Date(session.loginTime).getTime())/(1000*60*60*24);
     if(ageDays>1){ localStorage.removeItem(SESSION_KEY); return false; }
-    const users=await getAllUsers();
-    const user=users.find(u=>u.id===session.userId && u.active);
+    let user=null;
+    if(String(session.userId).startsWith('fb-')){
+      user=await restoreFirebaseSession(session);
+    }else{
+      const users=await getAllUsers();
+      user=users.find(u=>u.id===session.userId && u.active);
+    }
     if(!user){ localStorage.removeItem(SESSION_KEY); return false; }
     currentUser=user;
     document.body.classList.remove('locked');
@@ -5372,6 +5455,7 @@ async function restoreSession(){
 }
 async function logout(){
   if(currentUser) await addAudit('logout',currentUser,'تسجيل خروج');
+  if(firebaseAuth){ try{ await firebaseAuth.signOut(); }catch(e){} }
   localStorage.removeItem(SESSION_KEY);
   currentUser=null;
   location.reload();
@@ -5389,7 +5473,7 @@ async function renderUsers(){
       <td><b>${escapeHtml(u.name)}</b></td>
       <td>${escapeHtml(u.email)}</td>
       <td><span class="role-badge ${roleClass(u.role)}">${roleLabel(u.role)}</span></td>
-      <td>${u.provider==='google'?'Google':'محلي'}</td>
+      <td>${u.provider==='google'?'Google':'محلي (هذا الجهاز فقط)'}</td>
       <td>${u.lastLogin?formatDate(u.lastLogin):'—'}</td>
       <td>
         <button class="btn btn-sm btn-primary" onclick="editUser('${u.id}')">تعديل</button>
@@ -5400,6 +5484,8 @@ async function renderUsers(){
       </td>
     </tr>`;
   }).join('');
+  await appendFirebaseUserRows(tbody);
+  updateFirebaseStatus();
 }
 function escapeHtml(v){
   return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -5419,6 +5505,7 @@ async function editUser(id){
 function resetUserForm(){
   ['userIdInput','userNameInput','userEmailInput','userPasswordInput'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('userRoleInput').value='editor';
+  document.getElementById('userEmailInput').readOnly=false;
   document.getElementById('userFormMsg').className='admin-message';
 }
 function showUserMsg(msg,type){
@@ -5461,6 +5548,156 @@ async function syncUsersStorage(){
     if(button){button.disabled=false;button.textContent='🔄 تحديث ومزامنة الحسابات';}
   }
 }
+
+// ===== Firebase (cloud) users: email + password, usable from any device =====
+async function firebasePasswordLogin(email,password){
+  window.__fbManualLogin=true;
+  try{
+    const cred=await firebaseAuth.signInWithEmailAndPassword(email,password);
+    const account=cred.user;
+    const snap=await firebaseDb.collection('users').doc(account.uid).get();
+    const profile=snap.exists?snap.data():null;
+    if(!profile || profile.active!==true){
+      await firebaseAuth.signOut();
+      document.getElementById('passwordInput').value='';
+      await addAudit('failed_login',{name:email,email,role:''},'حساب Firebase معطل أو بلا ملف');
+      showLoginError('❌ هذا الحساب معطل أو بانتظار موافقة المدير.');
+      return true;
+    }
+    currentUser={id:'fb-'+account.uid,name:profile.name||email,email,role:profile.role||'viewer',active:true,provider:'firebase',firebaseUid:account.uid};
+    saveSession(currentUser);
+    await addAudit('login',currentUser,'تسجيل دخول بكلمة مرور عبر Firebase');
+    if(currentUser.role==='admin') showAdminPanel(); else enterDashboard();
+    return true;
+  }catch(err){
+    const code=err?.code||'';
+    // Not a Firebase account -> let the local login try.
+    if(['auth/invalid-credential','auth/user-not-found','auth/wrong-password','auth/invalid-email','auth/invalid-login-credentials'].includes(code)) return false;
+    if(code==='auth/too-many-requests'){ showLoginError('⏳ محاولات كثيرة. انتظر قليلاً ثم أعد المحاولة.'); return true; }
+    if(code==='auth/operation-not-allowed'){ showLoginError('دخول البريد وكلمة المرور غير مفعّل في Firebase (Authentication > Sign-in method).'); return true; }
+    console.warn('Firebase password login failed:',err);
+    return false;
+  }finally{
+    setTimeout(()=>{window.__fbManualLogin=false;},3000);
+  }
+}
+
+async function fbCreateUser(name,email,password,role){
+  if(!password || password.length<6){ showUserMsg('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل.','error'); return false; }
+  let uid=null;
+  try{
+    // A second Firebase app instance creates the account so the admin stays signed in.
+    const secondary=firebase.apps.find(a=>a.name==='Secondary')||firebase.initializeApp(FIREBASE_CONFIG,'Secondary');
+    const cred=await secondary.auth().createUserWithEmailAndPassword(email,password);
+    uid=cred.user.uid;
+    await secondary.auth().signOut();
+  }catch(err){
+    const code=err?.code||'';
+    const map={
+      'auth/email-already-in-use':'❌ هذا البريد مسجّل مسبقاً في Firebase. استخدم "تعديل" من الجدول أو أرسل له رابط إعادة تعيين كلمة المرور.',
+      'auth/invalid-email':'❌ صيغة البريد غير صحيحة.',
+      'auth/weak-password':'❌ كلمة المرور ضعيفة (6 أحرف على الأقل).',
+      'auth/operation-not-allowed':'❌ فعّل Email/Password من Firebase: Authentication > Sign-in method.'
+    };
+    console.error(err);
+    showUserMsg(map[code]||`❌ تعذر إنشاء الحساب (${code||'خطأ'}).`,'error');
+    return false;
+  }
+  try{
+    await firebaseDb.collection('users').doc(uid).set({
+      uid,name,email,role,active:true,status:'approved',provider:'firebase',authMethod:'password',
+      createdBy:currentUser.email,createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }catch(err){
+    console.error(err);
+    showUserMsg('⚠️ أُنشئ حساب الدخول لكن تعذر حفظ الملف الشخصي. تحقق من قواعد Firestore ثم أعد المحاولة.','error');
+    return false;
+  }
+  await addAudit('user_create',currentUser,`إضافة المستخدم ${email} بدور ${roleLabel(role)} (Firebase)`);
+  showUserMsg('✅ تم إنشاء الحساب في Firebase. يمكنه الدخول من أي جهاز.','success');
+  resetUserForm(); await renderUsers();
+  return false;
+}
+
+async function fbUpdateUser(uid,name,role,password){
+  const isOwnerRow=false;
+  await firebaseDb.collection('users').doc(uid).set({name,role,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:currentUser.email},{merge:true});
+  await addAudit('user_update',currentUser,`تعديل مستخدم Firebase ${document.getElementById('userEmailInput').value}`);
+  showUserMsg(password
+    ? '✅ تم تعديل الاسم والدور. كلمة المرور لا تُغيَّر من هنا؛ استخدم زر "إعادة تعيين كلمة المرور" في الجدول.'
+    : '✅ تم تعديل المستخدم.','success');
+  resetUserForm(); await renderUsers();
+  return false;
+}
+
+async function appendFirebaseUserRows(tbody){
+  if(!firebaseReady || !firebaseAuth?.currentUser || currentUser?.role!=='admin') return;
+  try{
+    const snap=await firebaseDb.collection('users').get();
+    const owner=FIREBASE_OWNER_EMAIL.toLowerCase();
+    const rows=snap.docs.map(d=>({uid:d.id,...d.data()})).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ar'));
+    const html=rows.map(u=>{
+      const email=String(u.email||'');
+      const isOwner=email.toLowerCase()===owner;
+      const isSelf=u.uid===currentUser.firebaseUid;
+      const pending=u.active!==true && u.status==='pending';
+      const src=(u.authMethod==='password'?'Firebase (كلمة مرور)':'Firebase (Google)')+(pending?' — بانتظار الموافقة':(u.active===false?' — معطل':''));
+      const em=encodeURIComponent(email);
+      return `<tr>
+        <td><b>${escapeHtml(u.name||'—')}</b></td>
+        <td>${escapeHtml(email)}</td>
+        <td><span class="role-badge ${roleClass(u.role)}">${roleLabel(u.role)}</span></td>
+        <td>${escapeHtml(src)}</td>
+        <td>—</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="fbEditUser('${u.uid}')">تعديل</button>
+          ${u.authMethod==='password'?`<button class="btn btn-sm btn-primary" onclick="fbResetPassword('${em}')">إعادة تعيين كلمة المرور</button>`:''}
+          ${(isOwner||isSelf)?'':(u.active===true
+            ? `<button class="btn btn-sm btn-warning" onclick="fbSetActive('${u.uid}',false)">إخراج وتعطيل</button>`
+            : `<button class="btn btn-sm btn-primary" onclick="fbSetActive('${u.uid}',true)">تفعيل</button>`)}
+          ${(isOwner||isSelf)?'':`<button class="btn btn-sm btn-danger" onclick="fbRemoveUser('${u.uid}')">حذف</button>`}
+        </td>
+      </tr>`;
+    }).join('');
+    tbody.insertAdjacentHTML('beforeend',html);
+  }catch(err){ console.warn('Could not load Firebase users:',err); }
+}
+
+async function fbEditUser(uid){
+  const snap=await firebaseDb.collection('users').doc(uid).get();
+  if(!snap.exists) return;
+  const u=snap.data();
+  document.getElementById('userIdInput').value='fb:'+uid;
+  document.getElementById('userNameInput').value=u.name||'';
+  const em=document.getElementById('userEmailInput'); em.value=u.email||''; em.readOnly=true;
+  document.getElementById('userRoleInput').value=u.role||'viewer';
+  document.getElementById('userPasswordInput').value='';
+  showUserMsg('تعديل حساب Firebase: يمكن تغيير الاسم والدور فقط (البريد وكلمة المرور من خلال إعادة التعيين).','success');
+}
+async function fbSetActive(uid,active){
+  if(currentUser?.role!=='admin') return;
+  if(!active && !confirm('هل تريد إخراج هذا المستخدم وتعطيل حسابه؟')) return;
+  await firebaseDb.collection('users').doc(uid).set({active,status:active?'approved':'disabled',updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:currentUser.email},{merge:true});
+  await addAudit(active?'user_reactivate':'force_logout',currentUser,`${active?'تفعيل':'تعطيل'} مستخدم Firebase ${uid}`);
+  await renderUsers();
+  showUserMsg(active?'✅ تم تفعيل المستخدم.':'✅ تم تعطيل المستخدم، وسيُخرَج عند التحقق الدوري التالي.','success');
+}
+async function fbResetPassword(encodedEmail){
+  const email=decodeURIComponent(encodedEmail);
+  if(!confirm(`إرسال رابط إعادة تعيين كلمة المرور إلى ${email}؟`)) return;
+  try{
+    await firebaseAuth.sendPasswordResetEmail(email);
+    showUserMsg(`✅ أُرسل رابط إعادة التعيين إلى ${email}.`,'success');
+  }catch(err){ console.error(err); showUserMsg('❌ تعذر إرسال رابط إعادة التعيين.','error'); }
+}
+async function fbRemoveUser(uid){
+  if(currentUser?.role!=='admin') return;
+  if(!confirm('حذف هذا المستخدم؟ سيفقد القدرة على الدخول فوراً.')) return;
+  await firebaseDb.collection('users').doc(uid).delete();
+  await addAudit('user_delete',currentUser,`حذف مستخدم Firebase ${uid}`);
+  await renderUsers();
+}
+
 async function saveUserFromForm(e){
   e.preventDefault();
   try{
@@ -5470,6 +5707,9 @@ async function saveUserFromForm(e){
     const password=document.getElementById('userPasswordInput').value;
     const role=document.getElementById('userRoleInput').value;
     if(!name||!email) return false;
+    if(id.startsWith('fb:')) return await fbUpdateUser(id.slice(3),name,role,password);
+    if(!id && firebaseReady && firebaseAuth?.currentUser) return await fbCreateUser(name,email,password,role);
+    const fbWarn=(!id && firebaseReady && !firebaseAuth?.currentUser);
     const existing=await getUserByEmail(email);
     if(existing && existing.id!==id) return showUserMsg('❌ البريد مستخدم من قبل.','error');
     let user;
@@ -5486,7 +5726,7 @@ async function saveUserFromForm(e){
       user={id:crypto.randomUUID?crypto.randomUUID():'u-'+Date.now(),name,email,role,
         passwordHash:await sha256(password),provider:'local',active:true,createdAt:new Date().toISOString(),lastLogin:null};
       await putUser(user); await addAudit('user_create',currentUser,`إضافة المستخدم ${email} بدور ${roleLabel(role)}`);
-      showUserMsg('✅ تم إنشاء المستخدم.','success');
+      showUserMsg('✅ تم إنشاء المستخدم.'+(fbWarn?' ⚠️ حُفظ محلياً على هذا الجهاز فقط. اضغط "ربط Firebase" لإنشاء حسابات تعمل من أي جهاز.':''),'success');
     }
     resetUserForm(); await renderUsers();
   }catch(err){ console.error(err); showUserMsg('❌ تعذر حفظ المستخدم.','error'); }
@@ -5562,7 +5802,7 @@ function saveGoogleClientId(){
   const msg=document.getElementById('googleConfigMsg');
   if(!/\.apps\.googleusercontent\.com$/.test(id)){msg.textContent='❌ أدخل Google OAuth Client ID صحيحاً.';msg.className='admin-message show error';return;}
   localStorage.setItem(GOOGLE_CLIENT_ID_KEY,id);
-  msg.textContent='✅ تم الحفظ. ' + googleOriginHelp();
+  msg.textContent='✅ تم الحفظ. سيظهر زر Google في شاشة الدخول عند إعادة فتح الصفحة.';
   msg.className='admin-message show success';
 }
 function decodeJwtPayload(token){
@@ -5612,14 +5852,6 @@ function initGoogleSignIn(){
   const hint=document.getElementById('googleHint');
   if(!holder) return;
   const clientId=getGoogleClientId();
-  if(location.protocol === 'file:'){
-    holder.innerHTML='';
-    if(hint) {
-      hint.style.display='block';
-      hint.textContent='⚠️ Google OAuth لا يعمل عند فتح الملف مباشرة. شغّل: python3 -m http.server 8000 ثم افتح http://localhost:8000/الاصدار3_جاهز.html';
-    }
-    return;
-  }
   if(!clientId){
     holder.innerHTML='';
     if(hint) hint.style.display='block';
